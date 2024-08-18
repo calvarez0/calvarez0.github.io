@@ -4,35 +4,7 @@ body {
     padding: 0;
     background-color: #121212; /* Dark grey background */
     color: #ffffff; /* White text */
-}
-
-header {
-    background-color: #1c1c1c; /* Slightly lighter dark grey for contrast */
-    color: #fff;
-    padding: 10px 0;
-    text-align: center;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-}
-
-header nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-}
-
-header nav ul li {
-    margin: 0 15px;
-}
-
-header nav ul li a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: 700;
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 .hero-section {
@@ -44,29 +16,44 @@ header nav ul li a {
     background-color: #121212;
     color: #fff;
     text-align: center;
+    overflow: hidden; /* Prevent overflow issues with the cursor */
 }
 
-.hero-section h1 span {
-    color: #ff9800;
+.hero-section h1 {
+    display: inline-block; /* Ensure text is properly centered */
 }
 
 .typewriter {
     overflow: hidden;
-    border-right: 0.15em solid #ff9800; /* Cursor color */
+    border-right: 0.15em solid #ffffff; /* Cursor color changed to white */
     white-space: nowrap;
     margin: 0 auto;
     letter-spacing: 0.15em;
-    animation: typing 3.5s steps(30, end), blink-caret 0.75s step-end infinite;
-}
-
-@keyframes typing {
-    from { width: 0 }
-    to { width: 100% }
+    animation: blink-caret 0.75s step-end infinite;
 }
 
 @keyframes blink-caret {
     from, to { border-color: transparent }
-    50% { border-color: #ff9800; }
+    50% { border-color: #ffffff; }
+}
+
+.menu-buttons {
+    margin-top: 20px;
+}
+
+.menu-buttons button {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.menu-buttons button:hover {
+    background-color: #555;
 }
 
 .content-section {

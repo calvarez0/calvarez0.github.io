@@ -11,30 +11,54 @@ const scroll = new SmoothScroll('a[href*="#"]', {
 
 // Typewriter effect
 document.addEventListener("DOMContentLoaded", () => {
-    const typewriterElements = document.querySelectorAll('.typewriter');
+    const typewriterElement = document.querySelector('.typewriter');
+    const menu = document.getElementById('menu');
+    const text = typewriterElement.getAttribute('data-text');
+    let index = 0;
+    const typingSpeed = 100;
 
-    typewriterElements.forEach(element => {
-        const text = element.getAttribute('data-text');
-        element.textContent = '';
-        let index = 0;
-        const typingSpeed = 100;
+    const type = () => {
+        if (index < text.length) {
+            typewriterElement.textContent += text.charAt(index);
+            index++;
+            setTimeout(type, typingSpeed);
+        } else {
+            // After typing is complete, show the menu buttons
+            showMenu();
+        }
+    };
 
-        const type = () => {
-            if (index < text.length) {
-                element.textContent += text.charAt(index);
-                index++;
-                setTimeout(type, typingSpeed);
-            }
-        };
-
-        type();
-    });
+    type();
 });
 
-// Contact form validation
-const contactForm = document.getElementById('contact-form');
-contactForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    alert('Thank you for your message!');
-    contactForm.reset();
+// Make scrollToSection globally accessible
+function scrollToSection(sectionId) {
+    document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+}
+
+function showMenu() {
+    document.getElementById('menu').innerHTML = `
+        <button onclick="scrollToSection('about')">About Me</button>
+        <button onclick="scrollToSection('projects')">Projects</button>
+        <button onclick="scrollToSection('research')">Research</button>
+        <button onclick="scrollToSection('contact')">Contact</button>
+    `;
+}
+
+// Initialize EmailJS with your user ID
+(function() {
+    emailjs.init("YOUR_USER_ID"); // Replace with your EmailJS user ID
+})();
+
+document.getElementById('contact-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    // Send the email
+    emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', this)
+        .then(function() {
+            alert('Thank you for your message!');
+            document.getElementById('contact-form').reset();
+        }, function(error) {
+            alert('Failed to send your message. Please try again later.');
+        });
 });
