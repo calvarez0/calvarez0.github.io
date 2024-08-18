@@ -3,77 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Personal website of a student, researcher, and entrepreneur.">
-    <title>Your Name - Personal Page</title>
+    <title>John Doe - Portfolio</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <img src="images/profile.jpg" alt="Your Name" class="profile-image">
-            <h1>Your Name</h1>
-            <p>Student | Researcher | Entrepreneur</p>
-        </div>
-    </header>
-
-    <nav>
-        <div class="container">
+    <header id="header">
+        <nav>
             <ul>
                 <li><a href="#about">About Me</a></li>
+                <li><a href="#projects">Projects</a></li>
                 <li><a href="#research">Research</a></li>
-                <li><a href="#projects">Entrepreneurial Projects</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
-    <section id="about">
-        <div class="container">
-            <h2>About Me</h2>
-            <p>I'm a passionate student with interests in [Your Fields of Interest]. I love exploring new ideas and turning them into real-world applications. Currently, I'm pursuing my studies in [Your Major] at [Your University]. My goal is to make a significant impact through research and entrepreneurship.</p>
+    <section id="home" class="hero-section">
+        <h1>Hello, I'm <span>John Doe</span></h1>
+        <p>Student | Undergraduate Researcher | Programmer</p>
+    </section>
+
+    <section id="about" class="content-section" data-aos="fade-up">
+        <h2>About Me</h2>
+        <p>I'm a passionate student with a strong interest in computer science, research, and programming. I enjoy learning new technologies and applying them to solve real-world problems.</p>
+    </section>
+
+    <section id="projects" class="content-section" data-aos="fade-up">
+        <h2>Projects</h2>
+        <div class="projects-grid">
+            <div class="project-card" data-aos="zoom-in">
+                <h3>Project 1</h3>
+                <p>Description of your project.</p>
+            </div>
+            <div class="project-card" data-aos="zoom-in">
+                <h3>Project 2</h3>
+                <p>Description of your project.</p>
+            </div>
+            <div class="project-card" data-aos="zoom-in">
+                <h3>Project 3</h3>
+                <p>Description of your project.</p>
+            </div>
         </div>
     </section>
 
-    <section id="research">
-        <div class="container">
-            <h2>Research</h2>
-            <p>Here is a summary of my research work:</p>
-            <ul>
-                <li><strong>Research Title 1:</strong> Brief description of your research. <a href="#">Read more</a></li>
-                <li><strong>Research Title 2:</strong> Brief description of your research. <a href="#">Read more</a></li>
-                <li><strong>Research Title 3:</strong> Brief description of your research. <a href="#">Read more</a></li>
-            </ul>
-        </div>
+    <section id="research" class="content-section" data-aos="fade-up">
+        <h2>Research</h2>
+        <p>My research interests include artificial intelligence, machine learning, and data science. I have worked on several research projects that focus on these areas.</p>
     </section>
 
-    <section id="projects">
-        <div class="container">
-            <h2>Entrepreneurial Projects</h2>
-            <p>Here are some projects I've worked on:</p>
-            <ul>
-                <li><strong>Project Name 1:</strong> Brief description of the project. <a href="#">Learn more</a></li>
-                <li><strong>Project Name 2:</strong> Brief description of the project. <a href="#">Learn more</a></li>
-                <li><strong>Project Name 3:</strong> Brief description of the project. <a href="#">Learn more</a></li>
-            </ul>
-        </div>
-    </section>
-
-    <section id="contact">
-        <div class="container">
-            <h2>Contact Me</h2>
-            <p>I'd love to hear from you! You can reach me via:</p>
-            <ul>
-                <li><strong>Email:</strong> <a href="mailto:your.email@example.com">your.email@example.com</a></li>
-                <li><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/your-profile" target="_blank">Your LinkedIn</a></li>
-                <li><strong>Twitter:</strong> <a href="https://twitter.com/yourhandle" target="_blank">@yourhandle</a></li>
-            </ul>
-        </div>
+    <section id="contact" class="content-section" data-aos="fade-up">
+        <h2>Contact</h2>
+        <form id="contact-form">
+            <input type="text" id="name" placeholder="Your Name" required>
+            <input type="email" id="email" placeholder="Your Email" required>
+            <textarea id="message" placeholder="Your Message" required></textarea>
+            <button type="submit">Send Message</button>
+        </form>
     </section>
 
     <footer>
-        <div class="container">
-            <p>&copy; 2024 Your Name. All rights reserved.</p>
+        <p>&copy; 2024 John Doe. All rights reserved.</p>
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-github"></i></a>
+            <a href="#"><i class="fab fa-linkedin"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
         </div>
     </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/smooth-scroll/16.1.3/smooth-scroll.polyfills.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
