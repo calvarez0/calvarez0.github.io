@@ -139,3 +139,27 @@ footer .social-icons a {
         align-items: center;
     }
 }
+
+#profile {
+    display: flex; /* Arrange elements horizontally */
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center elements horizontally */
+    margin-bottom: 20px; /* Add some space between profile and buttons */
+  }
+  
+  #profile img {
+    width: 150px; /* Adjust image width as needed */
+    height: 150px; /* Adjust image height as needed */
+    border-radius: 50%; /* Make the image circular */
+    margin-bottom: 10px; /* Add space between image and text */
+  }
+  
+  #profile h2, #profile h3 {
+    margin: 5px 0; /* Adjust spacing between headings */
+  }
+  
+  #profile a {
+    margin: 0 10px; /* Add space between social media icons */
+    font-size: 20px; /* Adjust icon size as needed */
+    color: #fff; /* White color for icons */
+  }

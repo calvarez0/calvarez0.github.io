@@ -23,13 +23,21 @@ document.addEventListener("DOMContentLoaded", () => {
             index++;
             setTimeout(type, typingSpeed);
         } else {
-            // After typing is complete, show the menu buttons
-            showMenu();
+            // After typing is complete, show the profile
+            showProfile();
+    
+            // Introduce a slight delay before showing the menu
+            setTimeout(showMenu, 500); // Adjust the delay as needed
         }
     };
 
     type();
 });
+
+function showProfile() {
+    const profileElement = document.getElementById('profile');
+    profileElement.style.display = 'block'; // Or use your preferred display style
+  }
 
 // Make scrollToSection globally accessible
 function scrollToSection(sectionId) {
