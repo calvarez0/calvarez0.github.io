@@ -1,36 +1,40 @@
-// Typewriter effect
-document.addEventListener("DOMContentLoaded", () => {
-    const typewriterElement = document.querySelector('.typewriter');
-    const text = typewriterElement.getAttribute('data-text');
-    typewriterElement.textContent = '';
-    let index = 0;
-    const typingSpeed = 100;
-
-    const type = () => {
-        if (index < text.length) {
-            typewriterElement.textContent += text.charAt(index);
-            index++;
-            setTimeout(type, typingSpeed);
-        } else {
-            setTimeout(() => {
-                document.getElementById('menu').classList.remove('hidden');
-            }, 500);
-        }
-    };
-
-    type();
+// Initialize AOS (Animate On Scroll)
+AOS.init({
+    duration: 1200,
 });
 
-function showContent(section) {
-    document.getElementById('main-content').classList.add('hidden');
-    document.getElementById('content').classList.remove('hidden');
-    document.getElementById(section).classList.remove('hidden');
-}
+// Smooth scroll for navigation links
+const scroll = new SmoothScroll('a[href*="#"]', {
+    speed: 800,
+    speedAsDuration: true
+});
 
-function goBack() {
-    const sections = document.querySelectorAll('.content-section');
-    sections.forEach(section => section.classList.add('hidden'));
+// Typewriter effect
+document.addEventListener("DOMContentLoaded", () => {
+    const typewriterElements = document.querySelectorAll('.typewriter');
 
-    document.getElementById('content').classList.add('hidden');
-    document.getElementById('main-content').classList.remove('hidden');
-}
+    typewriterElements.forEach(element => {
+        const text = element.getAttribute('data-text');
+        element.textContent = '';
+        let index = 0;
+        const typingSpeed = 100;
+
+        const type = () => {
+            if (index < text.length) {
+                element.textContent += text.charAt(index);
+                index++;
+                setTimeout(type, typingSpeed);
+            }
+        };
+
+        type();
+    });
+});
+
+// Contact form validation
+const contactForm = document.getElementById('contact-form');
+contactForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Thank you for your message!');
+    contactForm.reset();
+});
