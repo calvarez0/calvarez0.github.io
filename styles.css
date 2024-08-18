@@ -2,12 +2,12 @@ body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
+    background-color: #121212; /* Dark grey background */
+    color: #ffffff; /* White text */
 }
 
 header {
-    background-color: #333;
+    background-color: #1c1c1c; /* Slightly lighter dark grey for contrast */
     color: #fff;
     padding: 10px 0;
     text-align: center;
@@ -41,13 +41,32 @@ header nav ul li a {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #1e1e1e;
+    background-color: #121212;
     color: #fff;
     text-align: center;
 }
 
 .hero-section h1 span {
     color: #ff9800;
+}
+
+.typewriter {
+    overflow: hidden;
+    border-right: 0.15em solid #ff9800; /* Cursor color */
+    white-space: nowrap;
+    margin: 0 auto;
+    letter-spacing: 0.15em;
+    animation: typing 3.5s steps(30, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: #ff9800; }
 }
 
 .content-section {
@@ -64,7 +83,8 @@ header nav ul li a {
 }
 
 .project-card {
-    background-color: #fff;
+    background-color: #1e1e1e; /* Darker card background */
+    color: #ffffff; /* White text */
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     padding: 20px;
@@ -89,7 +109,9 @@ header nav ul li a {
     margin: 10px 0;
     width: 80%;
     max-width: 500px;
-    border: 1px solid #ccc;
+    border: 1px solid #444; /* Slightly lighter border */
+    background-color: #1e1e1e; /* Darker background for inputs */
+    color: #ffffff;
     border-radius: 4px;
 }
 
@@ -109,7 +131,7 @@ header nav ul li a {
 footer {
     text-align: center;
     padding: 20px 0;
-    background-color: #333;
+    background-color: #1c1c1c;
     color: #fff;
 }
 
