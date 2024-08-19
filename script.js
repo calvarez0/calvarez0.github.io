@@ -49,7 +49,6 @@ function showMenu() {
         <button onclick="scrollToSection('about')">About Me</button>
         <button onclick="scrollToSection('projects')">Projects</button>
         <button onclick="scrollToSection('research')">Research</button>
-        <button onclick="scrollToSection('contact')">Contact</button>
     `;
 }
 
