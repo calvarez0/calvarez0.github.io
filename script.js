@@ -51,3 +51,21 @@ function showMenu() {
         <button onclick="scrollToSection('research')">Research</button>
     `;
 }
+
+// Initialize EmailJS with your user ID
+(function() {
+    emailjs.init("YOUR_USER_ID"); // Replace with your EmailJS user ID
+})();
+
+document.getElementById('contact-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    // Send the email
+    emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', this)
+        .then(function() {
+            alert('Thank you for your message!');
+            document.getElementById('contact-form').reset();
+        }, function(error) {
+            alert('Failed to send your message. Please try again later.');
+        });
+});
