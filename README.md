@@ -1,2 +1,1 @@
-# calvarez0.github.io
-Personal Website
+This is the repo for project 1 for CSCE 331.

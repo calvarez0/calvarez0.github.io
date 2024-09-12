@@ -1,73 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alex Alvarez</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link id="theme-stylesheet" rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <section id="home" class="hero-section">
-        <div id="profile">
-            <img src="images/profile pic.png" alt="Alex Alvarez Profile Picture">
-            <h2>Alex Alvarez</h2>
-            <p>Undergrad Student @ Texas A&M University <br> Researcher @ Brain Networks Lab + Rockwell Automation Lab</h3>
-            <p>calvarez1 [at] tamu.edu</p>
-            <div class="social-icons">
-              <a href="https://github.com/calvarez0" target="_blank"><i class="fab fa-github"></i></a>
-              <a href="https://www.linkedin.com/in/calexalvarez/" target="_blank"><i class="fab fa-linkedin"></i></a>
-              <a href="https://x.com/0xalexrez" target="_blank"><i class="fab fa-twitter"></i></a>
-            </div>
-          </div>
-        <h1 class="typewriter" data-text="Thanks for visiting, I'm Alex"></h1>
-        <div id="profile" style="display: none;"> </div>
-        <div id="menu" class="menu-buttons"></div>
-      </section>
+<body data-title="Hey, I'm Alex">    
 
-    <section id="about" class="content-section" data-aos="fade-up">
-        <h2>About Me</h2>
-        <p>I'm an undergraduate student and researcher at Texas A&M University. In the past I've built and sold some companies but at the moment I'm focusing on deep learning research, more specifically, I'm researching prediction and consciousness at the Brain Networks Laboratory under Dr. Choe. I'm a stoic, a voracious reader, and lover of all combat sports.</p>
-    </section>
+    <header>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="portfolio.html">Portfolio</a></li>
+                <li><a href="qualifications.html">Qualifications</a></li>
+                <li><a href="service.html">Service</a></li>
+                <li><a href="ai-generated.html">Evolve images!</a></li>
+                <button id="theme-toggle" class="theme-btn">Red Pill?</button>
+            </ul>
+        </nav>
+    </header>
 
-    <section id="projects" class="content-section" data-aos="fade-up">
-        <h2>Projects</h2>
-        <div class="projects-grid">
-            <div class="project-card" data-aos="zoom-in">
-                <h3>Project 1</h3>
-                <p>Description of your project.</p>
-            </div>
-            <div class="project-card" data-aos="zoom-in">
-                <h3>Project 2</h3>
-                <p>Description of your project.</p>
-            </div>
-            <div class="project-card" data-aos="zoom-in">
-                <h3>Project 3</h3>
-                <p>Description of your project.</p>
-            </div>
+
+    <main>
+        <div class="typewriter"></div>
+            <h1 id="typewriter-text"></h1>
         </div>
-    </section>
+        <section id="about">
+            <img src="assets/profile pic.png" alt="Picture of Alex at poster session.">
+            <div>
+                <p>
+                    <span style="font-size: 24px;"><strong>Alex Alvarez</strong></span> <br>
+                    Undergrad @ Texas A&M University<br>
+                    Researcher @ Brain Networks Lab + Rockwell Automation Lab<br>
+                    calvarez1 [at] tamu.edu
+                </p>
+                <div class="social-media">
+                    <a href="https://github.com/calvarez0" target="_blank"><i class="fab fa-github"></i></a>
+                    <a href="https://www.linkedin.com/in/calexalvarez/" target="_blank"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://x.com/0xalexrez" target="_blank"><i class="fab fa-twitter"></i></a>
+                  </div>
+            </div>
+        </section>
+        <section id="introduction">
+            <h2 id="about-me-toggle">About Me <i class="fas fa-chevron-down"></i></h2>
+            <div id="about-me-content" class="collapsed">    
+                <p>I'm an undergraduate computer science and psychology student and researcher at <a href="https://www.tamu.edu/index.html">Texas A&M University</a>. <br><br>
+        
+                    My software engineering background is diverse; I've worked as a software engineer intern at <a href="https://www.schwab.com/td-ameritrade">Charles Schwab/TD Ameritrade</a>, often being involved in DevOps-esque projects and familiarizing myself with CI/CD tools and frameworks. I was part of a startup called <a href="https://zyntora.com/">Zyntora</a>, an attempt at a virtual real-estate and social media app that was ahead of its time. I've created Chrome extensions, most notably Swati AI, a Chrome extension that allows you to get an AI-based simplified explanation of whatever you highlight in-browser and in-context… for free. More than anything, I have experience creating, training, and fine-tuning ML models and creating front-end web or iOS apps for all of my ideas. <br> <br>
+                    
+                    I've built and sold some companies, mostly under Volk, an E-Commerce accelerator/holding company, and also Molly and the Mop, an employment referral agency. The crux of both of these companies was my innate understanding and relentless pursuit of a better user experience, complemented by my capacity to leverage digital media for distribution. Volk encompassed many brands (which you probably saw online around 2021-2023), some of which I built from scratch and exited from profitably, and even some that were "flipped" with LBOs and value-additions. Molly and the Mop was the first of its kind in my city and it was a way to give local independent house cleaners consistent customer flow. We created a marketplace that connected independent contractors with eager customers (sold beforehand over the phone by my sales team) looking for their expertise. <br> <br>
+                    
+                    I took a sharp turn from entrepreneurship to research at the end of 2023 and now I'm focusing on deep learning research. More specifically, I'm researching prediction, consciousness, and sensorimotor roots of meaning at the <a href="https://yschoe.github.io/research/">Brain Networks Laboratory</a> under Dr. Choe. At the moment, we are focused on expanding upon <a href="https://arxiv.org/abs/1803.00781">this paper</a> in a paper we're calling "Developing Intrinsically Motivated Autonomous Agents with
+                    Self-Organized Meaning". I was also awarded the FIGURES Scholarship to do research at the <a href="https://people.tamu.edu/~hsieh/Rockwell_Automation_Lab.html">Rockwell Automation Laboratory</a> under Dr. Hsieh. My research there focuses on deep learning applications to industrial engineering problems and the development of Industry 4.0.<br> <br>
+                    
+                    I'm a stoic, a voracious reader, and a lover of all combat sports.                
+                </p>
+            </div>
+        </section>
 
-    <section id="research" class="content-section" data-aos="fade-up">
-        <h2>Research</h2>
-        <p>My research interests include artificial intelligence, machine learning, and data science. I have worked on several research projects that focus on these areas.</p>
-    </section>
-
+        <section id="contributions">
+            <h2>What I'm Working On</h2>
+            <p>
+                <b>Developing Intrinsically Motivated Autonomous Agents with Self-Organized Meaning</b> (Research) <br>
+                <b>TIC-TOC: Enhancing Industrial Control Education through an Intelligent Tutoring System for Real-Time Interaction and Engagement
+                </b> (Research) <br>
+                <b>Swati AI</b> (Free E-Learning Chrome Extension)
+            </p>
+        </section>
+    </main>
 
     <footer>
+        *I’m not accepting or entertaining any business pursuits until I finish undergrad.
         <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
-        <div class="social-icons">
-            <a href="https://github.com/calvarez0" target="_blank"><i class="fab fa-github"></i></a>
-            <a href="https://www.linkedin.com/in/calexalvarez/" target="_blank"><i class="fab fa-linkedin"></i></a>
-            <a href="https://x.com/0xalexrez" target="_blank"><i class="fab fa-twitter"></i></a>
+        <div class="social-media">
+            <a href="https://github.com/calvarez0" target="_blank" aria-label="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="https://linkedin.com/in/calexalvarez" target="_blank" aria-label="LinkedIn">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://twitter.com/0xalexrez" target="_blank" aria-label="Twitter">
+                <i class="fab fa-twitter"></i>
+            </a>
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/smooth-scroll/16.1.3/smooth-scroll.polyfills.min.js"></script>
-    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
-    <script src="script.js"></script>
+    <script src="index.js"></script>
+
 </body>
 </html>
