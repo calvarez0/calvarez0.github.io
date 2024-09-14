@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alex Alvarez | Personal Website</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        .bg-custom-dark { background-color: #121212; }
+        .text-custom-light { color: #e0e0e0; }
+        .hover-effect:hover { transform: translateY(-5px); transition: transform 0.3s ease; }
+    </style>
+</head>
+<body class="bg-custom-dark text-custom-light">
+    <header class="bg-gray-900 shadow-lg">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="text-xl font-semibold">Alex Alvarez</div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#research" class="hover:text-blue-400 transition">Research</a>
+                    <a href="#projects" class="hover:text-blue-400 transition">Projects</a>
+                    <a href="#about-me" class="hover:text-blue-400 transition">About Me</a>
+                    <a href="evolve-images.html" class="hover:text-blue-400 transition">Evolve Images</a>
+                </div>
+                <button class="md:hidden focus:outline-none" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <a href="#research" class="block px-4 py-2 hover:bg-gray-700">Research</a>
+            <a href="#projects" class="block px-4 py-2 hover:bg-gray-700">Projects</a>
+            <a href="#about-me" class="block px-4 py-2 hover:bg-gray-700">About Me</a>
+            <a href="evolve-images.html" class="block px-4 py-2 hover:bg-gray-700">Evolve Images</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <section class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-10">
+            <img src="/assets/profile.png" alt="Alex Alvarez" class="w-80 h-80 object-cover rounded-lg shadow-xl hover-effect">
+            <div class="flex-1">
+                <h1 class="text-4xl font-bold mb-2">Alex Alvarez</h1>
+                <p class="text-xl mb-2">Undergrad @ Texas A&M University</p>
+                <p class="text-xl mb-2">Researcher @ Brain Networks Lab + Rockwell Automation Lab</p>
+                <p class="mb-4">calvarez1 [at] tamu [dot] edu</p>
+                <div class="flex space-x-4 mb-6">
+                    <a href="https://twitter.com/0xalexrez" target="_blank" class="text-2xl hover:text-blue-400 transition"><i class="fab fa-twitter"></i></a>
+                    <a href="https://linkedin.com/in/calexalvarez" target="_blank" class="text-2xl hover:text-blue-400 transition"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://github.com/calvarez0" target="_blank" class="text-2xl hover:text-blue-400 transition"><i class="fab fa-github"></i></a>
+                </div>
+                <hr class="border-gray-700 my-6">
+                <h2 class="text-2xl font-semibold mb-4">About Me</h2>
+                <p class="text-lg leading-relaxed">
+                    I am a senior Computer Science student at Texas A&M University with a passion for AI, machine learning, and research in cognitive science. I enjoy developing solutions that bridge education and technology.
+                </p>
+            </div>
+        </section>
+
+        <section id="research" class="mt-16">
+            <h2 class="text-3xl font-bold mb-6">Research</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-md hover-effect">
+                    <h3 class="text-xl font-semibold mb-2">AI in Education</h3>
+                    <p>Exploring the application of machine learning algorithms to personalize learning experiences.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-md hover-effect">
+                    <h3 class="text-xl font-semibold mb-2">Artificial Curiosity</h3>
+                    <p>Investigating the intersection of human cognition and artificial intelligence.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="mt-16">
+            <h2 class="text-3xl font-bold mb-6">Projects</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-md hover-effect">
+                    <h3 class="text-xl font-semibold mb-2">Swati AI</h3>
+                    <p>A chrome extension that allows you to get an AI-based simplified explanation of whatever you highlight in-browser and in-context… for free.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-md hover-effect">
+                    <h3 class="text-xl font-semibold mb-2">ML-Based Tax Extrication</h3>
+                    <p>Description of project 2.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-md hover-effect">
+                    <h3 class="text-xl font-semibold mb-2">Zyntora</h3>
+                    <p>I was part of a startup called <a href="https://zyntora.com/">Zyntora</a>, an attempt at a virtual real-estate and social media app that was ahead of its time.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 text-center py-6 mt-16">
+        <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
