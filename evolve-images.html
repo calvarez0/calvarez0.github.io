@@ -12,25 +12,25 @@
         .text-custom-light { color: #e0e0e0; }
         .hover-effect:hover { transform: translateY(-5px); transition: transform 0.3s ease; }
         .hover-scale:hover { transform: scale(1.05); transition: transform 0.3s ease; }
-        .grid-square { aspect-ratio: 1/1; } /* Ensures images remain square */
-        #evolutionIntensity::-webkit-slider-thumb, #evolutionIntensity::-moz-range-thumb {
+        .grid-square { aspect-ratio: 1/1; }
+        input[type="range"]::-webkit-slider-thumb, input[type="range"]::-moz-range-thumb {
             appearance: none;
             width: 15px;
             height: 15px;
-            background: #e0e0e0; /* Light thumb color */
+            background: #e0e0e0;
             border-radius: 50%;
             cursor: pointer;
         }
         .image-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 4px; /* Reduced gap between grid items */
-            max-width: 500px; /* Adjust this value to control the overall size of the grid */
-            margin: 0 auto; /* Center the grid */
+            gap: 4px;
+            width: 100%;
+            max-width: 500px;
         }
         .image-container {
             width: 100%;
-            padding-bottom: 100%; /* Creates a square aspect ratio */
+            padding-bottom: 100%;
             position: relative;
         }
         .image-container img {
@@ -40,6 +40,16 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+        .controls-container {
+            width: 200px;
+            margin-right: 2rem;
+        }
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
         }
     </style>
 </head>
@@ -60,28 +70,40 @@
     </nav>
     <div class="md:hidden hidden" id="mobile-menu">
         <a href="index.html" class="block px-4 py-2 hover:bg-gray-700">Home</a>
+        <a href="blog.html" class="hover:text-blue-400 transition">Blog</a>
         <a href="evolve-images.html" class="block px-4 py-2 hover:bg-gray-700">Evolve Images</a>
     </div>
 </header>
 
 <main class="container mx-auto px-6 py-8">
-    <div class="controls text-center mb-8">
-        <label for="evolutionIntensity" class="block text-lg font-semibold mb-2">Evolution Intensity:</label>
-        <input type="range" id="evolutionIntensity" min="1" max="10" value="1" class="w-64">
-        <span id="intensityValue">1</span>
+    <div class="main-content mb-8">
+        <div class="controls-container mb-4 md:mb-0">
+            <div class="mb-4">
+                <label for="evolutionIntensity" class="block text-lg font-semibold mb-2">Evolution Intensity:</label>
+                <input type="range" id="evolutionIntensity" min="1" max="100" value="10" class="w-full">
+                <span id="intensityValue">10</span>
+            </div>
+            <div class="mb-4">
+                <label for="randomnessSlider" class="block text-lg font-semibold mb-2">Random Mutation Rate:</label>
+                <input type="range" id="randomnessSlider" min="1" max="100" value="10" class="w-full">
+                <span id="randomnessValue">10</span>
+            </div>
+            <button id="resetButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                Reset Images
+            </button>
+        </div>
+        <div class="image-grid" id="imageGrid">
+            <!-- Images will be dynamically inserted here -->
+        </div>
     </div>
-
-    <div class="image-grid mb-8" id="imageGrid">
-        <!-- Images will be dynamically inserted here -->
-    </div> <br>
 
     <section class="description bg-gray-800 p-6 rounded-lg shadow-md">
         <h2 class="text-2xl font-semibold mb-4">Evolutionary Algorithm</h2>
         <p class="text-lg leading-relaxed">
-            This page showcases an evolutionary algorithm created entirely by AI. Every time you click on an image, it evolves the set of images based on the one you selected. See if you can observe patterns emerging from these mutations.
+            This page showcases evolutionary algorithms. Every time you click on an image, it evolves the set of images based on the one you selected while simultaneously allowing for mutations.
         </p>
         <p class="mt-4 text-lg leading-relaxed">
-            Experiment with different evolution intensities and watch as the images transform. This offers a glimpse into the power of evolutionary algorithms and their ability to generate novel, complex designs from simple starting points.
+            I think it's interesting to note that the images end up becoming blobs of color of relatively equal size, similar to species stabilizing within their ecosystem.
         </p>
     </section>
 </main>
@@ -89,30 +111,6 @@
 <footer class="bg-gray-900 text-center py-6 mt-16">
     <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
 </footer>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evolutionary Algorithm</title>
-</head>
-<body>
-    <div>
-        <label for="evolutionIntensity">Evolution Intensity: </label>
-        <input type="range" id="evolutionIntensity" min="1" max="100" value="10">
-        <span id="intensityValue">10</span>
-    </div>
-
-    <div>
-        <label for="randomnessSlider">Random Mutation Rate: </label>
-        <input type="range" id="randomnessSlider" min="1" max="100" value="10">
-        <span id="randomnessValue">10</span>
-    </div>
-
-    <button id="resetButton">Reset Images</button>
-
-    <div id="imageGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
 
     <script>
         const NUM_IMAGES = 9;
@@ -136,7 +134,7 @@
         // Update random mutation rate based on slider input
         randomnessSlider.addEventListener('input', () => {
             const randomness = randomnessSlider.value;
-            RANDOM_MUTATION_RATE = randomness * 10 / 100;
+            RANDOM_MUTATION_RATE = randomness / 1000;
             randomnessValue.textContent = randomness;
         });
 
@@ -292,10 +290,5 @@
 
         populateImages();
     </script>
-</body>
-</html>
-
-
-
 </body>
 </html>
