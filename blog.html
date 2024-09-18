@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alex Alvarez | Blog</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .bg-custom-dark { background-color: #121212; }
+        .text-custom-light { color: #e0e0e0; }
+        .hover-effect:hover { transform: translateY(-5px); transition: transform 0.3s ease; }
+    </style>
+</head>
+<body class="bg-custom-dark text-custom-light">
+    <header class="bg-gray-900 shadow-lg">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div id="typewriter-header" class="text-xl font-semibold"></div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="hover:text-blue-400 transition">Home</a>
+                    <a href="blog.html" class="hover:text-blue-400 transition">Blog</a>
+                    <a href="evolve-images.html" class="hover:text-blue-400 transition">Evolve Images</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main blog layout -->
+    <main class="container mx-auto px-6 py-8">
+        <div class="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">
+            <!-- Sidebar with categories -->
+            <aside class="w-full md:w-1/4 bg-gray-800 p-6 rounded-lg shadow-md mb-6 md:mb-0">
+                <h2 class="text-2xl font-bold mb-4">Categories</h2>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-blue-400 transition" onclick="filterBlogs('all')">All Posts</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition" onclick="filterBlogs('thoughts')">Thoughts To Self</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition" onclick="filterBlogs('neuroscience')">Computational Neuroscience</a></li>
+                </ul>
+            </aside>
+
+            <!-- Blog posts -->
+            <section class="w-full md:w-3/4">
+                <h2 class="text-3xl font-bold mb-6">Blog Posts</h2>
+                <div id="blog-posts" class="space-y-6">
+                    <!-- Blog Post 1 -->
+                    <a href="blogs/davinci.html">
+                        <article class="bg-gray-800 p-6 rounded-lg shadow-md hover-effect" data-category="thoughts">
+                            <h3 class="text-xl font-semibold mb-2">Learnings From da Vinci</h3>
+                            <p class="text-sm text-gray-400 mb-4">Posted on Sep 17, 2024</p>
+                            <p class="leading-relaxed">What do Leonardo Da Vinci, Naval Ravikant, and Steve Jobs all have in common?</p>
+                        </article>
+                    </a>
+
+                    <br> <!-- Don't forget this -->
+
+                    <!-- Blog Post 2 -->
+                    <a href="blogs/astarsearchalgorithm.html">
+                        <article class="bg-gray-800 p-6 rounded-lg shadow-md hover-effect" data-category="neuroscience">
+                            <h3 class="text-xl font-semibold mb-2">AI Basics: A* Search Algorithm</h3>
+                            <p class="text-sm text-gray-400 mb-4">Posted on Sep 17, 2024</p>
+                            <p class="leading-relaxed">In this post, I delve into how neural networks in AI are inspired by real brain networks and the potential for these models to evolve...</p>
+                        </article>
+                    </a>
+
+                    <!-- Add more blog posts above, follow the same structure -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 text-center py-6 mt-16">
+        <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
+    </footer>
+
+    <script src="typewriter.js"></script>
+    <script>
+        typewriterEffect("typewriter-header", "Hey, I'm Alex", 100);
+        function filterBlogs(category) {
+            const posts = document.querySelectorAll('article');
+            posts.forEach(post => {
+                if (category === 'all' || post.dataset.category === category) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
