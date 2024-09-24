@@ -46,7 +46,7 @@
             justify-content: space-between;
             align-items: flex-start;
             flex-wrap: wrap;
-            gap: 2rem; /* Add gap between the columns */
+            gap: 2rem;
         }
 
         .image-grid {
@@ -62,9 +62,26 @@
         .controls-container {
             flex-basis: 50%;
             max-width: 50%;
-            margin-right: 0; /* Remove margin-right to avoid extra space */
+            margin-right: 0;
         }
 
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .image-grid, .controls-container {
+                flex-basis: 100%;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .image-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body class="bg-custom-dark text-custom-light">
@@ -85,7 +102,7 @@
     </nav>
     <div class="md:hidden hidden" id="mobile-menu">
         <a href="index.html" class="block px-4 py-2 hover:bg-gray-700">Home</a>
-        <a href="blog.html" class="hover:text-blue-400 transition">Blog</a>
+        <a href="blog.html" class="block px-4 py-2 hover:bg-gray-700">Blog</a>
         <a href="evolve-images.html" class="block px-4 py-2 hover:bg-gray-700">Evolve Images</a>
     </div>
 </header>
@@ -120,195 +137,185 @@
                 </button>
             </div>
         </div>
-
-        
-        
     </div>
-
-    
 </main>
 
 <footer class="bg-gray-900 text-center py-6 mt-16">
     <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
 </footer>
 
-    <script>
-        const NUM_IMAGES = 9;
-        const IMAGE_SIZE = 150;
-        let MUTATION_RATE = 0.01;
-        let RANDOM_MUTATION_RATE = 0.01;
+<script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
 
-        const intensitySlider = document.getElementById('evolutionIntensity');
-        const intensityValue = document.getElementById('intensityValue');
-        const randomnessSlider = document.getElementById('randomnessSlider');
-        const randomnessValue = document.getElementById('randomnessValue');
-        const resetButton = document.getElementById('resetButton');
+    menuToggle.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
 
-        // Update mutation rate based on slider input
-        intensitySlider.addEventListener('input', () => {
-            const intensity = intensitySlider.value;
-            MUTATION_RATE = intensity / 100;
-            intensityValue.textContent = intensity;
-        });
+    const NUM_IMAGES = 9;
+    const IMAGE_SIZE = 150;
+    let MUTATION_RATE = 0.01;
+    let RANDOM_MUTATION_RATE = 0.01;
 
-        // Update random mutation rate based on slider input
-        randomnessSlider.addEventListener('input', () => {
-            const randomness = randomnessSlider.value;
-            RANDOM_MUTATION_RATE = randomness / 1000;
-            randomnessValue.textContent = randomness;
-        });
+    const intensitySlider = document.getElementById('evolutionIntensity');
+    const intensityValue = document.getElementById('intensityValue');
+    const randomnessSlider = document.getElementById('randomnessSlider');
+    const randomnessValue = document.getElementById('randomnessValue');
+    const resetButton = document.getElementById('resetButton');
 
-        // Reset images to initial state
-        resetButton.addEventListener('click', () => {
-            populateImages();
-        });
+    intensitySlider.addEventListener('input', () => {
+        const intensity = intensitySlider.value;
+        MUTATION_RATE = intensity / 100;
+        intensityValue.textContent = intensity;
+    });
 
-        function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
+    randomnessSlider.addEventListener('input', () => {
+        const randomness = randomnessSlider.value;
+        RANDOM_MUTATION_RATE = randomness / 1000;
+        randomnessValue.textContent = randomness;
+    });
+
+    resetButton.addEventListener('click', () => {
+        populateImages();
+    });
+
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    function generateRandomImageData() {
+        const canvas = document.createElement('canvas');
+        canvas.width = IMAGE_SIZE;
+        canvas.height = IMAGE_SIZE;
+        const ctx = canvas.getContext('2d');
+
+        const imageData = ctx.createImageData(IMAGE_SIZE, IMAGE_SIZE);
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            imageData.data[i] = Math.random() * 255;
+            imageData.data[i + 1] = Math.random() * 255;
+            imageData.data[i + 2] = Math.random() * 255;
+            imageData.data[i + 3] = 255;
         }
 
-        function generateRandomImageData() {
-            const canvas = document.createElement('canvas');
-            canvas.width = IMAGE_SIZE;
-            canvas.height = IMAGE_SIZE;
-            const ctx = canvas.getContext('2d');
+        ctx.putImageData(imageData, 0, 0);
+        return canvas.toDataURL();
+    }
 
-            const imageData = ctx.createImageData(IMAGE_SIZE, IMAGE_SIZE);
-            for (let i = 0; i < imageData.data.length; i += 4) {
-                imageData.data[i] = Math.random() * 255;     // Red
-                imageData.data[i + 1] = Math.random() * 255; // Green
-                imageData.data[i + 2] = Math.random() * 255; // Blue
-                imageData.data[i + 3] = 255;                 // Alpha (fully opaque)
-            }
+    function mutateImageDataWithNeighborInfluence(imageData) {
+        const width = IMAGE_SIZE;
+        const height = IMAGE_SIZE;
 
-            ctx.putImageData(imageData, 0, 0);
-            return canvas.toDataURL();
+        function getPixelIndex(x, y) {
+            return (y * width + x) * 4;
         }
 
-        function mutateImageDataWithNeighborInfluence(imageData) {
-            const width = IMAGE_SIZE;
-            const height = IMAGE_SIZE;
+        function getNeighborsColor(x, y) {
+            const neighbors = [];
+            if (x > 0) neighbors.push(getPixelColor(x - 1, y));
+            if (x < width - 1) neighbors.push(getPixelColor(x + 1, y));
+            if (y > 0) neighbors.push(getPixelColor(x, y - 1));
+            if (y < height - 1) neighbors.push(getPixelColor(x, y + 1));
+            if (x > 0 && y > 0) neighbors.push(getPixelColor(x - 1, y - 1));
+            if (x < width - 1 && y > 0) neighbors.push(getPixelColor(x + 1, y - 1));
+            if (x > 0 && y < height - 1) neighbors.push(getPixelColor(x - 1, y + 1));
+            if (x < width - 1 && y < height - 1) neighbors.push(getPixelColor(x + 1, y + 1));
+            return neighbors;
+        }
 
-            function getPixelIndex(x, y) {
-                return (y * width + x) * 4;
-            }
+        function getPixelColor(x, y) {
+            const idx = getPixelIndex(x, y);
+            return [imageData.data[idx], imageData.data[idx + 1], imageData.data[idx + 2]];
+        }
 
-            function getNeighborsColor(x, y) {
-                const neighbors = [];
-                // Direct neighbors (top, bottom, left, right)
-                if (x > 0) neighbors.push(getPixelColor(x - 1, y));    // left
-                if (x < width - 1) neighbors.push(getPixelColor(x + 1, y)); // right
-                if (y > 0) neighbors.push(getPixelColor(x, y - 1));    // top
-                if (y < height - 1) neighbors.push(getPixelColor(x, y + 1)); // bottom
-                // Diagonal neighbors (top-left, top-right, bottom-left, bottom-right)
-                if (x > 0 && y > 0) neighbors.push(getPixelColor(x - 1, y - 1)); // top-left
-                if (x < width - 1 && y > 0) neighbors.push(getPixelColor(x + 1, y - 1)); // top-right
-                if (x > 0 && y < height - 1) neighbors.push(getPixelColor(x - 1, y + 1)); // bottom-left
-                if (x < width - 1 && y < height - 1) neighbors.push(getPixelColor(x + 1, y + 1)); // bottom-right
-                return neighbors;
-            }
+        function setPixelColor(x, y, color) {
+            const idx = getPixelIndex(x, y);
+            imageData.data[idx] = color[0];
+            imageData.data[idx + 1] = color[1];
+            imageData.data[idx + 2] = color[2];
+        }
 
-            function getPixelColor(x, y) {
-                const idx = getPixelIndex(x, y);
-                return [imageData.data[idx], imageData.data[idx + 1], imageData.data[idx + 2]];
-            }
-
-            function setPixelColor(x, y, color) {
-                const idx = getPixelIndex(x, y);
-                imageData.data[idx] = color[0];   // Red
-                imageData.data[idx + 1] = color[1]; // Green
-                imageData.data[idx + 2] = color[2]; // Blue
-            }
-
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    // Add random mutations to introduce diversity
-                    if (Math.random() < RANDOM_MUTATION_RATE) {
-                        setPixelColor(x, y, [Math.random() * 255, Math.random() * 255, Math.random() * 255]);
-                    } else if (Math.random() < MUTATION_RATE) {
-                        const neighbors = getNeighborsColor(x, y);
-                        const colorFrequencies = {};
-
-                        // Count frequency of each neighbor's color
-                        neighbors.forEach(color => {
-                            const colorKey = color.join(',');
-                            colorFrequencies[colorKey] = (colorFrequencies[colorKey] || 0) + 1;
-                        });
-
-                        // Select the most frequent color
-                        let dominantColor = null;
-                        let maxCount = -1;
-                        for (const [colorKey, count] of Object.entries(colorFrequencies)) {
-                            if (count > maxCount) {
-                                maxCount = count;
-                                dominantColor = colorKey.split(',').map(Number);
-                            }
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                if (Math.random() < RANDOM_MUTATION_RATE) {
+                    setPixelColor(x, y, [Math.random() * 255, Math.random() * 255, Math.random() * 255]);
+                } else if (Math.random() < MUTATION_RATE) {
+                    const neighbors = getNeighborsColor(x, y);
+                    const colorFrequencies = {};
+                    neighbors.forEach(color => {
+                        const colorKey = color.join(',');
+                        colorFrequencies[colorKey] = (colorFrequencies[colorKey] || 0) + 1;
+                    });
+                    let dominantColor = null;
+                    let maxCount = -1;
+                    for (const [colorKey, count] of Object.entries(colorFrequencies)) {
+                        if (count > maxCount) {
+                            maxCount = count;
+                            dominantColor = colorKey.split(',').map(Number);
                         }
-
-                        if (dominantColor) {
-                            setPixelColor(x, y, dominantColor);
-                        }
+                    }
+                    if (dominantColor) {
+                        setPixelColor(x, y, dominantColor);
                     }
                 }
             }
-
-            return imageData;
         }
+        return imageData;
+    }
 
-        function evolveImages(event) {
-            const clickedImage = event.target;
-            const canvas = document.createElement('canvas');
-            canvas.width = IMAGE_SIZE;
-            canvas.height = IMAGE_SIZE;
-            const ctx = canvas.getContext('2d');
+    function evolveImages(event) {
+        const clickedImage = event.target;
+        const canvas = document.createElement('canvas');
+        canvas.width = IMAGE_SIZE;
+        canvas.height = IMAGE_SIZE;
+        const ctx = canvas.getContext('2d');
 
-            const parentImage = new Image();
-            parentImage.src = clickedImage.src;
+        const parentImage = new Image();
+        parentImage.src = clickedImage.src;
 
-            parentImage.onload = () => {
-                ctx.drawImage(parentImage, 0, 0);
-                let imageData = ctx.getImageData(0, 0, IMAGE_SIZE, IMAGE_SIZE);
+        parentImage.onload = () => {
+            ctx.drawImage(parentImage, 0, 0);
+            let imageData = ctx.getImageData(0, 0, IMAGE_SIZE, IMAGE_SIZE);
 
-                populateImages(() => mutateImageDataWithNeighborInfluence(imageData));
-            };
-        }
+            populateImages(() => mutateImageDataWithNeighborInfluence(imageData));
+        };
+    }
 
-        function populateImages(mutateFunction) {
-            const imageGrid = document.getElementById('imageGrid');
-            imageGrid.innerHTML = '';
+    function populateImages(mutateFunction) {
+        const imageGrid = document.getElementById('imageGrid');
+        imageGrid.innerHTML = '';
 
-            for (let i = 0; i < NUM_IMAGES; i++) {
-                const imageContainer = document.createElement('div');
-                imageContainer.classList.add('image-container');
+        for (let i = 0; i < NUM_IMAGES; i++) {
+            const imageContainer = document.createElement('div');
+            imageContainer.classList.add('image-container');
 
-                const img = document.createElement('img');
-                img.classList.add('hover-scale', 'rounded-lg', 'shadow-md');
+            const img = document.createElement('img');
+            img.classList.add('hover-scale', 'rounded-lg', 'shadow-md');
 
-                if (mutateFunction) {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = IMAGE_SIZE;
-                    canvas.height = IMAGE_SIZE;
-                    const ctx = canvas.getContext('2d');
+            if (mutateFunction) {
+                const canvas = document.createElement('canvas');
+                canvas.width = IMAGE_SIZE;
+                canvas.height = IMAGE_SIZE;
+                const ctx = canvas.getContext('2d');
 
-                    const mutatedData = mutateFunction();
-                    ctx.putImageData(mutatedData, 0, 0);
-                    img.src = canvas.toDataURL();
-                } else {
-                    img.src = generateRandomImageData();
-                }
-
-                img.addEventListener('click', evolveImages);
-                imageContainer.appendChild(img);
-                imageGrid.appendChild(imageContainer);
+                const mutatedData = mutateFunction();
+                ctx.putImageData(mutatedData, 0, 0);
+                img.src = canvas.toDataURL();
+            } else {
+                img.src = generateRandomImageData();
             }
-        }
 
-        populateImages();
-    </script>
+            img.addEventListener('click', evolveImages);
+            imageContainer.appendChild(img);
+            imageGrid.appendChild(imageContainer);
+        }
+    }
+
+    populateImages();
+</script>
 </body>
 </html>
