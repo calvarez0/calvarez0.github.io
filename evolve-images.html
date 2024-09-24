@@ -96,7 +96,7 @@
                 <a href="evolve-images.html" class="hover:text-blue-400 transition">Evolve Images</a>
             </div>
             <button class="md:hidden focus:outline-none" id="menu-toggle">
-                <i class="fas fa-bars"></i>
+                <i class="fas fa-bars text-xl"></i>
             </button>
         </div>
     </nav>
@@ -118,7 +118,7 @@
                 This page showcases a very simple evolutionary algorithm. Every time you click on an image it evolves the set of images based on the one you selected, allowing for distinct pseudorandom mutations in each image.
             </p>
             <p class="mt-4 text-lg leading-relaxed">
-                It's interesting to note that (unless mutation rate/randomness is very hight) the images end up becoming blobs of color of relatively equal size, similar to species stabilizing within their ecosystem.
+                It's interesting to note that (unless mutation rate/randomness is very high) the images end up becoming blobs of color of relatively equal size, similar to species stabilizing within their ecosystem.
             </p>
 
             <div class="controls-container mb-4 md:mb-0">
@@ -150,6 +150,7 @@
 
     menuToggle.addEventListener('click', () => {
         mobileMenu.classList.toggle('hidden');
+        
     });
 
     const NUM_IMAGES = 9;
