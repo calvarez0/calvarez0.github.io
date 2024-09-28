@@ -10,44 +10,30 @@
         .bg-custom-dark { background-color: #121212; }
         .text-custom-light { color: #e0e0e0; }
         .hover-effect:hover { transform: translateY(-5px); transition: transform 0.3s ease; }
-
-        #mobile-menu {
-            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            overflow: hidden;
-            max-height: 0;
-            opacity: 0;
-        }
-        #mobile-menu.active {
-            max-height: 500px;
-            opacity: 1;
-        }
     </style>
 </head>
 <body class="bg-custom-dark text-custom-light">
 
-<header class="bg-gray-900 shadow-lg">
-    <nav class="container mx-auto px-6 py-3">
-        <div class="flex justify-between items-center">
-            <div id="typewriter-header" class="text-xl font-semibold"></div>
-            <!-- Desktop menu -->
-            <div class="hidden md:flex space-x-6">
-                <a href="index.html" class="hover:text-blue-400 transition">Home</a>
-                <a href="blog.html" class="hover:text-blue-400 transition">Blog</a>
-                <a href="evolve-images.html" class="hover:text-blue-400 transition">Evolve Images</a>
+    <header class="bg-gray-900 shadow-lg">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="text-xl font-semibold">Alex Alvarez</div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="hover:text-blue-400 transition">Home</a>
+                    <a href="blog.html" class="hover:text-blue-400 transition">Blog</a>
+                    <a href="evolve-images.html" class="hover:text-blue-400 transition">Evolve Images</a>
+                </div>
+                <button class="md:hidden focus:outline-none" id="menu-toggle">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
             </div>
-            <!-- Mobile menu button -->
-            <button class="md:hidden focus:outline-none" id="menu-toggle">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <a href="index.html" class="block px-4 py-2 hover:bg-gray-700">Home</a>
+            <a href="blog.html" class="block px-4 py-2 hover:bg-gray-700">Blog</a>
+            <a href="evolve-images.html" class="block px-4 py-2 hover:bg-gray-700">Evolve Images</a>
         </div>
-    </nav>
-    <!-- Mobile menu -->
-    <div class="md:hidden bg-gray-800 px-4 py-2" id="mobile-menu">
-        <a href="index.html" class="block px-4 py-2 hover:bg-gray-700">Home</a>
-        <a href="blog.html" class="block px-4 py-2 hover:bg-gray-700">Blog</a>
-        <a href="evolve-images.html" class="block px-4 py-2 hover:bg-gray-700">Evolve Images</a>
-    </div>
-</header>
+    </header>
 
 <!-- Main blog layout -->
 <main class="container mx-auto px-6 py-8">
@@ -104,10 +90,14 @@
     <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
 </footer>
 
-<!-- Script to handle mobile menu toggle -->
-<script src="typewriter.js"></script>
 <script>
-    typewriterEffect("typewriter-header", "Hey, I'm Alex", 100);
+
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
 
     function filterBlogs(category) {
         const posts = document.querySelectorAll('article');
@@ -120,12 +110,8 @@
         });
     }
 
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
+    
 
-    menuToggle.addEventListener('click', () => {
-        mobileMenu.classList.toggle('active');
-    });
 </script>
 
 </body>
