@@ -1,141 +1,23 @@
-/* General body styling */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #121212; /* Dark background */
-    color: #ffffff; /* White text */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    min-height: 100vh;
+/* Custom Styles */
+.bg-custom-dark {
+    background-color: #121212;
 }
 
-/* Header styling */
-header {
-    width: 100%;
-    background-color: #1e1e1e; /* Darker header */
-    padding: 15px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+.text-custom-light {
+    color: #e0e0e0;
 }
 
-nav ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
+.hover-effect:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
 }
 
-nav ul li {
-    margin: 0 20px;
+/* Nav menu */
+#mobile-menu a:hover {
+    background-color: #4a5568; /* Same as hover:bg-gray-700 */
 }
 
-nav ul li a {
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 1.2em;
-}
-
-nav ul li a:hover {
-    color: #00a0dc; /* LinkedIn blue on hover */
-}
-
-/* Profile section */
-.container {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    padding: 50px 20px;
-    max-width: 1200px;
-    width: 100%;
-}
-
-.profile-section {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-}
-
-.profile-photo {
-    border-radius: 0; /* Square image */
-    height: 150px;
-    width: 150px;
-    object-fit: cover;
-    margin-right: 30px;
-}
-
-/* Info section */
-.info h1 {
-    margin: 0;
-    font-size: 2.5em;
-    color: #ffffff; /* White text */
-}
-
-.info p {
-    margin: 5px 0;
-    font-size: 1.1em;
-}
-
+/* Divider */
 hr {
-    border: none;
-    border-top: 1px solid #444;
-    margin: 20px 0;
-}
-
-/* About Me section */
-.about-me h2 {
-    font-size: 1.8em;
-    margin-bottom: 10px;
-}
-
-.about-me p {
-    font-size: 1.1em;
-    line-height: 1.6;
-}
-
-/* Social icons */
-.social-icons {
-    display: flex;
-    margin-top: 15px;
-}
-
-.social-icons a {
-    margin-right: 20px;
-}
-
-.social-icons img {
-    height: 32px;
-    width: 32px;
-}
-
-.social-icons img:hover {
-    filter: brightness(0) saturate(100%) invert(51%) sepia(80%) saturate(366%) hue-rotate(157deg) brightness(96%) contrast(98%);
-    /* Applies LinkedIn blue color effect on hover */
-}
-
-/* Add responsiveness */
-@media screen and (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .profile-section {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .profile-photo {
-        margin-bottom: 20px;
-    }
-
-    .info {
-        text-align: center;
-    }
-
-    .social-icons {
-        justify-content: center;
-    }
+    border-color: #4a5568; /* Same as border-gray-700 */
 }
