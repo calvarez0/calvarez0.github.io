@@ -8,16 +8,18 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
     <style>
-        .bg-custom-dark { background-color: #121212; }
+        .bg-custom-content {background-color: #1b1b1b;}
+        .bg-custom-button {background-color: #f8f8f8;}
+        .bg-custom-dark { background-color: #000000; }
         .text-custom-light { color: #e0e0e0; }
         .hover-effect:hover { transform: translateY(-5px); transition: transform 0.3s ease; }
         blockquote {
             font-style: italic;
             padding: 1em;
             margin: 1.5em 0;
-            border-left: 4px solid #4a5568; /* Tailwind's gray-600 */
-            background-color: #2d3748; /* Tailwind's gray-800 */
-            color: #a0aec0; /* Tailwind's gray-400 */
+            border-left: 4px solid #ffffff; /* Tailwind's gray-600 */
+            background-color: #434343; /* Tailwind's gray-800 */
+            color: #ffffff; /* Tailwind's gray-400 */
         }
         .quote-author {
             text-align: right;
@@ -27,7 +29,7 @@
     </style>
 </head>
 <body class="bg-custom-dark text-custom-light">
-    <header class="bg-gray-900 shadow-lg">
+    <header class="bg-custom-content shadow-lg">
         <nav class="container mx-auto px-6 py-3">
             <div class="flex justify-between items-center">
                 <div class="text-xl font-semibold">Alex Alvarez</div>
@@ -42,13 +44,13 @@
 
     <!-- Back to Blog Button -->
     <div class="container mx-auto px-6 mt-4">
-        <a href="../blog.html" class="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition">
+        <a href="../blog.html" class="inline-block bg-custom-button text-black px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition">
             ← Back to Blog
         </a>
     </div>
 
     <main class="container mx-auto px-6 py-8">
-        <article class="bg-gray-800 p-6 rounded-lg shadow-md">
+        <article class="bg-custom-content p-6 rounded-lg shadow-md">
             <div class="text-center mb-4">
                 <img src="assets/davinky.jpg" alt="Leonardo da Vinci" class="mx-auto w-full md:w-1/2 h-auto object-cover rounded-lg shadow-md">
                 <p class="text-sm text-gray-400 mt-2">Da Vinci's sketches of the human heart.</p>
@@ -93,7 +95,7 @@
         </article>
     </main>
 
-    <footer class="bg-gray-900 text-center py-6 mt-16">
+    <footer class="bg-custom-content text-center py-6 mt-16">
         <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
     </footer>
 </body>
