@@ -7,11 +7,16 @@
     <link rel="icon" type="image/x-icon" href="assets/icon.webp"> 
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
+    <style>
+        .bg-custom-content {background-color: #1b1b1b;}
+        .text-custom-light { color: #e0e0e0; }
+        .hover-effect:hover { transform: translateY(-5px); transition: transform 0.3s ease; }
+        .bg-custom-dark { background-color: #040404; }
+    </style>
 </head>
 <body class="bg-custom-dark text-custom-light">
 
-    <header class="bg-gray-900 shadow-lg">
+    <header class="shadow-lg">
         <nav class="container mx-auto px-6 py-3">
             <div class="flex justify-between items-center">
                 <div class="text-xl font-semibold">Alex Alvarez</div>
@@ -36,7 +41,7 @@
 <main class="container mx-auto px-6 py-8">
     <div class="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">
         <!-- Sidebar with categories -->
-        <aside class="w-full md:w-1/4 bg-gray-800 p-6 rounded-lg shadow-md mb-6 md:mb-0">
+        <aside class="w-full md:w-1/4 bg-custom-content p-6 rounded-lg shadow-md mb-6 md:mb-0">
             <h2 class="text-2xl font-bold mb-4">Categories</h2>
             <ul class="space-y-2">
                 <li><a href="#" class="hover:text-blue-400 transition" onclick="filterBlogs('all')">All Posts</a></li>
@@ -51,7 +56,7 @@
             <div id="blog-posts" class="space-y-6">
                 <!-- Blog Post 3 -->
                 <a href="blogs/on_fasting.html">
-                    <article class="bg-gray-800 p-6 rounded-lg shadow-md hover-effect" data-category="thoughts">
+                    <article class="bg-custom-content p-6 rounded-lg shadow-md hover-effect" data-category="thoughts">
                         <h3 class="text-xl font-semibold mb-2">On Fasting</h3>
                         <p class="text-sm text-gray-400 mb-4">Posted on Sep 21, 2024</p>
                         <p class="leading-relaxed">I document my experience during a 24-hour fast and explain why I'm doing it in the first place.</p>
@@ -60,7 +65,7 @@
                 <br>
                 <!-- Blog Post 2 -->
                 <a href="blogs/summoning_luck.html">
-                    <article class="bg-gray-800 p-6 rounded-lg shadow-md hover-effect" data-category="thoughts">
+                    <article class="bg-custom-content p-6 rounded-lg shadow-md hover-effect" data-category="thoughts">
                         <h3 class="text-xl font-semibold mb-2">Summon Your Own Luck</h3>
                         <p class="text-sm text-gray-400 mb-4">Posted on Sep 19, 2024</p>
                         <p class="leading-relaxed">You don't wait for luck. You summon her by incessantly throwing in chemicals and shaking up the beaker of fortune until something reacts.</p>
@@ -69,7 +74,7 @@
                 <br>
                 <!-- Blog Post 1 -->
                 <a href="blogs/davinci.html">
-                    <article class="bg-gray-800 p-6 rounded-lg shadow-md hover-effect" data-category="thoughts">
+                    <article class="bg-custom-content p-6 rounded-lg shadow-md hover-effect" data-category="thoughts">
                         <h3 class="text-xl font-semibold mb-2">Fortune Steers, You Row (Learnings From da Vinci)</h3>
                         <p class="text-sm text-gray-400 mb-4">Posted on Sep 17, 2024</p>
                         <p class="leading-relaxed">What do Leonardo Da Vinci, Naval Ravikant, and Steve Jobs all have in common?</p>
@@ -83,7 +88,7 @@
     </div>
 </main>
 
-<footer class="bg-gray-900 text-center py-6 mt-16">
+<footer class="bg-custom-content text-center py-6 mt-16">
     <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
 </footer>
 

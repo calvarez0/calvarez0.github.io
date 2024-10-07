@@ -9,7 +9,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        .bg-custom-dark { background-color: #121212; }
+        .bg-custom-content {background-color: #1b1b1b;}
+        .bg-custom-dark { background-color: #000000; }
         .text-custom-light { color: #e0e0e0; }
         .hover-effect:hover { transform: translateY(-5px); transition: transform 0.3s ease; }
         .hover-scale:hover { transform: scale(1.05); transition: transform 0.3s ease; }
@@ -87,7 +88,7 @@
 </head>
 <body class="bg-custom-dark text-custom-light">
 
-<header class="bg-gray-900 shadow-lg">
+<header class="shadow-lg">
     <nav class="container mx-auto px-6 py-3">
         <div class="flex justify-between items-center">
             <div class="text-xl font-semibold">Alex Alvarez</div>
@@ -113,7 +114,7 @@
         <div class="image-grid" id="imageGrid">
             <!-- Images will be dynamically inserted here -->
         </div>
-        <div class="controls-container mb-4 md:mb-0 description bg-gray-800 p-6 rounded-lg shadow-md">
+        <div class="controls-container mb-4 md:mb-0 description bg-custom-content p-6 rounded-lg shadow-md">
             <h2 class="text-2xl font-semibold mb-4">Evolutionary Algorithm</h2>
             <p class="text-lg leading-relaxed">
                 This page showcases a very simple evolutionary algorithm. Every time you click on an image it evolves the set of images based on the one you selected, allowing for distinct pseudorandom mutations in each image.
@@ -141,7 +142,7 @@
     </div>
 </main>
 
-<footer class="bg-gray-900 text-center py-6 mt-16">
+<footer class="text-center py-6 mt-16">
     <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
 </footer>
 
