@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PicBreeder-like Evolution</title>
+    <title>Evolutionary Algorithms</title>
     <link rel="icon" type="image/x-icon" href="assets/icon.webp">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -95,7 +95,7 @@
             <div class="hidden md:flex space-x-6">
                 <a href="index.html" class="hover:text-blue-400 transition">Home</a>
                 <a href="blog.html" class="hover:text-blue-400 transition">Blog</a>
-                <a href="evolve-images.html" class="hover:text-blue-400 transition">Evolve Images</a>
+                <a href="evolve-images.html" class="hover:text-blue-400 transition">Evolutionary Algorithms</a>
             </div>
             <button class="md:hidden focus:outline-none" id="menu-toggle">
                 <i class="fas fa-bars text-xl"></i>
@@ -105,7 +105,7 @@
     <div class="md:hidden hidden" id="mobile-menu">
         <a href="index.html" class="block px-4 py-2 hover:bg-gray-700">Home</a>
         <a href="blog.html" class="block px-4 py-2 hover:bg-gray-700">Blog</a>
-        <a href="evolve-images.html" class="block px-4 py-2 hover:bg-gray-700">Evolve Images</a>
+        <a href="evolve-images.html" class="block px-4 py-2 hover:bg-gray-700">Evolutionary Algorithms</a>
     </div>
 </header>
 
@@ -120,7 +120,7 @@
                 This page showcases a very simple evolutionary algorithm. Every time you click on an image it evolves the set of images based on the one you selected, allowing for distinct pseudorandom mutations in each image.
             </p>
             <p class="mt-4 text-lg leading-relaxed">
-                It's interesting to note that (unless mutation rate/randomness is very high) the images end up becoming blobs of color of relatively equal size, similar to species stabilizing within their ecosystem.
+                It's interesting to note that (unless mutation rate/randomness is very high) the images end up becoming blobs of color of relatively equal size, similar to species stabilizing within their ecosystem. The higher the mutation rate the more aggresive competition is and the less number of colors (species) in the ecosystem; inveresly, the higher the mutation rate the higher the diversity.
             </p>
 
             <div class="controls-container mb-4 md:mb-0">
