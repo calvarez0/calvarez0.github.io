@@ -47,6 +47,7 @@ nav .menu a {
     font-weight: 500;
 }
 
+/* Hamburger Menu */
 /* Mobile Menu */
 .menu-toggle {
     display: none;
@@ -179,3 +180,17 @@ footer {
     text-align: center;
     padding: 20px;
 }
+
+
+
+
+/* Initially hide the menu on mobile */
+.menu {
+    display: flex;
+}
+
+.menu.show {
+    display: block;
+}
+
+
