@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Policy Impact Calculator</title>
+    <link rel="stylesheet" href="demographic.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Enter Your Information</h2>
+            <p>See the impacts of each candidate's policies on your household.</p>
+    
+            <label for="income">Income:</label>
+            <input type="number" id="income" min="0">
+    
+            <label for="capitalGains">Capital Gains:</label>
+            <input type="number" id="capitalGains" min="0">
+    
+            <label for="dividends">Dividends:</label>
+            <input type="number" id="dividends" min="0">
+    
+            <label for="age">Age:</label>
+            <input type="number" id="age" min="0" max="120">
+    
+            <label for="dependents">Number of Dependents:</label>
+            <select id="dependents">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+    
+            <label for="dependentsCollege">Students in College:</label>
+            <select id="dependentsCollege">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+            </select>
+    
+            <label for="healthNeeds">Health Needs:</label>
+            <select id="healthNeeds">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+    
+            <label for="energyUsage">Energy Usage:</label>
+            <select id="energyUsage">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+    
+            <button onclick="calculateImpact()">Calculate</button>
+        </div>
+    
+        <div class="results-container">
+            <div class="mobile-tabs">
+                <button onclick="switchCandidate('kamala')" class="tab-btn active">Kamala Harris</button>
+                <button onclick="switchCandidate('trump')" class="tab-btn">Donald Trump</button>
+            </div>
+    
+            <div class="candidates-wrapper">
+                <div id="kamalaCandidate" class="candidate">
+                    <div class="candidate-header">
+                        <img src="harris.jpg" alt="Kamala Harris" class="candidate-photo">
+                        <div>
+                            <h3>Kamala Harris</h3>
+                            <p>Vice President of the United States</p>
+                        </div>
+                    </div>
+                    <div class="net-income-title">Net Change to Your Income (2025)</div>
+                    <div id="kamalaImpact" class="net-income">+$0</div>
+                    <div id="kamalaChart" class="chart"></div>
+                </div>
+    
+                <div id="trumpCandidate" class="candidate">
+                    <div class="candidate-header">
+                        <img src="trump.jpg" alt="Donald Trump" class="candidate-photo">
+                        <div>
+                            <h3>Donald Trump</h3>
+                            <p>Former President of the United States</p>
+                        </div>
+                    </div>
+                    <div class="net-income-title">Net Change to Your Income (2025)</div>
+                    <div id="trumpImpact" class="net-income">+$0</div>
+                    <div id="trumpChart" class="chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="demographic_iq_app.js"></script>    
+</body>
+<!-- <footer class="footer-disclaimer">
+    <p>
+        As students of Texas A&M University, we created this app independently with the hopes of better-informing voters. Its content reflects our own views and is not officially affiliated with or endorsed by Texas A&M University.
+    </p>
+    <br>
+    <p>
+        *If you find any inaccuracies in our content, please contact us: calvarez1 [at] tamu [dot] edu.*
+    </p>
+</footer> -->
+</html>
