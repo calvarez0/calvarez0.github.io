@@ -184,3 +184,46 @@ body {
     }
 }
 
+/* Existing CSS remains the same until the checkbox styling */
+
+/* Checkbox group styling */
+.checkbox-group {
+    margin: 0px 0;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-weight: normal;
+    color: #333;
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.checkbox-text {
+    flex: 1;
+}
+
+/* Button styling */
+button {
+    background-color: #28a745;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #218838;
+}

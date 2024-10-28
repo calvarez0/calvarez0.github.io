@@ -12,19 +12,19 @@
         <div class="sidebar">
             <h2>Enter Your Information</h2>
             <p>See the impacts of each candidate's policies on your household.</p>
-    
+
             <label for="income">Income:</label>
             <input type="number" id="income" min="0">
-    
+
             <label for="capitalGains">Capital Gains:</label>
             <input type="number" id="capitalGains" min="0">
-    
+
             <label for="dividends">Dividends:</label>
             <input type="number" id="dividends" min="0">
-    
+
             <label for="age">Age:</label>
             <input type="number" id="age" min="0" max="120">
-    
+
             <label for="dependents">Number of Dependents:</label>
             <select id="dependents">
                 <option value="0">0</option>
@@ -33,28 +33,36 @@
                 <option value="3">3</option>
                 <option value="4">4</option>
             </select>
-    
+
             <label for="dependentsCollege">Students in College:</label>
             <select id="dependentsCollege">
                 <option value="0">0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
             </select>
+
+            <div class="checkbox-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="firstTimeHomebuyer">
+                    <span class="checkbox-text">First-Time Homebuyer</span>
+                </label>
     
-            <label for="healthNeeds">Health Needs:</label>
-            <select id="healthNeeds">
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-            </select>
+                <label class="checkbox-container">
+                    <input type="checkbox" id="isStartup">
+                    <span class="checkbox-text">Small Business Startup</span>
+                </label>
     
-            <label for="energyUsage">Energy Usage:</label>
-            <select id="energyUsage">
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-            </select>
+                <label class="checkbox-container">
+                    <input type="checkbox" id="tips">
+                    <span class="checkbox-text">Earns Tips</span>
+                </label>
     
+                <label class="checkbox-container">
+                    <input type="checkbox" id="overtime">
+                    <span class="checkbox-text">Earns Overtime</span>
+                </label>
+            </div>
+
             <button onclick="calculateImpact()">Calculate</button>
         </div>
     

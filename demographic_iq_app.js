@@ -1,4 +1,5 @@
 // Policy Calculation Functions
+
 function calculateMedicareSavings(age, healthNeeds) {
     if (age >= 65) {
         return healthNeeds === "high" ? 3000 : healthNeeds === "medium" ? 2000 : 1000;
@@ -13,31 +14,99 @@ function calculateEnergySavings(energyUsage) {
 
 function kamalaHarrisPolicy(demographics) {
     let netIncomeImpact = 0;
-    if (demographics.capitalGains > 1000000) {
-        netIncomeImpact -= (demographics.capitalGains * (28 - 20)) / 100;
-    }
+
+    // Higher taxes on income for those above specific thresholds
     if (demographics.income > 400000) {
-        netIncomeImpact -= (demographics.income * (5 - 3.8)) / 100;
+        netIncomeImpact -= (demographics.income * 0.012); // Increase in Medicare and NIIT rates for high earners
+        netIncomeImpact -= (demographics.income > 1000000 ? demographics.income * 0.0396 : 0); // Top rate for high earners
     }
+
+    // Capital gains tax increase for high earners
+    if (demographics.capitalGains > 1000000) {
+        netIncomeImpact -= (demographics.capitalGains * (0.28 - 0.20)); // 28% capital gains tax on gains above $1 million
+    }
+    if (demographics.dividends > 1000000) {
+        netIncomeImpact -= (demographics.dividends * (0.28 - 0.20)); // Increase on dividends
+    }
+
+    // Credits for households earning $400k or below
     if (demographics.income <= 400000) {
-        netIncomeImpact += demographics.dependents * 3000;
-        netIncomeImpact += demographics.dependentsCollege * 6000;
+        netIncomeImpact += demographics.dependents * 3000; // Child tax credit for dependents
+        netIncomeImpact += demographics.dependentsCollege * 6000; // Extra credit for dependents in college
         if (demographics.income < 50000) {
-            netIncomeImpact += 1000;
+            netIncomeImpact += 1000; // Additional support for low-income earners
         }
     }
+
+    // First-time homebuyer credit (if applicable)
+    if (demographics.firstTimeHomebuyer) {
+        netIncomeImpact += 25000 / 4; // $25,000 spread over 4 years for first-time homebuyers
+    }
+
+    // Expanded earned income tax credit (EITC) for workers without dependents
+    if (!demographics.dependents && demographics.income < 20000) {
+        netIncomeImpact += 1500; // Approximation for EITC expansion for individuals without dependents
+    }
+
+    // Credits and exemptions
+    netIncomeImpact += demographics.age >= 65 ? 1500 : 0; // Credit for Social Security beneficiaries
+    netIncomeImpact += demographics.tips ? 100 : 0; // Exemption on tips for service workers
+
+    // Small business and startup deductions
+    if (demographics.isStartup) {
+        netIncomeImpact += 50000; // Expanded Section 195 deduction for startup expenses
+    }
+
+    // Medicare savings for healthcare needs
     netIncomeImpact += calculateMedicareSavings(demographics.age, demographics.healthNeeds);
+
     return netIncomeImpact;
 }
 
+
 function donaldTrumpPolicy(demographics) {
-    let netIncomeImpact = demographics.dependents * 5000;
-    if (demographics.income < 400000) {
-        netIncomeImpact += 1000;
+    let netIncomeImpact = 0;
+
+    // Adjust for dependents
+    netIncomeImpact += demographics.dependents * 5000;
+    if (demographics.dependentsCollege) {
+        netIncomeImpact += demographics.dependentsCollege * 2500; // Additional for dependents in college
     }
+
+    // Income adjustments based on threshold
+    if (demographics.income < 400000) {
+        netIncomeImpact += 1000; // Small tax cut for households under $400,000
+    }
+
+    // Exemptions
+    if (demographics.age >= 65) {
+        netIncomeImpact += 1500; // Exempt Social Security benefits for seniors
+    }
+    netIncomeImpact += demographics.overtime ? 200 : 0; // Exempt overtime pay from income tax
+    netIncomeImpact += demographics.tips ? 100 : 0; // Exempt tips from income tax
+
+    // Adjustments for capital gains and dividends (reduced rate)
+    netIncomeImpact += (demographics.capitalGains || 0) * 0.15; // Approximate 15% reduction for capital gains
+    netIncomeImpact += (demographics.dividends || 0) * 0.15; // Approximate 15% reduction for dividends
+
+    // Itemized deduction for auto loan interest
+    if (demographics.autoLoanInterest) {
+        netIncomeImpact += demographics.autoLoanInterest * 0.10; // Approximate 10% benefit on auto loan interest
+    }
+
+    // Adjustments based on tariffs and foreign retaliation
+    if (demographics.income <= 80000) {
+        netIncomeImpact -= 500; // Tariff burden on lower-income households
+    } else if (demographics.income <= 200000) {
+        netIncomeImpact -= 300; // Tariff burden on middle-income households
+    }
+
+    // Additional deductions for energy savings
     netIncomeImpact += calculateEnergySavings(demographics.energyUsage);
+
     return netIncomeImpact;
 }
+
 
 function createPieChart(data, title, elementId) {
     // Check if Plotly is available
@@ -145,8 +214,10 @@ function calculateImpact() {
             age: parseInt(document.getElementById("age").value) || 0,
             dependents: parseInt(document.getElementById("dependents").value) || 0,
             dependentsCollege: parseInt(document.getElementById("dependentsCollege").value) || 0,
-            healthNeeds: document.getElementById("healthNeeds").value || "low",
-            energyUsage: document.getElementById("energyUsage").value || "low",
+            firstTimeHomebuyer: document.getElementById("firstTimeHomebuyer").checked || false,
+            isStartup: document.getElementById("isStartup").checked || false,
+            tips: document.getElementById("tips").checked || false,
+            overtime: document.getElementById("overtime").checked || false,
         };
 
         const kamalaImpact = kamalaHarrisPolicy(demographics);
@@ -158,19 +229,16 @@ function calculateImpact() {
         const kamalaPieData = [
             { label: "Income Tax Savings", value: kamalaImpact > 0 ? kamalaImpact : 0, color: "green" },
             { label: "Income Tax Increase", value: kamalaImpact < 0 ? -kamalaImpact : 0, color: "#c10013" },
-            { label: "Other Deductions", value: 2000, color: "lightgreen" },
-            { label: "Social Security", value: 70, color: "blue" },
-            { label: "Healthcare Savings", value: calculateMedicareSavings(demographics.age, demographics.healthNeeds), color: "lightblue" },
-            { label: "Energy Savings", value: calculateEnergySavings(demographics.energyUsage), color: "skyblue" },
+            { label: "First-Time Homebuyer Credit", value: demographics.firstTimeHomebuyer ? 6250 : 0, color: "orange" },
+            { label: "Child Tax Credit", value: demographics.dependents * 3000 + demographics.dependentsCollege * 6000, color: "lightgreen" },
+            { label: "Social Security", value: demographics.age >= 65 ? 1500 : 0, color: "blue" },
         ];
 
         const trumpPieData = [
             { label: "Income Tax Savings", value: trumpImpact > 0 ? trumpImpact : 0, color: "green" },
             { label: "Income Tax Increase", value: trumpImpact < 0 ? -trumpImpact : 0, color: "red" },
-            { label: "Other Deductions", value: 1500, color: "lightgreen" },
-            { label: "Social Security", value: 75, color: "blue" },
-            { label: "Healthcare", value: 45, color: "lightblue" },
-            { label: "Education", value: 35, color: "skyblue" },
+            { label: "Social Security", value: demographics.age >= 65 ? 1500 : 0, color: "blue" },
+            { label: "Overtime Exemption", value: demographics.overtime ? 200 : 0, color: "lightblue" },
         ];
 
         createPieChart(kamalaPieData, "Kamala Harris", "kamalaChart");
@@ -181,6 +249,7 @@ function calculateImpact() {
         console.error('Error in calculateImpact:', error);
     }
 }
+
 
 function switchCandidate(candidate) {
     // Update tab buttons
