@@ -197,7 +197,7 @@ function donaldTrumpPolicy(demographics) {
   }
   
   function scrollToResults() {
-    const candidateTabs = document.querySelector(".tabs");
+    const candidateTabs = document.querySelector(".mobile-tabs");
     if (candidateTabs) {
       candidateTabs.scrollIntoView({ behavior: "smooth" });
     }
