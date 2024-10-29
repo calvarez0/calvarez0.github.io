@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Questionnaire</title>
+  <link rel="stylesheet" href="questionnaire.css">
+</head>
+<body>
+  <div class="container">
+    <div id="questionnaire">
+      <!-- Theme Statement -->
+      <h2 class="theme">Individual Rights</h2>
+
+      <!-- Question Statement -->
+      <h3 class="question">Abortion is a woman's unrestricted right.</h3>
+
+      <!-- Progress Bar -->
+      <div class="progress-bar">
+        <div class="progress"></div>
+      </div>
+
+      <!-- Options -->
+      <div class="options">
+        <input type="radio" id="option1" name="answer" value="1">
+        <label for="option1">Strongly Disagree</label>
+      
+        <input type="radio" id="option2" name="answer" value="2">
+        <label for="option2">Disagree</label>
+      
+        <input type="radio" id="option3" name="answer" value="3">
+        <label for="option3">Neutral</label>
+      
+        <input type="radio" id="option4" name="answer" value="4">
+        <label for="option4">Agree</label>
+      
+        <input type="radio" id="option5" name="answer" value="5">
+        <label for="option5">Strongly Agree</label>
+      </div>
+      
+      
+
+      <!-- Navigation Buttons -->
+      <div class="navigation">
+        <button id="previous" class="btn">Previous</button>
+        <button id="next" class="btn">Next</button>
+      </div>
+    </div>
+  </div>
+  <script src="questionnaire.js"></script>
+</body>
+</html>
