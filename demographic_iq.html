@@ -8,19 +8,20 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <header class="header">
+    <!-- <header class="header">
         <div class="header-container">
             <div class="header-logo">
                 Policy Impact Calculator
             </div>
             <nav class="header-nav">
                 <a href="questionnaire.html">Policy Match</a>
-                <a href="index.html">About</a>
-                <!-- <a href="methodology.html">Methodology</a> -->
-                <!-- <a href="contact.html">Contact</a> -->
+                <a href="https://taxfoundation.org/research/federal-tax/">Learn More</a>
+                <a href="methodology.html">Methodology</a>
+                <a href="contact.html">Contact</a>
             </nav>
         </div>
-    </header>
+    </header> -->
+
 <div class="content-wrapper">
 <div class="main-content">
     <div class="container">
@@ -29,19 +30,47 @@
             <p>See the impacts of each candidate's policies on your household.</p>
 
             <label for="income">Income:</label>
-            <input type="number" id="income" min="0">
+            <input type="number" id="income" min="0" value="45000">
 
             <label for="capitalGains">Capital Gains:</label>
-            <input type="number" id="capitalGains" min="0">
+            <input type="number" id="capitalGains" min="0" value="0">
 
             <label for="dividends">Dividends:</label>
-            <input type="number" id="dividends" min="0">
+            <input type="number" id="dividends" min="0" value="0">
 
             <label for="age">Age:</label>
-            <input type="number" id="age" min="0" max="120">
+            <input type="number" id="age" min="0" max="120" value="35">
+            
 
-            <label for="dependents">Number of Dependents:</label>
-            <select id="dependents">
+            <label for="newbornDependents">Newborn Dependents (under 1 year):</label>
+            <select id="newbornDependents">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+            </select>
+
+            <label for="youngDependents">Dependents Ages 2-5:</label>
+            <select id="youngDependents">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+
+            <label for="otherDependents">Dependents Ages 6+:</label>
+            <select id="otherDependents">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+            </select>
+
+            <label for="dependentsCollege">Dependents in College:</label>
+            <select id="dependentsCollege">
                 <option value="0">0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -49,12 +78,8 @@
                 <option value="4">4</option>
             </select>
 
-            <label for="dependentsCollege">Students in College:</label>
-            <select id="dependentsCollege">
-                <option value="0">0</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-            </select>
+            <label for="autoLoanInterest">Annual Auto Loan Interest:</label>
+            <input type="number" id="autoLoanInterest" min="0" value="0">
 
             <div class="checkbox-group">
                 <label class="checkbox-container">
@@ -76,6 +101,12 @@
                     <input type="checkbox" id="overtime">
                     <span class="checkbox-text">Earns Overtime</span>
                 </label>
+
+                <!-- <label class="checkbox-container">
+                    <input type="checkbox" id="socialSecurity">
+                    <span class="checkbox-text">Receive Social Security:</span>
+                </label> -->
+
             </div>
 
             <button onclick="calculateImpact()">Calculate</button>
@@ -99,6 +130,7 @@
                     <div class="net-income-title">Net Change to Your Income (2025)</div>
                     <div id="kamalaImpact" class="net-income">+$0</div>
                     <div id="kamalaChart" class="chart"></div>
+                    <a href="https://taxfoundation.org/research/all/federal/kamala-harris-tax-plan-2024/" target="_blank">Learn More</a>
                 </div>
     
                 <div id="trumpCandidate" class="candidate">
@@ -112,6 +144,7 @@
                     <div class="net-income-title">Net Change to Your Income (2025)</div>
                     <div id="trumpImpact" class="net-income">+$0</div>
                     <div id="trumpChart" class="chart"></div>
+                    <a href="https://taxfoundation.org/research/all/federal/donald-trump-tax-plan-2024/" target="_blank">Learn More</a>
                 </div>
             </div>
         </div>
@@ -120,12 +153,12 @@
 
 <footer class="footer-disclaimer">
     <p>
-        As students of Texas A&M University, we created this app independently with the hopes of better-informing voters. Its content reflects our own views and is not officially affiliated with or endorsed by Texas A&M University.
+        We created this app independently with the hopes of better-informing voters and with no official affiliation or endorsement by Texas A&M University.
     </p>
     <br>
     <p class="p-disclaimer">
         <em>
-            *If you find any inaccuracies in our content, please contact us: calvarez1 [at] tamu [dot] edu.*
+            *If you find any inaccuracies in our calculations, please contact us: calvarez1 [at] tamu [dot] edu.*
         </em>
     </p>
 </footer>
