@@ -16,10 +16,17 @@ function calculateMedicareSavings(age, healthNeeds) {
     let netIncomeImpact = 0;
     let taxableIncome = demographics.income;
   
-    // Higher taxes on high income
+    // Apply deductions first
+    if (demographics.isStartup) {
+        taxableIncome -= 50000; // Expanded Section 195 deduction
+    }
+  
+    // Higher taxes on high income after deductions
     if (taxableIncome > 400000) {
         netIncomeImpact -= taxableIncome * 0.012; // Medicare and NIIT rates increase for high earners
-        netIncomeImpact -= taxableIncome > 1000000 ? taxableIncome * 0.0396 : 0; // Top rate for high earners
+        if (taxableIncome > 1000000) {
+            netIncomeImpact -= taxableIncome * 0.0396; // Top rate for high earners
+        }
     }
   
     // Capital gains and dividends tax
@@ -40,7 +47,7 @@ function calculateMedicareSavings(age, healthNeeds) {
     }
   
     // Low-income additional support (Direct credit)
-    if (taxableIncome <= 400000 && taxableIncome < 50000) {
+    if (taxableIncome <= 50000) {
         netIncomeImpact += 1000;
     }
   
@@ -58,11 +65,6 @@ function calculateMedicareSavings(age, healthNeeds) {
     netIncomeImpact += demographics.age >= 65 ? 1500 : 0;
     netIncomeImpact += demographics.tips ? 100 : 0;
   
-    // Startup deduction (Tax deduction, reducing taxable income)
-    if (demographics.isStartup) {
-        taxableIncome -= 50000; // Expanded Section 195 deduction
-    }
-  
     // Medicare savings (Direct credit)
     netIncomeImpact += calculateMedicareSavings(demographics.age, demographics.healthNeeds);
   
@@ -73,32 +75,18 @@ function donaldTrumpPolicy(demographics) {
     let netIncomeImpact = 0;
     let taxableIncome = demographics.income;
   
-    // Adjust for dependents (Direct credits)
-    netIncomeImpact += demographics.newbornDependents * 5000;
-    netIncomeImpact += demographics.youngDependents * 3000;
-    netIncomeImpact += demographics.otherDependents * 2000;
-  
-    if (demographics.dependentsCollege) {
-        netIncomeImpact += demographics.dependentsCollege * 2500;
+    // Apply deductions first
+    if (demographics.autoLoanInterest) {
+        taxableIncome -= demographics.autoLoanInterest * 0.1;
     }
-  
-    // Income adjustments (Direct credit)
-    if (taxableIncome < 400000) {
-        netIncomeImpact += 1000; // Tax cut for households under $400,000
-    }
-  
-    // Social Security, overtime, and tips exemptions (Direct credits)
-    netIncomeImpact += demographics.age >= 65 ? 1500 : 0;
-    netIncomeImpact += demographics.overtime ? 200 : 0;
-    netIncomeImpact += demographics.tips ? 100 : 0;
   
     // Capital gains and dividends (reduced rate, Direct credit)
     netIncomeImpact += (demographics.capitalGains || 0) * 0.15;
     netIncomeImpact += (demographics.dividends || 0) * 0.15;
   
-    // Auto loan interest deduction (Tax deduction, reducing taxable income)
-    if (demographics.autoLoanInterest) {
-        taxableIncome -= demographics.autoLoanInterest * 0.1;
+    // Income adjustments (Direct credit)
+    if (taxableIncome < 400000) {
+        netIncomeImpact += 1000; // Tax cut for households under $400,000
     }
   
     // Tariff burdens (Direct impact on net income)
@@ -106,6 +94,20 @@ function donaldTrumpPolicy(demographics) {
         netIncomeImpact -= 500;
     } else if (taxableIncome <= 200000) {
         netIncomeImpact -= 300;
+    }
+  
+    // Social Security, overtime, and tips exemptions (Direct credits)
+    netIncomeImpact += demographics.age >= 65 ? 1500 : 0;
+    netIncomeImpact += demographics.overtime ? 200 : 0;
+    netIncomeImpact += demographics.tips ? 100 : 0;
+  
+    // Adjust for dependents (Direct credits)
+    netIncomeImpact += demographics.newbornDependents * 5000;
+    netIncomeImpact += demographics.youngDependents * 3000;
+    netIncomeImpact += demographics.otherDependents * 2000;
+  
+    if (demographics.dependentsCollege) {
+        netIncomeImpact += demographics.dependentsCollege * 2500;
     }
   
     // Energy savings (Direct credit)
