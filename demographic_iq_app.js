@@ -238,18 +238,29 @@ function donaldTrumpPolicy(demographics) {
   
       updateImpactDisplay("kamalaImpact", kamalaImpact);
       updateImpactDisplay("trumpImpact", trumpImpact);
+      //kamala
+      const kHomeBuyerCredit = demographics.firstTimeHomebuyer ? 6250 : 0;
+      const kChildTaxCredit = demographics.newbornDependents * 6000 + demographics.youngDependents * 3600 + demographics.otherDependents * 3000;
+      const kSocialSecurityCredit = demographics.age >= 65 ? 1500 : 0;
+      const kIncomeTaxSavings = kamalaImpact - (kamalaImpact < 0 ? -1 : 1) * (kHomeBuyerCredit + kChildTaxCredit + kSocialSecurityCredit);
+
+      //trump
+      const tSocialSecurityCredit = demographics.age >= 65 ? 1500 : 0;
+      const tOvertimeCredit = demographics.overtime ? 200 : 0;
+      const tIncomeTaxSavings = trumpImpact - (trumpImpact < 0 ? -1 : 1) * (tSocialSecurityCredit + tOvertimeCredit);
+
   
       const kamalaPieData = [
-        { label: "Income Tax Savings", value: kamalaImpact > 0 ? kamalaImpact : 0, color: "green" },
-        { label: "Income Tax Increase", value: kamalaImpact < 0 ? -kamalaImpact : 0, color: "#c10013" },
+        { label: "Income Tax Savings", value: kIncomeTaxSavings > 0 ? kIncomeTaxSavings : 0, color: "green" },
+        { label: "Income Tax Increase", value: kIncomeTaxSavings < 0 ? -kIncomeTaxSavings : 0, color: "#c10013" },
         { label: "First-Time Homebuyer Credit", value: demographics.firstTimeHomebuyer ? 6250 : 0, color: "orange" },
         { label: "Child Tax Credit", value: demographics.newbornDependents * 6000 + demographics.youngDependents * 3600 + demographics.otherDependents * 3000, color: "lightgreen" },
         { label: "Social Security", value: demographics.age >= 65 ? 1500 : 0, color: "blue" },
       ];
   
       const trumpPieData = [
-        { label: "Income Tax Savings", value: trumpImpact > 0 ? trumpImpact : 0, color: "green" },
-        { label: "Income Tax Increase", value: trumpImpact < 0 ? -trumpImpact : 0, color: "red" },
+        { label: "Income Tax Savings", value: tIncomeTaxSavings > 0 ? tIncomeTaxSavings : 0, color: "green" },
+        { label: "Income Tax Increase", value: tIncomeTaxSavings < 0 ? -tIncomeTaxSavings : 0, color: "red" },
         { label: "Social Security", value: demographics.age >= 65 ? 1500 : 0, color: "blue" },
         { label: "Overtime Exemption", value: demographics.overtime ? 200 : 0, color: "lightblue" },
       ];
