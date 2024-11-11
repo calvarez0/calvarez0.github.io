@@ -98,7 +98,7 @@
     </div>
 </main>
 
-<footer class="bg-custom-content text-center py-6 mt-16">
+<footer class="text-custom-light bg-custom-content text-center py-6 mt-16">
     <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
 </footer>
 
@@ -123,12 +123,32 @@
     }
 
     // Light/Dark Mode Toggle Functionality
+    // Select the theme toggle checkbox and the body
     const themeToggleCheckbox = document.getElementById('toggle-checkbox');
-        const body = document.body;
+    const body = document.body;
 
-        themeToggleCheckbox.addEventListener('change', () => {
-            body.classList.toggle('light-mode', themeToggleCheckbox.checked);
-        });
+    // Check localStorage for theme preference on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('preferredTheme');
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+            themeToggleCheckbox.checked = true;
+        } else {
+            body.classList.remove('light-mode');
+            themeToggleCheckbox.checked = false;
+        }
+    });
+
+    // Add an event listener to toggle theme and save preference
+    themeToggleCheckbox.addEventListener('change', () => {
+        if (themeToggleCheckbox.checked) {
+            body.classList.add('light-mode');
+            localStorage.setItem('preferredTheme', 'light');
+        } else {
+            body.classList.remove('light-mode');
+            localStorage.setItem('preferredTheme', 'dark');
+        }
+    });
 
 </script>
 
