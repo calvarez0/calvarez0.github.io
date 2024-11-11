@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research - Alex Alvarez</title>
+    <link rel="icon" type="image/x-icon" href="assets/icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .bg-custom-content {background-color: #1b1b1b;}
+        .text-custom-light { color: #e0e0e0; }
+        .hover-effect:hover { transform: translateY(-5px); transition: transform 0.3s ease; }
+        .bg-custom-dark { background-color: #040404; }
+    </style>
+</head>
+<body class="bg-custom-dark text-custom-light">
+
+    <header class="shadow-lg">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="text-xl font-semibold">Alex Alvarez</div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="hover:text-blue-400 transition">Home</a>
+                    <a href="blog.html" class="hover:text-blue-400 transition">Blog</a>
+                    <a href="evolve-images.html" class="hover:text-blue-400 transition">Evolutionary Algorithms</a>
+                    <a href="demographic_iq.html" class="hover:text-blue-400 transition">Demographic IQ</a>
+                </div>
+                <button class="md:hidden focus:outline-none" id="menu-toggle">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <a href="index.html" class="block px-4 py-2 hover:bg-gray-700">Home</a>
+            <a href="blog.html" class="block px-4 py-2 hover:bg-gray-700">Blog</a>
+            <a href="evolve-images.html" class="block px-4 py-2 hover:bg-gray-700">Evolutionary Algorithms</a>
+            <a href="demographic_iq.html" class="block px-4 py-2 hover:bg-gray-700">Demographic IQ</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <h1 class="text-4xl font-bold mb-8">Research Projects</h1>
+        <div class="space-y-6">
+            <!-- Research Project 1 -->
+            <article class="bg-custom-content p-6 rounded-lg shadow-md hover-effect">
+                <h2 class="text-2xl font-semibold mb-2">Artificial Curiosity</h2>
+                <p class="text-sm text-gray-400 mb-4">Project in AI and Goal Exploration</p>
+                <p>Intrinsically motivated goal exploration algorithms for autotelic agents. We are creating AI agents, giving them an environment, and letting them create their own goals. The agent learns about the environment through its own curiosity. Then we analyze its internal structures to find out how "conscious" it is (consciousness/understanding is very hard to quantify, we are looking for meaningful representations).</p>
+                <!-- Buttons for Code and Paper -->
+                <div class="mt-4 flex space-x-4">
+                    <a href="https://github.com/your-github-link" target="_blank" class="bg-white text-black px-4 py-2 rounded hover:bg-blue-600 transition">Code</a>
+                    <a href="https://link-to-paper.com" target="_blank" class="bg-white text-black px-4 py-2 rounded hover:bg-green-600 transition">Paper</a>
+                </div>
+            </article>
+    
+            <!-- Research Project 2 -->
+            <article class="bg-custom-content p-6 rounded-lg shadow-md hover-effect">
+                <h2 class="text-2xl font-semibold mb-2">Fine Tuning LLMs to Emulate Instructor</h2>
+                <p class="text-sm text-gray-400 mb-4">Project in Intelligent Tutoring Systems</p>
+                <p>TIC-TOC: Enhancing Industrial Control Education through an Intelligent Tutoring System for Real-Time Interaction and Engagement. Researching the best intelligent tutoring systems and combining them with fine-tuned multi-modal LLMs to create a novel learning experience that emulates individual professor's feedback for the engineering students at TAMU. We already have permission to implement the ITS in a TAMU materials class for the Spring 2025 semester.</p>
+                <!-- Buttons for Code and Paper -->
+                <div class="mt-4 flex space-x-4">
+                    <a href="https://github.com/your-github-link" target="_blank" class="bg-white text-black px-4 py-2 rounded hover:bg-blue-600 transition">Code</a>
+                    <a href="https://link-to-paper.com" target="_blank" class="bg-white text-black px-4 py-2 rounded hover:bg-green-600 transition">Paper</a>
+                </div>
+            </article>
+    
+            <!-- Add more research project articles in the same format as needed -->
+        </div>
+    </main>
+    
+
+    <footer class="bg-custom-content text-center py-6 mt-16">
+        <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

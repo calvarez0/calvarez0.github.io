@@ -7,35 +7,35 @@
     <link rel="icon" type="image/x-icon" href="assets/icon.png"> 
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .bg-custom-content {background-color: #1b1b1b;}
-        .text-custom-light { color: #e0e0e0; }
-        .hover-effect:hover { transform: translateY(-5px); transition: transform 0.3s ease; }
-        .bg-custom-dark { background-color: #040404; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-custom-dark text-custom-light">
-
-    <header class="shadow-lg">
-        <nav class="container mx-auto px-6 py-3">
-            <div class="flex justify-between items-center">
-                <div class="text-xl font-semibold">Alex Alvarez</div>
-                <div class="hidden md:flex space-x-6">
-                    <a href="index.html" class="hover:text-blue-400 transition">Home</a>
-                    <a href="blog.html" class="hover:text-blue-400 transition">Blog</a>
-                    <a href="evolve-images.html" class="hover:text-blue-400 transition">Evolutionary Algorithms</a>
-                    <a href="demographic_iq.html" class="hover:text-blue-400 transition">Demographic IQ</a>
-                </div>
-                <button class="md:hidden focus:outline-none" id="menu-toggle">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
+    <header>
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="text-custom-light text-xl font-semibold">Alex Alvarez</div>
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="text-custom-light hover:text-blue-400 transition">Home</a>
+                <a href="blog.html" class="text-custom-light hover:text-blue-400 transition">Blog</a>
+                <a href="evolve-images.html" class="text-custom-light hover:text-blue-400 transition">Evolutionary Algorithms</a>
+                <a href="connectome_visualization.html" class="text-custom-light hover:text-blue-400 transition">Connectome Visualization</a>
+                <a href="demographic_iq.html" class="text-custom-light hover:text-blue-400 transition">Demographic IQ</a>
             </div>
+            <button class="md:hidden focus:outline-none" id="menu-toggle">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <!-- Light/Dark Mode Toggle Button -->
+            <label class="theme-switch" id="theme-toggle">
+                <input type="checkbox" id="toggle-checkbox">
+                <span class="slider"></span>
+            </label>
+            
         </nav>
         <div class="md:hidden hidden" id="mobile-menu">
-            <a href="index.html" class="block px-4 py-2 hover:bg-gray-700">Home</a>
-            <a href="blog.html" class="block px-4 py-2 hover:bg-gray-700">Blog</a>
-            <a href="evolve-images.html" class="block px-4 py-2 hover:bg-gray-700">Evolutionary Algorithms</a>
-            <a href="demographic_iq.html" class="block px-4 py-2 hover:bg-gray-700">Demographic IQ</a>
+            <a href="index.html" class="block px-4 py-2 text-custom-light hover:bg-gray-700">Home</a>
+            <a href="blog.html" class="block px-4 py-2 text-custom-light hover:bg-gray-700">Blog</a>
+            <a href="evolve-images.html" class="block px-4 py-2 text-custom-light hover:bg-gray-700">Evolutionary Algorithms</a>
+            <a href="connectome_visualization.html" class="block px-4 py-2 text-custom-light hover:bg-gray-700">Connectome Visualization</a>
+            <a href="demographic_iq.html" class="block px-4 py-2 text-custom-light hover:bg-gray-700">Demographic IQ</a>
         </div>
     </header>
 
@@ -44,50 +44,50 @@
     <div class="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">
         <!-- Sidebar with categories -->
         <aside class="w-full md:w-1/4 bg-custom-content p-6 rounded-lg shadow-md mb-6 md:mb-0">
-            <h2 class="text-2xl font-bold mb-4">Categories</h2>
+            <h2 class="text-custom-light text-2xl font-bold mb-4">Categories</h2>
             <ul class="space-y-2">
-                <li><a href="#" class="hover:text-blue-400 transition" onclick="filterBlogs('all')">All Posts</a></li>
-                <li><a href="#" class="hover:text-blue-400 transition" onclick="filterBlogs('thoughts')">Thoughts To Self</a></li>
-                <li><a href="#" class="hover:text-blue-400 transition" onclick="filterBlogs('neuroscience')">AI/Neuroscience</a></li>
+                <li><a href="#" class="text-custom-light hover:text-blue-400 transition" onclick="filterBlogs('all')">All Posts</a></li>
+                <li><a href="#" class="text-custom-light hover:text-blue-400 transition" onclick="filterBlogs('thoughts')">Thoughts To Self</a></li>
+                <li><a href="#" class="text-custom-light hover:text-blue-400 transition" onclick="filterBlogs('neuroscience')">AI/Neuroscience</a></li>
             </ul>
         </aside>
 
         <!-- Blog posts -->
         <section class="w-full md:w-3/4">
-            <h2 class="text-3xl font-bold mb-6">Blog Posts</h2>
+            <h2 class="text-custom-light text-3xl font-bold mb-6">Blog Posts</h2>
             <div id="blog-posts" class="space-y-6">
                 <a href="blogs/neural_compass.html">
                     <article class="bg-custom-content p-6 rounded-lg shadow-md hover-effect" data-category="neuroscience">
-                        <h3 class="text-xl font-semibold mb-2">How a Fly's Brain Creates a Compass</h3>
+                        <h3 class="text-custom-light text-xl font-semibold mb-2">How a Fly's Brain Creates a Compass</h3>
                         <p class="text-sm text-gray-400 mb-4">Posted on Oct 24, 2024</p>
-                        <p class="leading-relaxed">Flies' brains turn directions from their surroundings into steering signals, like an internal GPS. This could explain how bees always find the beehive after searching for pollen.</p>
+                        <p class="text-custom-light leading-relaxed">Flies' brains turn directions from their surroundings into steering signals, like an internal GPS. This could explain how bees always find the beehive after searching for pollen.</p>
                     </article>
                 </a>
                 <br>
                 <!-- Blog Post 3 -->
                 <a href="blogs/on_fasting.html">
                     <article class="bg-custom-content p-6 rounded-lg shadow-md hover-effect" data-category="thoughts">
-                        <h3 class="text-xl font-semibold mb-2">On Fasting</h3>
+                        <h3 class="text-custom-light text-xl font-semibold mb-2">On Fasting</h3>
                         <p class="text-sm text-gray-400 mb-4">Posted on Sep 21, 2024</p>
-                        <p class="leading-relaxed">I document my experience during a 24-hour fast and explain why I'm doing it in the first place.</p>
+                        <p class="text-custom-light leading-relaxed">I document my experience during a 24-hour fast and explain why I'm doing it in the first place.</p>
                     </article>
                 </a>
                 <br>
                 <!-- Blog Post 2 -->
                 <a href="blogs/summoning_luck.html">
                     <article class="bg-custom-content p-6 rounded-lg shadow-md hover-effect" data-category="thoughts">
-                        <h3 class="text-xl font-semibold mb-2">Summon Your Own Luck</h3>
+                        <h3 class="text-custom-light text-xl font-semibold mb-2">Summon Your Own Luck</h3>
                         <p class="text-sm text-gray-400 mb-4">Posted on Sep 19, 2024</p>
-                        <p class="leading-relaxed">You don't wait for luck. You summon her by incessantly throwing in chemicals and shaking up the beaker of fortune until something reacts.</p>
+                        <p class="text-custom-light leading-relaxed">You don't wait for luck. You summon her by incessantly throwing in chemicals and shaking up the beaker of fortune until something reacts.</p>
                     </article>
                 </a>
                 <br>
                 <!-- Blog Post 1 -->
                 <a href="blogs/davinci.html">
                     <article class="bg-custom-content p-6 rounded-lg shadow-md hover-effect" data-category="thoughts">
-                        <h3 class="text-xl font-semibold mb-2">Fortune Steers, You Row (Learnings From da Vinci)</h3>
+                        <h3 class="text-custom-light text-xl font-semibold mb-2">Fortune Steers, You Row (Learnings From da Vinci)</h3>
                         <p class="text-sm text-gray-400 mb-4">Posted on Sep 17, 2024</p>
-                        <p class="leading-relaxed">What do Leonardo Da Vinci, Naval Ravikant, and Steve Jobs all have in common?</p>
+                        <p class="text-custom-light leading-relaxed">What do Leonardo Da Vinci, Naval Ravikant, and Steve Jobs all have in common?</p>
                     </article>
                 </a>
                 <br>
@@ -122,7 +122,13 @@
         });
     }
 
-    
+    // Light/Dark Mode Toggle Functionality
+    const themeToggleCheckbox = document.getElementById('toggle-checkbox');
+        const body = document.body;
+
+        themeToggleCheckbox.addEventListener('change', () => {
+            body.classList.toggle('light-mode', themeToggleCheckbox.checked);
+        });
 
 </script>
 
