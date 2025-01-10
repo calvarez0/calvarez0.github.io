@@ -4,159 +4,465 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alex Alvarez</title>
-    <link rel="icon" type="image/x-icon" href="assets/icon.png">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body class="bg-custom-dark text-custom-light">
-    <header>
-        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
-            <div class="text-custom-light text-xl font-semibold">Alex Alvarez</div>
-            <div class="hidden md:flex space-x-6">
-                <a href="index.html" class="text-custom-light hover:text-blue-400 transition">Home</a>
-                <a href="https://medium.com/@0xalexrez" class="text-custom-light hover:text-blue-400 transition">Blog</a>
-                <a href="evolve-images.html" class="text-custom-light hover:text-blue-400 transition">Evolutionary Algorithms</a>
-                <a href="connectome_visualization.html" class="text-custom-light hover:text-blue-400 transition">Connectome Visualization</a>
-                <a href="demographic_iq.html" class="text-custom-light hover:text-blue-400 transition">Demographic IQ</a>
-            </div>
-            <button class="md:hidden focus:outline-none" id="menu-toggle">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            <!-- Light/Dark Mode Toggle Button -->
-            <label class="theme-switch" id="theme-toggle">
-                <input type="checkbox" id="toggle-checkbox">
-                <span class="slider"></span>
-            </label>
-            
-        </nav>
-        <div class="md:hidden hidden" id="mobile-menu">
-            <a href="index.html" class="block px-4 py-2 text-custom-light hover:bg-gray-700">Home</a>
-            <a href="https://medium.com/@0xalexrez" class="block px-4 py-2 text-custom-light hover:bg-gray-700">Blog</a>
-            <a href="evolve-images.html" class="block px-4 py-2 text-custom-light hover:bg-gray-700">Evolutionary Algorithms</a>
-            <a href="connectome_visualization.html" class="block px-4 py-2 text-custom-light hover:bg-gray-700">Connectome Visualization</a>
-            <a href="demographic_iq.html" class="block px-4 py-2 text-custom-light hover:bg-gray-700">Demographic IQ</a>
-        </div>
-    </header>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --background: #ffffff;
+            --accent: #0071e3;
+        }
+ 
+        .dark {
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --background: #000000;
+            --accent: #2997ff;
+        }
 
-    <main class="container mx-auto px-6 py-8">
-        <section class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-10">
-            <img src="/assets/profile.png" alt="Alex Alvarez" class="w-80 h-80 object-cover rounded-lg shadow-xl hover-effect">
-            <div class="flex-1">
-                <h1 class="text-custom-light text-4xl font-bold mb-2">Alex Alvarez</h1>
-                <p class="text-custom-light text-xl mb-2">Undergrad @ Texas A&M University</p>
-                <p class="text-custom-light text-xl mb-2">Researcher @ Brain Networks Lab</p>
-                <p class="text-custom-light mb-4">calvarez1 [at] tamu [dot] edu</p>
-                <div class="flex space-x-4 mb-6">
-                    <a href="https://twitter.com/0xalexrez" target="_blank" class="text-2xl text-custom-light hover:text-gray-300 transition"><i class="fab fa-twitter"></i></a>
-                    <a href="https://linkedin.com/in/calexalvarez" target="_blank" class="text-2xl text-custom-light hover:text-gray-300 transition"><i class="fab fa-linkedin"></i></a>
-                    <a href="https://github.com/calvarez0" target="_blank" class="text-2xl text-custom-light hover:text-gray-300 transition"><i class="fab fa-github"></i></a>
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .section-title {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+            line-height: 1.1;
+        }
+
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 36px;
+            }
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--accent);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dark .card {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-switch {
+            width: 50px;
+            height: 26px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--text-secondary);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--background);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        a.news-link {
+            color: #2997ff;
+        }
+
+        .light a.news-link {
+            color: #0071e3;
+        }
+
+        #questions {
+            text-align: justify;
+            font-family: 'Inter', sans-serif;
+            -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+        }
+
+        #questions a { 
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+        }
+
+        #questions a:hover { 
+            text-decoration: underline;
+            opacity: 0.8;
+        }
+
+        .dark #questions a:nth-child(1) { color: #FF6B6B; }
+        .dark #questions a:nth-child(2) { color: #4ECDC4; }
+        .dark #questions a:nth-child(3) { color: #FFD93D; }
+        .dark #questions a:nth-child(4) { color: #95D5B2; }
+        .dark #questions a:nth-child(5) { color: #FF8C42; }
+        .dark #questions a:nth-child(6) { color: #C792EA; }
+        .dark #questions a:nth-child(7) { color: #6BCB77; }
+        .dark #questions a:nth-child(8) { color: #FF69B4; }
+        .dark #questions a:nth-child(9) { color: #40A2E3; }
+        .dark #questions a:nth-child(10) { color: #FFA07A; }
+
+        #questions a:nth-child(1) { color: #D14343; }
+        #questions a:nth-child(2) { color: #2A8A84; }
+        #questions a:nth-child(3) { color: #B39429; }
+        #questions a:nth-child(4) { color: #4A8B64; }
+        #questions a:nth-child(5) { color: #CC6A28; }
+        #questions a:nth-child(6) { color: #8B4BA8; }
+        #questions a:nth-child(7) { color: #458B4B; }
+        #questions a:nth-child(8) { color: #C1366B; }
+        #questions a:nth-child(9) { color: #1C6CA3; }
+        #questions a:nth-child(10) { color: #CC6A4A; }
+
+        /* Mobile menu styles */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background);
+            z-index: 40;
+            padding-top: 5rem;
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-menu-button {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .desktop-menu {
+                display: none;
+            }
+
+            .mobile-menu .nav-link {
+                display: block;
+                padding: 1rem;
+                text-align: center;
+                font-size: 1.25rem;
+            }
+
+            .profile-img {
+                float: none !important;
+                margin: 0 auto 1rem auto;
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="fixed w-full backdrop-blur-md bg-opacity-70 z-50 border-b border-gray-800">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="#" class="text-2xl font-semibold">AA</a>
+                <div class="desktop-menu hidden md:flex space-x-8">
+                    <a href="/index.html" class="nav-link">Home</a>
+                    <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
+                    <a href="evolve-images.html" class="nav-link">Evolutionary Algorithms</a>
+                    <a href="demographic_iq.html" class="nav-link">Demographic IQ</a>
                 </div>
-                <hr class="border-gray-700 my-6">
-                <h2 class="text-custom-light text-2xl font-semibold mb-4">About Me</h2>
-                <p class="text-custom-light text-lg leading-relaxed">
-                    I'm a computer science and neuroscience student at Texas A&M University. In the past I built and sold some companies but at the moment I'm focusing on AI research. I'm a stoic, a voracious reader, and a lover of all combat sports.
+                <div class="flex items-center space-x-4">
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <button class="mobile-menu-button md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="space-y-4">
+            <a href="/index.html" class="nav-link">Home</a>
+            <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
+            <a href="evolve-images.html" class="nav-link">Evolutionary Algorithms</a>
+            <a href="demographic_iq.html" class="nav-link">Demographic IQ</a>
+        </div>
+    </div>
+
+    <main class="pt-24">
+        <!-- Hero Section -->
+        <section class="py-4 px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="space-y-6">
+                    <h1 class="section-title">Alex Alvarez</h1>
+                    <img src="assets/profile.png" alt="Alex Alvarez" class="profile-img float-left w-64 mr-4 mb-2 rounded-lg shadow-lg">
+                    <p class="text-xl text-secondary">Undergrad @ Texas A&M University<br>Researcher @ <u><a href="https://yschoe.github.io/" target="_blank">Brain Networks Lab</a></u></p>
+                    <div class="mt-4 space-y-3 text-secondary">
+                        <p class="text-lg">I study computer science, psychology, and mathematics at Texas A&M University. 
+                            In the past I built and sold some companies but at the moment I'm focusing on AI research. 
+                            I'm particularly interested in finding principles of intelligence/learning that converge from natural and artificial intelligence.
+                        </p>
+                        <p class="text-lg">
+                            I'm a stoic, a voracious reader, and a lover of all combat sports. 
+                            I came to America as a <u><a href="https://en.wikipedia.org/wiki/Wet_feet,_dry_feet_policy" target="_blank">Cuban political refugee</a></u> when I was eight years old. 
+                            I'd like to one day provide Cuban students with the same educational resources that I had access to in America.
+                        </p>
+                    </div>
+                    <p class="text-lg"><b>News</b></p>
+                    <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" target="_blank" class="news-link">My app (and Brain Networks Lab) on the news!</a>
+                    <div class="flex space-x-6 text-2xl">
+                        <a href="https://twitter.com/0xalexrez" target="_blank" class="text-secondary hover:text-accent transition-colors"><i class="fab fa-twitter"></i></a>
+                        <a href="https://linkedin.com/in/calexalvarez" target="_blank" class="text-secondary hover:text-accent transition-colors"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://github.com/calvarez0" target="_blank" class="text-secondary hover:text-accent transition-colors"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-4 px-6">
+            <h2 class="section-title text-center mb-16">Research Interests</h2>
+            <div class="max-w-6xl mx-auto">
+                <div class="relative p-8 card rounded-2xl overflow-hidden">
+                    <svg viewBox="0 0 700 480" class="w-full h-full">
+                        <!-- Background Blobs -->
+                        <path d="M340 40 c -25 0 -50 10 -60 45 s 5 50 40 55 s 95 -20 90 -50 s -25 -50 -70 -50" 
+                              fill="rgb(162,201,232)" fill-opacity="0.3"/>
+                        <path d="M100 210 c -20 0 -28 0 -42 30 s -20 130 0 160 s 80 30 110 10 s -4 -78 -20 -100 s -18 -100 -48 -100"
+                              fill="rgb(162,232,201)" fill-opacity="0.3"/>
+                        
+                        <!-- Main Research Lines -->
+                        <g fill="none" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M 450 30 L 450 110 L 450 210 L 450 290 L 450 330 L 450 345" stroke="rgb(207,60,49)"/>
+                            <path d="M 455 290 L 370 290 L 320 240 L 270 190 L 220 140 L 220 60" stroke="rgb(57,129,75)"/>
+                            <path d="M 520 140 L 510 150 L 450 210 L 370 290 L 370 310 L 370 350 L 370 390 L 370 440" stroke="rgb(34,75,140)"/>
+                        </g>
+
+                        <!-- Research Topics -->
+                        <g class="text-primary" fill="currentColor" font-family="sans-serif" font-size="14">
+                            <!-- Cognitive Science Branch -->
+                            <text x="204" y="60" text-anchor="end">
+                                <tspan font-weight="bold" x="204" dy="1.6em">COGNITIVE SCIENCE</tspan>
+                                <tspan x="204" dy="1.28em" font-size="0.8em">Neural basis of navigation</tspan>
+                            </text>
+                            
+                            <text x="254" y="190" text-anchor="end">
+                                <tspan x="254" dy="0.25em">Neural Vector Circuits</tspan>
+                                <tspan x="254" dy="1.4em" font-size="0.6em">[Brain Networks Lab '24]</tspan>
+                            </text>
+                            
+                            <text x="304" y="240" text-anchor="end">
+                                <tspan x="304" dy="0.25em">Emergent Communication</tspan>
+                                <tspan x="304" dy="1.4em" font-size="0.6em">[In Progress]</tspan>
+                            </text>
+
+                            <!-- Computer Graphics Branch -->
+                            <text x="466" y="30" text-anchor="start">
+                                <tspan font-weight="bold" x="466" dy="1.6em">AI SAFETY</tspan>
+                                <tspan x="466" dy="1.28em" font-size="0.8em">Mechanistic interpretability</tspan>
+                            </text>
+
+                            <text x="466" y="110" text-anchor="start">
+                                <tspan x="466" dy="0.25em">Neural Alphabets</tspan>
+                                <tspan x="466" dy="1.4em" font-size="0.6em">[Upcoming]</tspan>
+                            </text>
+
+                            <text x="466" y="210" text-anchor="start">
+                                <tspan x="466" dy="0.25em">Understanding Emergence</tspan>
+                                <tspan x="466" dy="1.4em" font-size="0.6em">[In Progress]</tspan>
+                            </text>
+
+                            <!-- Programming Languages Branch -->
+                            <text x="354" y="440" text-anchor="end">
+                                <tspan font-weight="bold" x="354" dy="1.6em">COMPUTATIONAL NEURO</tspan>
+                                <tspan x="354" dy="1.28em" font-size="0.8em">Biological computation</tspan>
+                            </text>
+
+                            <text x="354" y="350" text-anchor="end">
+                                <tspan x="354" dy="0.25em">Neuroevolution</tspan>
+                                <tspan x="354" dy="1.4em" font-size="0.6em">[Current Work]</tspan>
+                            </text>
+
+                            <text x="354" y="390" text-anchor="end">
+                                <tspan x="354" dy="0.25em">Bio-inspired AI</tspan>
+                                <tspan x="354" dy="1.4em" font-size="0.6em">[Future Direction]</tspan>
+                            </text>
+                        </g>
+
+                        <!-- Connection Points -->
+                        <g fill="var(--text-primary)" stroke="none">
+                            <circle cx="450" cy="110" r="3"/>
+                            <circle cx="450" cy="210" r="3"/>
+                            <circle cx="450" cy="290" r="3"/>
+                            <circle cx="450" cy="330" r="3"/>
+                            <circle cx="320" cy="240" r="3"/>
+                            <circle cx="270" cy="190" r="3"/>
+                            <circle cx="220" cy="140" r="3"/>
+                            <circle cx="510" cy="150" r="3"/>
+                            <circle cx="370" cy="290" r="3"/>
+                            <circle cx="370" cy="350" r="3"/>
+                            <circle cx="370" cy="390" r="3"/>
+                        </g>
+
+                        <!-- Labels for blobs -->
+                        <text x="340" y="92" font-size="0.6em" text-anchor="middle" fill="var(--text-secondary)">Sea of Failed Ideas</text>
+                        <text x="100" y="320" font-size="0.6em" text-anchor="middle" fill="var(--text-secondary)">Field of New Ideas</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+                
+
+        <!-- Projects Section -->
+        <section class="py-4 px-6">
+            <div class="max-w-6xl mx-auto">
+                
+                <p class="text-xl"><b>Currently on my mind:</b></p>
+                <p class="text-lg">
+                    <a href="#">Can we use spectral filtering algorithms to extract neuron activation patterns from neural networks?</a>
+                    <a href="#">How do sea turtles find the same beach they were born in to lay their eggs?</a>
+                    <a href="#">Why do Thursdays feel like forest green?</a>
+                    <a href="#">Can bayesian models  predict a person's aesthetic sensitivities or taste?</a>
+                </p>
+        
+                <p class="text-xl"><b>Previously on my mind:</b></p>
+                <p><em class="text-secondary">(Projects, research, apps, and sundries)</em></p>
+                <p id="questions" class="text-lg">
+                    <a href="connectome_visualization.html" target="_blank">What does the C. Ellegans connectome look like on a 3d plane?</a>
+                    <a href="https://zyntora.com" target="_blank">Can we make a virtual real estate social media app?</a>
+                    <a href="https://medium.com/@0xalexrez/your-mind-is-a-storm-856e57553070" target="_blank">Why can I say that LLMs aren't conscious?</a>
+                    <a href="https://chromewebstore.google.com/detail/swati-ai" target="_blank">Can I exploit free LLM APIs for research?</a>
+                    <a href="evolve-images.html" target="_blank">What's the easiest way to visualize evolutionary algorithms?</a>
+                    <a href="demographic_iq.html" target="_blank">How can we better inform voters using without bias?</a>
+                    <a href="https://project-3-team-4c-niwj.vercel.app/" target="_blank">How do you make a SaaS product for fast food chains?</a>
+                    <a href="ticbot.pdf" target="_blank">Can we fine-tune an LLMs to emulate a professor?</a>
                 </p>
             </div>
         </section>
-
-        <section id="research" class="mt-16">
-            <h2 class="text-custom-light text-3xl font-bold mb-6">Research</h2>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="bg-custom-content p-6 rounded-lg shadow-md hover-effect">
-                    <h3 class="text-custom-light text-xl font-semibold mb-2">Neural Vector Calculations</h3>
-                    <p class = "text-custom-light">The bee's central cortex contains intersecting columnar and tangential neurons, forming a matrix-like structure that performs vector calculations. These calculations are responsible for the bee’s allocentric orientation of the world (understanding north and south as opposed to just forwards and backwards) and for navigating to resources (pollen is 2 km away, 20 degrees to the right of the sun). We are using neuroevolutionary algorithms to understand how these neural vector calculations might emerge from simple inputs and environments.
-                    </p>
-                </div>
-                <div class="bg-custom-content p-6 rounded-lg shadow-md hover-effect">
-                    <h3 class="text-custom-light text-xl font-semibold mb-2">Biologically-Inspired Mechanistic Interpretation</h3>
-                    <p class = "text-custom-light">I perform mechanistic interpretation on NEAT-Based genomes by extracting known activation patterns analogous to those found in real brains. This can be things like tightly-fit sine wave activations or vector summation in both single neurons or entangled within sets of neurons (via Fourier transforms). I believe that neuroscience and mechanistic interpretation are intimately intewrwoven and by evolving networks that perform real-life tasks and extricating neural mechanisms mirroring those of actual brains, we can learn more about how the neural correlates of these behaviors evolved.</p>
-                </div>
-            </div>
-            <!-- <div class="mt-4">
-                <a href="research.html" class="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">See All</a>
-            </div> -->
-        </section>
-        
-
-        <section id="projects" class="mt-16">
-            <h2 class="text-custom-light text-3xl font-bold mb-6">Projects</h2>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-custom-content p-6 rounded-lg shadow-md hover-effect">
-                    <h3 class="text-custom-light text-xl font-semibold mb-2">Swati AI</h3>
-                    <p class = "text-custom-light">A chrome extension that allows you to get an AI-based simplified explanation of whatever you highlight in-browser and in-context… for free.</p>
-                </div>
-                <div class="bg-custom-content p-6 rounded-lg shadow-md hover-effect">
-                    <h3 class="text-custom-light text-xl font-semibold mb-2">Robots Can Do Your Taxes</h3>
-                    <p class = "text-custom-light">There does not exist commercially-available software that can extricate personal expenses from business expenses within the same statement. If you used your business credit card for personal use (and vice versa) you have to manually sift through each transaction to separate them. I created a RL model that fixed this.</p>
-                </div>
-                <div class="bg-custom-content p-6 rounded-lg shadow-md hover-effect">
-                    <h3 class="text-custom-light text-xl font-semibold mb-2">Zyntora</h3>
-                    <p class = "text-custom-light">I was part of a startup called <strong><a href="https://zyntora.com/">Zyntora</a></strong>, an attempt at a virtual real-estate and social media app that was ahead of its time.</p>
-                    <a href="https://zyntora.com/" target="_blank" class="learn-more-btn inline-block mt-4 px-4 py-2 rounded hover:bg-blue-600 transition">Learn More</a>
-                </div>
-                
-            </div>
-        </section>
-
-        <section id="news" class="mt-16">
-            <h2 class="text-custom-light text-3xl font-bold mb-6">News</h2>
-            <ul class="text-custom-light list-disc pl-5 space-y-2">
-                <li><a href="https://x.com/0xalexrez/status/1856067884000174584" target="_blank" class="text-blue-400 hover:text-blue-400 transition">First neural compass visualizations</a></li>
-                <li><a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" target="_blank" class="text-blue-400 hover:text-blue-400 transition">My app (and Brain Networks Lab) on the news!</a></li>
-            </ul>
-        </section>
     </main>
 
-    <footer class="text-center py-6 mt-16">
-        <p class = "text-custom-light">&copy; 2024 Alex Alvarez. All rights reserved.</p>
+    <footer class="py-4 px-6 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto text-center text-secondary">
+            <p> I <i>borrowed</i> most of this website layout from <a href= "https://cs.stanford.edu/~kach/" target="_blank"><u>Kartik Chandra's website</u></a>. Notwithstanding, &copy; 2024 Alex Alvarez. All rights reserved.</p>
+        </div>
     </footer>
 
     <script>
-        document.getElementById('menu-toggle').addEventListener('click', function() {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        let isMenuOpen = false;
+    
+        mobileMenuButton.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            mobileMenu.classList.toggle('active');
+            mobileMenuButton.innerHTML = isMenuOpen ? 
+                '<i class="fas fa-times"></i>' : 
+                '<i class="fas fa-bars"></i>';
         });
-
-        // Smooth scrolling for anchor links
+    
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('.mobile-menu .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                isMenuOpen = false;
+                mobileMenuButton.innerHTML = '<i class="fas fa-bars"></i>';
+            });
+        });
+    
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+    
+        // Check for saved theme preference, default to light if none saved
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.classList.toggle('dark', savedTheme === 'dark');
+        themeToggle.checked = savedTheme === 'light';
+    
+        themeToggle.addEventListener('change', () => {
+            body.classList.toggle('dark');
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+        });
+    
+        // Smooth Scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
             });
         });
-
-        // Light/Dark Mode Toggle Functionality
-        // Select the theme toggle checkbox and the body
-        const themeToggleCheckbox = document.getElementById('toggle-checkbox');
-        const body = document.body;
-
-        // Check localStorage for theme preference on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('preferredTheme');
-            if (savedTheme === 'light') {
-                body.classList.add('light-mode');
-                themeToggleCheckbox.checked = true;
-            } else {
-                body.classList.remove('light-mode');
-                themeToggleCheckbox.checked = false;
-            }
-        });
-
-        // Add an event listener to toggle theme and save preference
-        themeToggleCheckbox.addEventListener('change', () => {
-            if (themeToggleCheckbox.checked) {
-                body.classList.add('light-mode');
-                localStorage.setItem('preferredTheme', 'light');
-            } else {
-                body.classList.remove('light-mode');
-                localStorage.setItem('preferredTheme', 'dark');
-            }
-        });
-
-
-
     </script>
 </body>
 </html>
