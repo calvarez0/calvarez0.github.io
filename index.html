@@ -20,7 +20,7 @@
             --text-primary: #f5f5f7;
             --text-secondary: #86868b;
             --background: #000000;
-            --accent: #2997ff;
+            --accent: #0071e3;
         }
 
         body {
@@ -131,51 +131,77 @@
         }
 
         a.news-link {
-            color: #2997ff;
+            color: #0071e3;
         }
 
         .light a.news-link {
             color: #0071e3;
         }
 
-        #questions {
+        #current-questions, #previous-questions {
             text-align: justify;
             font-family: 'Inter', sans-serif;
-            -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
         }
 
-        #questions a { 
+        #current-questions a, #previous-questions a { 
             text-decoration: none;
             transition: opacity 0.2s ease;
         }
 
-        #questions a:hover { 
+        #current-questions a:hover, #previous-questions a:hover { 
             text-decoration: underline;
             opacity: 0.8;
         }
 
-        .dark #questions a:nth-child(1) { color: #FF6B6B; }
-        .dark #questions a:nth-child(2) { color: #4ECDC4; }
-        .dark #questions a:nth-child(3) { color: #FFD93D; }
-        .dark #questions a:nth-child(4) { color: #95D5B2; }
-        .dark #questions a:nth-child(5) { color: #FF8C42; }
-        .dark #questions a:nth-child(6) { color: #C792EA; }
-        .dark #questions a:nth-child(7) { color: #6BCB77; }
-        .dark #questions a:nth-child(8) { color: #FF69B4; }
-        .dark #questions a:nth-child(9) { color: #40A2E3; }
-        .dark #questions a:nth-child(10) { color: #FFA07A; }
+        /* Colors for current questions - dark mode (brighter) */
+        .dark #current-questions a:nth-child(1) { color: #40A2E3; }  /* Bright Blue */
+        .dark #current-questions a:nth-child(2) { color: #FF69B4; }  /* Hot Pink */
+        .dark #current-questions a:nth-child(3) { color: #7276cb; }  /* Lilac */
+        .dark #current-questions a:nth-child(4) { color: #FF8C42; }  /* Dark Orange */
+        .dark #current-questions a:nth-child(5) { color: #6BCB77; }  /* Lime Green */
+        .dark #current-questions a:nth-child(6) { color: #C792EA; }  /* Light Purple */
+        .dark #current-questions a:nth-child(7) { color: #FF6B6B; }  /* Coral Red */
+        .dark #current-questions a:nth-child(8) { color: #4ECDC4; }  /* Turquoise */
+        .dark #current-questions a:nth-child(9) { color: #FF69B4; }  /* Hot Pink */
+        .dark #current-questions a:nth-child(10) { color: #FF7F50; } /* Coral */
 
-        #questions a:nth-child(1) { color: #D14343; }
-        #questions a:nth-child(2) { color: #2A8A84; }
-        #questions a:nth-child(3) { color: #B39429; }
-        #questions a:nth-child(4) { color: #4A8B64; }
-        #questions a:nth-child(5) { color: #CC6A28; }
-        #questions a:nth-child(6) { color: #8B4BA8; }
-        #questions a:nth-child(7) { color: #458B4B; }
-        #questions a:nth-child(8) { color: #C1366B; }
-        #questions a:nth-child(9) { color: #1C6CA3; }
-        #questions a:nth-child(10) { color: #CC6A4A; }
+        /* Colors for current questions - light mode (muted) */
+        #current-questions a:nth-child(1) { color: #C1366B; }  /* Deep Pink */
+        #current-questions a:nth-child(2) { color: #1C6CA3; }  /* Navy Blue */
+        #current-questions a:nth-child(3) { color: #d8861b; }  /* Burnt Orange */
+        #current-questions a:nth-child(4) { color: #458B4B; }  /* Forest Green */
+        #current-questions a:nth-child(5) { color: #37258e; }  /* Deep Violet */
+        #current-questions a:nth-child(6) { color: #8B4BA8; }  /* Deep Purple */
+        #current-questions a:nth-child(8) { color: #D14343; }  /* Muted Red */
+        #current-questions a:nth-child(9) { color: #2A8A84; }  /* Deep Turquoise */
+        #current-questions a:nth-child(10) { color: #B13E67; }  /* Deep Rose */
+        #current-questions a:nth-child(10) { color: #CC6A4A; } /* Terracotta */
+
+        /* Colors for previous questions - dark mode (brighter) */
+        .dark #previous-questions a:nth-child(1) { color: #7ED6DF; }  /* Fresh Turquoise */
+        .dark #previous-questions a:nth-child(2) { color: #FF7675; }  /* Soft Red */
+        .dark #previous-questions a:nth-child(3) { color: #A8E6CF; }  /* Mint Green */
+        .dark #previous-questions a:nth-child(4) { color: #B0A8E6; }  /* Soft Purple */
+        .dark #previous-questions a:nth-child(5) { color: #FF9F43; }  /* Bright Orange */
+        .dark #previous-questions a:nth-child(6) { color: #74B9FF; }  /* Soft Blue */
+        .dark #previous-questions a:nth-child(7) { color: #E584FF; }  /* Light Purple */
+        .dark #previous-questions a:nth-child(8) { color: #55E6C1; }  /* Bright Mint */
+        .dark #previous-questions a:nth-child(9) { color: #FF8075; }  /* Soft Coral */
+        .dark #previous-questions a:nth-child(10) { color: #78E6D0; } /* Aqua */
+
+        /* Colors for previous questions - light mode (muted) */
+        #previous-questions a:nth-child(1) { color: #3B9A9C; }  /* Deep Turquoise */
+        #previous-questions a:nth-child(2) { color: #C84444; }  /* Deep Red */
+        #previous-questions a:nth-child(3) { color: #5BAB8B; }  /* Deep Mint */
+        #previous-questions a:nth-child(4) { color: #6C5BA8; }  /* Deep Purple */
+        #previous-questions a:nth-child(5) { color: #CF7122; }  /* Burnt Orange */
+        #previous-questions a:nth-child(6) { color: #4576B3; }  /* Deep Blue */
+        #previous-questions a:nth-child(7) { color: #A252B3; }  /* Deep Purple */
+        #previous-questions a:nth-child(8) { color: #2D9E82; }  /* Deep Green */
+        #previous-questions a:nth-child(9) { color: #B3524A; }  /* Deep Coral */
+        #previous-questions a:nth-child(10) { color: #3B9E8C; } /* Deep Aqua */
 
         /* Mobile menu styles */
         .mobile-menu {
@@ -197,8 +223,12 @@
         .mobile-menu-button {
             display: none;
         }
+        
 
         @media (max-width: 768px) {
+            .section-title {
+                text-align: center;
+            }
             .mobile-menu-button {
                 display: block;
             }
@@ -230,8 +260,8 @@
                 <div class="desktop-menu hidden md:flex space-x-8">
                     <a href="/index.html" class="nav-link">Home</a>
                     <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
-                    <a href="evolve-images.html" class="nav-link">Evolutionary Algorithms</a>
                     <a href="demographic_iq.html" class="nav-link">Demographic IQ</a>
+                    <a href="evolve-images.html" class="nav-link">Evolutionary Algorithms</a>
                 </div>
                 <div class="flex items-center space-x-4">
                     <label class="theme-switch">
@@ -263,20 +293,20 @@
                 <div class="space-y-6">
                     <h1 class="section-title">Alex Alvarez</h1>
                     <img src="assets/profile.png" alt="Alex Alvarez" class="profile-img float-left w-64 mr-4 mb-2 rounded-lg shadow-lg">
-                    <p class="text-xl text-secondary">Undergrad @ Texas A&M University<br>Researcher @ <u><a href="https://yschoe.github.io/" target="_blank">Brain Networks Lab</a></u></p>
+                    <p class="text-xl text-secondary">Undergrad @ Texas A&M University<br>Researcher @ <a href="https://yschoe.github.io/" target="_blank" class="news-link"><u>Brain Networks Lab</u></a></p>
                     <div class="mt-4 space-y-3 text-secondary">
                         <p class="text-lg">I study computer science, psychology, and mathematics at Texas A&M University. 
                             In the past I built and sold some companies but at the moment I'm focusing on AI research. 
-                            I'm particularly interested in finding principles of intelligence/learning that converge from natural and artificial intelligence.
+                            I'm especially interested in foundational principles of intelligence and learning emergent in AI and neuroscience.
                         </p>
                         <p class="text-lg">
+                            I came to America as a <a href="https://en.wikipedia.org/wiki/Wet_feet,_dry_feet_policy" target="_blank" class="news-link"><u>political refugee from Cuba</u></a> when I was eight years old. 
+                            I'd like to one day provide Cuban students with the same education and resources that I had access to in America.
                             I'm a stoic, a voracious reader, and a lover of all combat sports. 
-                            I came to America as a <u><a href="https://en.wikipedia.org/wiki/Wet_feet,_dry_feet_policy" target="_blank">Cuban political refugee</a></u> when I was eight years old. 
-                            I'd like to one day provide Cuban students with the same educational resources that I had access to in America.
                         </p>
                     </div>
                     <p class="text-lg"><b>News</b></p>
-                    <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" target="_blank" class="news-link">My app (and Brain Networks Lab) on the news!</a>
+                    <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" target="_blank" class="news-link"><u>My app (and Brain Networks Lab) on the news!</u></a>
                     <div class="flex space-x-6 text-2xl">
                         <a href="https://twitter.com/0xalexrez" target="_blank" class="text-secondary hover:text-accent transition-colors"><i class="fab fa-twitter"></i></a>
                         <a href="https://linkedin.com/in/calexalvarez" target="_blank" class="text-secondary hover:text-accent transition-colors"><i class="fab fa-linkedin"></i></a>
@@ -286,30 +316,79 @@
             </div>
         </section>
 
+        <!-- Research Interests Section -->
         <section class="py-4 px-6">
+            <div class="max-w-6xl mx-auto">
+                <p class="text-xl"><b>Research Interests:</b></p>
+                <div class="grid md:grid-cols-2 gap-4 mt-2">
+                    <div>
+                        <ul class="text-lg text-secondary">
+                            <li class="flex items-start">
+                                <span class="text-primary mr-2">•</span>
+                                <span>Computational models for cognition</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary mr-2">•</span>
+                                <span>Mathematical models of learning principles</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary mr-2">•</span>
+                                <span>Meta-learning</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary mr-2">•</span>
+                                <span>Mechanistic interpretation</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul class="text-lg text-secondary">
+                            <li class="flex items-start">
+                                <span class="text-primary mr-2">•</span>
+                                <span>Lo-fi whole brain emulation</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary mr-2">•</span>
+                                <span>Neuroevolution and evolutionary computation</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary mr-2">•</span>
+                                <span>Neural correlates of consciousness</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary mr-2">•</span>
+                                <span>AI Safety</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- unused map section-->
+        <!-- <section class="py-4 px-6">
             <h2 class="section-title text-center mb-16">Research Interests</h2>
             <div class="max-w-6xl mx-auto">
                 <div class="relative p-8 card rounded-2xl overflow-hidden">
                     <svg viewBox="0 0 700 480" class="w-full h-full">
-                        <!-- Background Blobs -->
+
                         <path d="M340 40 c -25 0 -50 10 -60 45 s 5 50 40 55 s 95 -20 90 -50 s -25 -50 -70 -50" 
                               fill="rgb(162,201,232)" fill-opacity="0.3"/>
                         <path d="M100 210 c -20 0 -28 0 -42 30 s -20 130 0 160 s 80 30 110 10 s -4 -78 -20 -100 s -18 -100 -48 -100"
                               fill="rgb(162,232,201)" fill-opacity="0.3"/>
                         
-                        <!-- Main Research Lines -->
                         <g fill="none" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M 450 30 L 450 110 L 450 210 L 450 290 L 450 330 L 450 345" stroke="rgb(207,60,49)"/>
                             <path d="M 455 290 L 370 290 L 320 240 L 270 190 L 220 140 L 220 60" stroke="rgb(57,129,75)"/>
                             <path d="M 520 140 L 510 150 L 450 210 L 370 290 L 370 310 L 370 350 L 370 390 L 370 440" stroke="rgb(34,75,140)"/>
                         </g>
 
-                        <!-- Research Topics -->
+
                         <g class="text-primary" fill="currentColor" font-family="sans-serif" font-size="14">
-                            <!-- Cognitive Science Branch -->
-                            <text x="204" y="60" text-anchor="end">
+
+                            <text x="204" y="42" text-anchor="end">
                                 <tspan font-weight="bold" x="204" dy="1.6em">COGNITIVE SCIENCE</tspan>
-                                <tspan x="204" dy="1.28em" font-size="0.8em">Neural basis of navigation</tspan>
+
                             </text>
                             
                             <text x="254" y="190" text-anchor="end">
@@ -322,47 +401,50 @@
                                 <tspan x="304" dy="1.4em" font-size="0.6em">[In Progress]</tspan>
                             </text>
 
-                            <!-- Computer Graphics Branch -->
-                            <text x="466" y="30" text-anchor="start">
-                                <tspan font-weight="bold" x="466" dy="1.6em">AI SAFETY</tspan>
-                                <tspan x="466" dy="1.28em" font-size="0.8em">Mechanistic interpretability</tspan>
+
+                            <text x="466" y="12" text-anchor="start">
+                                <tspan font-weight="bold" x="466" dy="1.6em">MACHINE LEARNING</tspan>
+
                             </text>
 
-                            <text x="466" y="110" text-anchor="start">
-                                <tspan x="466" dy="0.25em">Neural Alphabets</tspan>
-                                <tspan x="466" dy="1.4em" font-size="0.6em">[Upcoming]</tspan>
+                            <text x="566" y="110" text-anchor="end">
+                                <tspan x="570" dy="0.25em"><a href="https://arxiv.org/abs/1810.10531">Saxe et al. (2018)</a></tspan>
                             </text>
 
                             <text x="466" y="210" text-anchor="start">
-                                <tspan x="466" dy="0.25em">Understanding Emergence</tspan>
-                                <tspan x="466" dy="1.4em" font-size="0.6em">[In Progress]</tspan>
+                                <tspan x="466" dy="0.25em"><a href="https://openreview.net/pdf/639227bcf1a258fd70ce091042536afc3780a946.pdf">Lufkin et al. (2018)</a></tspan>
                             </text>
 
-                            <!-- Programming Languages Branch -->
-                            <text x="354" y="440" text-anchor="end">
-                                <tspan font-weight="bold" x="354" dy="1.6em">COMPUTATIONAL NEURO</tspan>
-                                <tspan x="354" dy="1.28em" font-size="0.8em">Biological computation</tspan>
+                            <text x="466" y="290" text-anchor="start">
+                                <tspan x="466" dy="0.25em"><a href="https://arxiv.org/abs/1604.00289">Lake et al. (2018)</a></tspan>
                             </text>
 
-                            <text x="354" y="350" text-anchor="end">
-                                <tspan x="354" dy="0.25em">Neuroevolution</tspan>
-                                <tspan x="354" dy="1.4em" font-size="0.6em">[Current Work]</tspan>
+
+                            <text x="466" y="424" text-anchor="end">
+                                <tspan font-weight="bold" x="620" dy="1.6em">COMPUTATIONAL NEUROSCIENCE</tspan>
+
                             </text>
 
-                            <text x="354" y="390" text-anchor="end">
-                                <tspan x="354" dy="0.25em">Bio-inspired AI</tspan>
-                                <tspan x="354" dy="1.4em" font-size="0.6em">[Future Direction]</tspan>
+                            <text x="354" y="392" text-anchor="end">
+                                <tspan x="354" dy="0.25em"><a href="https://www.nature.com/articles/s41586-023-07006-3#citeas">Pires et al. (2024)</a></tspan>
+                            </text>
+
+                            <text x="354" y="294" text-anchor="end">
+                                <tspan x="354" dy="0.25em"><a href="https://www.nature.com/articles/s41593-018-0210-5" class="news-link">Kriegeskorte & Douglas (2018)</a></tspan>
                             </text>
                         </g>
 
-                        <!-- Connection Points -->
+
                         <g fill="var(--text-primary)" stroke="none">
+                            <circle cx="370" cy="440" r="8"/>
                             <circle cx="450" cy="110" r="3"/>
+                            <circle cx="450" cy="30" r="8"/>
                             <circle cx="450" cy="210" r="3"/>
                             <circle cx="450" cy="290" r="3"/>
                             <circle cx="450" cy="330" r="3"/>
                             <circle cx="320" cy="240" r="3"/>
                             <circle cx="270" cy="190" r="3"/>
+                            <circle cx="220" cy= "60" r="8"/>
                             <circle cx="220" cy="140" r="3"/>
                             <circle cx="510" cy="150" r="3"/>
                             <circle cx="370" cy="290" r="3"/>
@@ -370,13 +452,13 @@
                             <circle cx="370" cy="390" r="3"/>
                         </g>
 
-                        <!-- Labels for blobs -->
+
                         <text x="340" y="92" font-size="0.6em" text-anchor="middle" fill="var(--text-secondary)">Sea of Failed Ideas</text>
                         <text x="100" y="320" font-size="0.6em" text-anchor="middle" fill="var(--text-secondary)">Field of New Ideas</text>
                     </svg>
                 </div>
             </div>
-        </section>
+        </section> -->
                 
 
         <!-- Projects Section -->
@@ -384,24 +466,26 @@
             <div class="max-w-6xl mx-auto">
                 
                 <p class="text-xl"><b>Currently on my mind:</b></p>
-                <p class="text-lg">
-                    <a href="#">Can we use spectral filtering algorithms to extract neuron activation patterns from neural networks?</a>
-                    <a href="#">How do sea turtles find the same beach they were born in to lay their eggs?</a>
-                    <a href="#">Why do Thursdays feel like forest green?</a>
-                    <a href="#">Can bayesian models  predict a person's aesthetic sensitivities or taste?</a>
+                <p id="current-questions" class="text-lg">
+                    <a href="https://dspace.mit.edu/handle/1721.1/70990">Can bayesian models predict a person's aesthetic sensitivities or taste?</a>
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/34912112/">How do sea turtles find the same beach they were born in to lay their eggs?</a>
+                    <a href="https://www.tandfonline.com/doi/full/10.1080/17588928.2013.877880">Why do Thursdays feel like forest green?</a>
+                    <a href="https://arxiv.org/abs/2308.10388?utm_source=chatgpt.com">Can we use spectral filtering algorithms to extract neuron activation patterns?</a>
                 </p>
+
+                <br>
         
                 <p class="text-xl"><b>Previously on my mind:</b></p>
                 <p><em class="text-secondary">(Projects, research, apps, and sundries)</em></p>
-                <p id="questions" class="text-lg">
-                    <a href="connectome_visualization.html" target="_blank">What does the C. Ellegans connectome look like on a 3d plane?</a>
+                <p id="previous-questions" class="text-lg">
                     <a href="https://zyntora.com" target="_blank">Can we make a virtual real estate social media app?</a>
+                    <a href="connectome_visualization.html" target="_blank">What does the C. Ellegans connectome look like on a 3d plane?</a>
                     <a href="https://medium.com/@0xalexrez/your-mind-is-a-storm-856e57553070" target="_blank">Why can I say that LLMs aren't conscious?</a>
                     <a href="https://chromewebstore.google.com/detail/swati-ai" target="_blank">Can I exploit free LLM APIs for research?</a>
-                    <a href="evolve-images.html" target="_blank">What's the easiest way to visualize evolutionary algorithms?</a>
-                    <a href="demographic_iq.html" target="_blank">How can we better inform voters using without bias?</a>
+                    <a href="ticbot.pdf" target="_blank">Can LLMs emulate professors?</a>
+                    <a href="evolve-images.html" target="_blank">What are evolutionary algorithms?</a>
+                    <a href="demographic_iq.html" target="_blank">Why do Americans vote against their own self-interest?</a>
                     <a href="https://project-3-team-4c-niwj.vercel.app/" target="_blank">How do you make a SaaS product for fast food chains?</a>
-                    <a href="ticbot.pdf" target="_blank">Can we fine-tune an LLMs to emulate a professor?</a>
                 </p>
             </div>
         </section>
@@ -409,7 +493,7 @@
 
     <footer class="py-4 px-6 border-t border-gray-800">
         <div class="max-w-6xl mx-auto text-center text-secondary">
-            <p> I <i>borrowed</i> most of this website layout from <a href= "https://cs.stanford.edu/~kach/" target="_blank"><u>Kartik Chandra's website</u></a>. Notwithstanding, &copy; 2024 Alex Alvarez. All rights reserved.</p>
+            <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
         </div>
     </footer>
 
