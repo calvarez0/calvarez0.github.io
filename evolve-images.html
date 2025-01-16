@@ -133,8 +133,8 @@
             <div class="controls-container mb-4 md:mb-0">
                 <div class="mb-4">
                     <label for="evolutionIntensity" class="block text-lg font-semibold mb-2">Evolution Intensity:</label>
-                    <input type="range" id="evolutionIntensity" min="1" max="100" value="10" class="w-full">
-                    <span id="intensityValue">10</span>
+                    <input type="range" id="evolutionIntensity" min="1" max="100" value="40" class="w-full">
+                    <span id="intensityValue">40</span>
                 </div>
                 <div class="mb-4">
                     <label for="randomnessSlider" class="block text-lg font-semibold mb-2">Random Mutation Rate:</label>
@@ -159,7 +159,6 @@
 
     menuToggle.addEventListener('click', () => {
         mobileMenu.classList.toggle('hidden');
-        
     });
 
     const NUM_IMAGES = 9;
@@ -167,26 +166,34 @@
     let MUTATION_RATE = 0.01;
     let RANDOM_MUTATION_RATE = 0.01;
 
-    const intensitySlider = document.getElementById('evolutionIntensity');
-    const intensityValue = document.getElementById('intensityValue');
-    const randomnessSlider = document.getElementById('randomnessSlider');
-    const randomnessValue = document.getElementById('randomnessValue');
-    const resetButton = document.getElementById('resetButton');
+    document.addEventListener('DOMContentLoaded', () => {
+        const intensitySlider = document.getElementById('evolutionIntensity');
+        const intensityValue = document.getElementById('intensityValue');
+        const randomnessSlider = document.getElementById('randomnessSlider');
+        const randomnessValue = document.getElementById('randomnessValue');
+        const resetButton = document.getElementById('resetButton');
 
-    intensitySlider.addEventListener('input', () => {
-        const intensity = intensitySlider.value;
-        MUTATION_RATE = intensity / 100;
-        intensityValue.textContent = intensity;
-    });
+        // Initialize global MUTATION_RATE and update intensity display
+        MUTATION_RATE = intensitySlider.value / 100;
+        intensityValue.textContent = intensitySlider.value;
 
-    randomnessSlider.addEventListener('input', () => {
-        const randomness = randomnessSlider.value;
-        RANDOM_MUTATION_RATE = randomness / 1000;
-        randomnessValue.textContent = randomness;
-    });
+        intensitySlider.addEventListener('input', () => {
+            const intensity = intensitySlider.value;
+            MUTATION_RATE = intensity / 100; // Update global MUTATION_RATE
+            intensityValue.textContent = intensity;
+        });
 
-    resetButton.addEventListener('click', () => {
-        populateImages();
+        randomnessSlider.addEventListener('input', () => {
+            const randomness = randomnessSlider.value;
+            RANDOM_MUTATION_RATE = randomness / 1000; // Update global RANDOM_MUTATION_RATE
+            randomnessValue.textContent = randomness;
+        });
+
+        resetButton.addEventListener('click', () => {
+            populateImages();
+        });
+
+        populateImages(); // Populate images after initialization
     });
 
     function getRandomColor() {
@@ -324,8 +331,7 @@
             imageGrid.appendChild(imageContainer);
         }
     }
-
-    populateImages();
 </script>
+
 </body>
 </html>
