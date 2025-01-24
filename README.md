@@ -1,3 +1,3 @@
-Would you choose to help someone out if it didn't cost you any money or time?
+⭐ Would you help someone if it didn't cost you any time or money? ⭐
 
-⭐If yes, can you star my repo? This helps me get (much needed) exposure :)⭐
+⭐ If yes, can you star my repo? This helps me get (much needed) exposure :) ⭐
