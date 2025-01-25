@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribution Explorer</title>
+    <link rel="icon" type="image/x-icon" href="assets/icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.3.0/math.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --background: #ffffff;
+            --accent: #0071e3;
+        }
+ 
+        .dark {
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --background: #000000;
+            --accent: #0071e3;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--accent);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .theme-switch {
+            width: 50px;
+            height: 26px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--text-secondary);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--background);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Mobile menu styles */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background);
+            z-index: 40;
+            padding-top: 5rem;
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-menu-button {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .desktop-menu {
+                display: none;
+            }
+
+            .mobile-menu .nav-link {
+                display: block;
+                padding: 1rem;
+                text-align: center;
+                font-size: 1.25rem;
+            }
+        }
+
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px;
+        }
+
+        .distribution-row {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .distribution-card {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dark .distribution-card {
+            background: #1a1a1a;
+        }
+
+        .controls {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .dark .controls {
+            background: #1a1a1a;
+        }
+
+        .control-item {
+            margin-bottom: 12px;
+        }
+
+        .graph {
+            width: 100%;
+            height: 300px;
+        }
+
+        /* D3.js styling */
+        .line {
+            fill: none;
+            stroke: #6366f1;
+            stroke-width: 2;
+        }
+
+        .point {
+            fill: #6366f1;
+        }
+
+        .axis {
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+
+        .dark .axis text {
+            fill: #f5f5f7;
+        }
+
+        .dark .axis path,
+        .dark .axis line {
+            stroke: #666;
+        }
+
+        .axis path,
+        .axis line {
+            stroke: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <nav class="fixed w-full backdrop-blur-md bg-opacity-70 z-50 border-b border-gray-800">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="#" class="text-2xl font-semibold">AA</a>
+                <div class="desktop-menu hidden md:flex space-x-8">
+                    <a href="/index.html" class="nav-link">Home</a>
+                    <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
+                    <a href="demographic_iq.html" class="nav-link">Demographic IQ</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <button class="mobile-menu-button md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="space-y-4">
+            <a href="/index.html" class="nav-link">Home</a>
+            <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
+            <a href="demographic_iq.html" class="nav-link">Demographic IQ</a>
+        </div>
+    </div>
+    
+    <div class="content-container">
+        <!-- Gaussian Distribution Row -->
+        <div class="distribution-row">
+            <div class="distribution-card">
+                <h2>Gaussian Distribution</h2>
+                <div id="gaussian-plot" class="graph"></div>
+            </div>
+            <div class="controls">
+                <h3>Gaussian Parameters</h3>
+                <div class="control-item">
+                    <label for="mean">Mean (1st moment)</label>
+                    <input type="range" id="mean" min="-3" max="3" step="0.1" value="0">
+                    <div class="value-display">Value: <span id="mean-value">0</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="variance">Variance (2nd moment)</label>
+                    <input type="range" id="variance" min="0.1" max="5" step="0.1" value="1">
+                    <div class="value-display">Value: <span id="variance-value">1</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="skewness">Skewness (3rd moment)</label>
+                    <input type="range" id="skewness" min="-2" max="2" step="0.1" value="0">
+                    <div class="value-display">Value: <span id="skewness-value">0</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="kurtosis">Kurtosis (4th moment)</label>
+                    <input type="range" id="kurtosis" min="1" max="10" step="0.1" value="3">
+                    <div class="value-display">Value: <span id="kurtosis-value">3</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bernoulli Distribution Row -->
+        <div class="distribution-row">
+            <div class="distribution-card">
+                <h2>Bernoulli Distribution</h2>
+                <div id="bernoulli-plot" class="graph"></div>
+            </div>
+            <div class="controls">
+                <h3>Bernoulli Parameter</h3>
+                <div class="control-item">
+                    <label for="probability">Probability</label>
+                    <input type="range" id="probability" min="0" max="1" step="0.01" value="0.5">
+                    <div class="value-display">Value: <span id="probability-value">0.5</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Poisson Distribution Row -->
+        <div class="distribution-row">
+            <div class="distribution-card">
+                <h2>Poisson Distribution</h2>
+                <div id="poisson-plot" class="graph"></div>
+            </div>
+            <div class="controls">
+                <h3>Poisson Parameter</h3>
+                <div class="control-item">
+                    <label for="lambda">Lambda (λ)</label>
+                    <input type="range" id="lambda" min="0.1" max="10" step="0.1" value="2">
+                    <div class="value-display">Value: <span id="lambda-value">2</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-4 px-6 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto text-center text-secondary">
+            <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.classList.toggle('dark', savedTheme === 'dark');
+        themeToggle.checked = savedTheme === 'light';
+
+        themeToggle.addEventListener('change', () => {
+            body.classList.toggle('dark');
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+            // Redraw plots when theme changes
+            updateGaussianPlot();
+            updateBernoulliPlot();
+            updatePoissonPlot();
+        });
+
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        let isMenuOpen = false;
+
+        mobileMenuButton.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            mobileMenu.classList.toggle('active');
+            mobileMenuButton.innerHTML = isMenuOpen ? 
+                '<i class="fas fa-times"></i>' : 
+                '<i class="fas fa-bars"></i>';
+        });
+
+        document.querySelectorAll('.mobile-menu .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                isMenuOpen = false;
+                mobileMenuButton.innerHTML = '<i class="fas fa-bars"></i>';
+            });
+        });
+
+        // Utility functions
+        function generateGaussianPoints(mean, variance, skewness, kurtosis) {
+            const points = [];
+            for (let x = -4; x <= 4; x += 0.1) {
+                const z = (x - mean) / Math.sqrt(variance);
+                let y = (1 / Math.sqrt(2 * Math.PI * variance)) * 
+                        Math.exp(-(z * z) / 2) * 
+                        (1 + (skewness * (z * z - 1)) / 6 + 
+                        ((kurtosis - 3) * (z * z * z * z - 6 * z * z + 3)) / 24);
+                points.push({ x, y: Math.max(0, y) });
+            }
+            return points;
+        }
+
+        function generateBernoulliPoints(p) {
+            return [
+                { x: 0, y: 1 - p },
+                { x: 1, y: p }
+            ];
+        }
+
+        function generatePoissonPoints(lambda) {
+            const points = [];
+            for (let k = 0; k <= Math.max(10, 2 * lambda); k++) {
+                const p = (Math.pow(lambda, k) * Math.exp(-lambda)) / math.factorial(k);
+                points.push({ x: k, y: p });
+            }
+            return points;
+        }
+
+        // Set up D3 plots
+        function setupGaussianPlot() {
+            const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+            const width = document.getElementById('gaussian-plot').clientWidth - margin.left - margin.right;
+            const height = document.getElementById('gaussian-plot').clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select('#gaussian-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleLinear().range([0, width]);
+            const y = d3.scaleLinear().range([height, 0]);
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(y));
+
+            const line = d3.line()
+                .x(d => x(d.x))
+                .y(d => y(d.y));
+
+            const path = svg.append('path')
+                .attr('class', 'line');
+
+            return { svg, x, y, line, path };
+        }
+
+        function setupBernoulliPlot() {
+            const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+            const width = document.getElementById('bernoulli-plot').clientWidth - margin.left - margin.right;
+            const height = document.getElementById('bernoulli-plot').clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select('#bernoulli-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleLinear()
+                .domain([-0.5, 1.5])
+                .range([0, width]);
+
+            const y = d3.scaleLinear()
+                .domain([0, 1])
+                .range([height, 0]);
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(y));
+
+            return { svg, x, y };
+        }
+
+        function setupPoissonPlot() {
+            const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+            const width = document.getElementById('poisson-plot').clientWidth - margin.left - margin.right;
+            const height = document.getElementById('poisson-plot').clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select('#poisson-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleLinear().range([0, width]);
+            const y = d3.scaleLinear().range([height, 0]);
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(y));
+
+            return { svg, x, y };
+        }
+
+        // Initialize plots
+        const gaussianPlot = setupGaussianPlot();
+        const bernoulliPlot = setupBernoulliPlot();
+        const poissonPlot = setupPoissonPlot();
+
+        // Update functions
+        function updateGaussianPlot() {
+            const mean = parseFloat(document.getElementById('mean').value);
+            const variance = parseFloat(document.getElementById('variance').value);
+            const skewness = parseFloat(document.getElementById('skewness').value);
+            const kurtosis = parseFloat(document.getElementById('kurtosis').value);
+
+            const data = generateGaussianPoints(mean, variance, skewness, kurtosis);
+            
+            gaussianPlot.x.domain([d3.min(data, d => d.x), d3.max(data, d => d.x)]);
+            gaussianPlot.y.domain([0, d3.max(data, d => d.y)]);
+            
+            gaussianPlot.svg.selectAll('.axis')
+                .transition()
+                .duration(200)
+                .call(d3.axisBottom(gaussianPlot.x))
+                .call(d3.axisLeft(gaussianPlot.y));
+
+            gaussianPlot.path
+                .datum(data)
+                .transition()
+                .duration(200)
+                .attr('d', gaussianPlot.line);
+        }
+
+        function updateBernoulliPlot() {
+            const probability = parseFloat(document.getElementById('probability').value);
+            const data = generateBernoulliPoints(probability);
+
+            bernoulliPlot.svg.selectAll('circle').remove();
+            
+            bernoulliPlot.svg.selectAll('circle')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('class', 'point')
+                .attr('cx', d => bernoulliPlot.x(d.x))
+                .attr('cy', d => bernoulliPlot.y(d.y))
+                .attr('r', 5);
+        }
+
+        function updatePoissonPlot() {
+            const lambda = parseFloat(document.getElementById('lambda').value);
+            const data = generatePoissonPoints(lambda);
+
+            poissonPlot.x.domain([0, d3.max(data, d => d.x)]);
+            poissonPlot.y.domain([0, d3.max(data, d => d.y)]);
+
+            poissonPlot.svg.selectAll('.axis')
+                .transition()
+                .duration(200)
+                .call(d3.axisBottom(poissonPlot.x))
+                .call(d3.axisLeft(poissonPlot.y));
+
+            poissonPlot.svg.selectAll('circle').remove();
+            
+            poissonPlot.svg.selectAll('circle')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('class', 'point')
+                .attr('cx', d => poissonPlot.x(d.x))
+                .attr('cy', d => poissonPlot.y(d.y))
+                .attr('r', 5);
+        }
+
+        // Setup event listeners
+        const inputs = ['mean', 'variance', 'skewness', 'kurtosis', 'probability', 'lambda'];
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            const display = document.getElementById(`${id}-value`);
+            
+            input.addEventListener('input', (e) => {
+                display.textContent = e.target.value;
+                if (id === 'mean' || id === 'variance' || id === 'skewness' || id === 'kurtosis') {
+                    updateGaussianPlot();
+                } else if (id === 'probability') {
+                    updateBernoulliPlot();
+                } else if (id === 'lambda') {
+                    updatePoissonPlot();
+                }
+            });
+        });
+
+        // Initial update
+        updateGaussianPlot();
+        updateBernoulliPlot();
+        updatePoissonPlot();
+    </script>
+</body>
+</html>
