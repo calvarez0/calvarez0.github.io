@@ -2,4 +2,4 @@
 
 ⭐ If yes, can you star my repo? This helps me get (much needed) exposure :) ⭐
 
-&copy; 2024 Alex Alvarez. All rights reserved.
+&copy; 2025 Alex Alvarez. All rights reserved.
