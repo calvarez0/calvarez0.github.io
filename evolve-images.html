@@ -7,331 +7,540 @@
     <link rel="icon" type="image/x-icon" href="assets/icon.png">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
     <style>
-        .bg-custom-content {background-color: #1b1b1b;}
-        .bg-custom-dark { background-color: #000000; }
-        .text-custom-light { color: #e0e0e0; }
-        .hover-effect:hover { transform: translateY(-5px); transition: transform 0.3s ease; }
-        .hover-scale:hover { transform: scale(1.05); transition: transform 0.3s ease; }
-        .grid-square { aspect-ratio: 1/1; }
-        input[type="range"]::-webkit-slider-thumb, input[type="range"]::-moz-range-thumb {
-            appearance: none;
-            width: 15px;
-            height: 15px;
-            background: #e0e0e0;
-            border-radius: 50%;
-            cursor: pointer;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --background: #ffffff;
+            --accent: #0071e3;
         }
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 4px;
-            width: 100%;
-            max-width: 500px;
+ 
+        .dark {
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --background: #000000;
+            --accent: #0071e3;
         }
-        .image-container {
-            width: 100%;
-            padding-bottom: 100%;
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .nav-link {
             position: relative;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
         }
-        .image-container img {
+
+        .nav-link::after {
+            content: '';
             position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--accent);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .theme-switch {
+            width: 50px;
+            height: 26px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--text-secondary);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--background);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-        }
-        .main-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 2rem;
+            background-color: var(--background);
+            z-index: 40;
+            padding-top: 5rem;
         }
 
-        .image-grid {
-            flex-basis: 50%;
-            max-width: 50%;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 4px;
-            width: 100%;
-            max-width: 500px;
+        .mobile-menu.active {
+            display: block;
         }
 
-        .controls-container {
-            flex-basis: 50%;
-            max-width: 50%;
-            margin-right: 0;
+        .mobile-menu-button {
+            display: none;
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-                align-items: center;
+            .mobile-menu-button {
+                display: block;
             }
 
-            .image-grid, .controls-container {
-                flex-basis: 100%;
-                max-width: 100%;
+            .desktop-menu {
+                display: none;
+            }
+
+            .mobile-menu .nav-link {
+                display: block;
+                padding: 1rem;
+                text-align: center;
+                font-size: 1.25rem;
             }
         }
 
-        @media (max-width: 480px) {
-            .image-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        .evolution-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .dark .evolution-card {
+            background: #1a1a1a;
+        }
+
+        .left-column {
+            flex: 1;
+            max-width: 500px;
+            display: flex;
+            align-items: center; /* Center the grid vertically */
+        }
+
+        .right-column {
+            flex: 1;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;  /* Uniform gap for both rows and columns */
+            width: 100%;
+            line-height: 0; /* Remove any line height spacing */
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .image-container {
+            aspect-ratio: 1/1;
+        }
+
+        .description-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 50%;
+            overflow-y: auto;
+        }
+
+        .controls-section {
+            padding-top: 1rem;
+        }
+
+        .image-container {
+            aspect-ratio: 1/1;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .image-container:hover {
+            transform: scale(1.05);
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .controls-section {
+            padding: 2rem;
+            border-top: 1px solid rgba(134, 134, 139, 0.1);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 1rem 0;
+            background: var(--text-secondary);
+            height: 2px;
+            border-radius: 2px;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .reset-button {
+            background-color: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: opacity 0.2s ease;
+        }
+
+        .reset-button:hover {
+            opacity: 0.9;
         }
     </style>
 </head>
-<body class="bg-custom-dark text-custom-light">
-
-<header class="shadow-lg">
-    <nav class="container mx-auto px-6 py-3">
-        <div class="flex justify-between items-center">
-            <div class="text-xl font-semibold">Alex Alvarez</div>
-            <div class="hidden md:flex space-x-6">
-                <a href="index.html" class="hover:text-blue-400 transition">Home</a>
-                <a href="https://medium.com/@0xalexrez" class="hover:text-blue-400 transition">Blog</a>
-                <a href="evolve-images.html" class="hover:text-blue-400 transition">Evolutionary Algorithms</a>
-                <a href="connectome_visualization.html" class="hover:text-blue-400 transition">Connectome Visualization</a>
-                <a href="demographic_iq.html" class="hover:text-blue-400 transition">Demographic IQ</a>
+<body>
+    <nav class="fixed w-full backdrop-blur-md bg-opacity-70 z-50 border-b border-gray-800">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="#" class="text-2xl font-semibold">AA</a>
+                <div class="desktop-menu hidden md:flex space-x-8">
+                    <a href="/index.html" class="nav-link">Home</a>
+                    <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
+                    <a href="demographic_iq.html" class="nav-link">Demographic IQ</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <button class="mobile-menu-button md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </div>
-            <button class="md:hidden focus:outline-none" id="menu-toggle">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
         </div>
     </nav>
-    <div class="md:hidden hidden" id="mobile-menu">
-        <a href="index.html" class="block px-4 py-2 hover:bg-gray-700">Home</a>
-        <a href="https://medium.com/@0xalexrez" class="block px-4 py-2 hover:bg-gray-700">Blog</a>
-        <a href="evolve-images.html" class="block px-4 py-2 hover:bg-gray-700">Evolutionary Algorithms</a>
-        <a href="connectome_visualization.html" class="block px-4 py-2 hover:bg-gray-700">Connectome Visualization</a>
-        <a href="demographic_iq.html" class="block px-4 py-2 hover:bg-gray-700">Demographic IQ</a>
-    </div>
-</header>
 
-<main class="container mx-auto px-6 py-8">
-    <div class="main-content mb-8">
-        <div class="image-grid" id="imageGrid">
-            <!-- Images will be dynamically inserted here -->
+    <div class="mobile-menu">
+        <div class="space-y-4">
+            <a href="/index.html" class="nav-link">Home</a>
+            <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
+            <a href="demographic_iq.html" class="nav-link">Demographic IQ</a>
         </div>
-        <div class="controls-container mb-4 md:mb-0 description bg-custom-content p-6 rounded-lg shadow-md">
-            <h2 class="text-2xl font-semibold mb-4">Evolutionary Algorithm</h2>
-            <p class="text-lg leading-relaxed">
-                This page showcases a very simple evolutionary algorithm. 
-                Every time you click on an image the colors compete and eat each other.
-                Each image is slightly different based on its distinct pseudorandom mutations.
-            </p>
-            <p class="mt-4 text-lg leading-relaxed">
-                It's interesting to note that (unless mutation rate/randomness is very high) the images end up becoming blobs of color of relatively equal size, analogous to species stabilizing within their ecosystem. 
-                The higher the evolution intensity the more aggresive competition is and the less number of colors (species) in the ecosystem; conversely, the higher the mutation rate the higher the diversity.
-            </p>
+    </div>
 
-            <div class="controls-container mb-4 md:mb-0">
-                <div class="mb-4">
-                    <label for="evolutionIntensity" class="block text-lg font-semibold mb-2">Evolution Intensity:</label>
-                    <input type="range" id="evolutionIntensity" min="1" max="100" value="40" class="w-full">
-                    <span id="intensityValue">40</span>
+    <div class="content-container">
+        <div class="evolution-card">
+            <div class="left-column">
+                <div class="image-grid" id="imageGrid">
+                    <!-- Images will be dynamically inserted here -->
                 </div>
-                <div class="mb-4">
-                    <label for="randomnessSlider" class="block text-lg font-semibold mb-2">Random Mutation Rate:</label>
-                    <input type="range" id="randomnessSlider" min="1" max="100" value="10" class="w-full">
-                    <span id="randomnessValue">10</span>
+            </div>
+            <div class="right-column">
+                <div class="description-section">
+                    <h2 class="text-2xl font-semibold">Evolutionary Algorithm Visualization</h2>
+                    <p class="text-lg text-secondary">
+                        This visualization demonstrates a simple evolutionary algorithm where colors compete and evolve. 
+                        Click on any image to trigger evolution - the colors will compete and mutate based on the parameters below.
+                    </p>
+                    <p class="text-lg text-secondary">
+                        Notice how the images tend to stabilize into color regions of similar size, similar to species finding their niches in an ecosystem. 
+                        Higher evolution intensity leads to more aggressive competition and fewer surviving colors, while higher mutation rates increase diversity.
+                    </p>
                 </div>
-                <button id="resetButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                
+                <div class="controls-section">
+                <div class="mb-6">
+                    <label for="evolutionIntensity" class="block text-lg font-medium mb-2">Evolution Intensity</label>
+                    <input type="range" id="evolutionIntensity" min="1" max="100" value="40">
+                    <div class="text-secondary">Value: <span id="intensityValue">40</span></div>
+                </div>
+
+                <div class="mb-6">
+                    <label for="randomnessSlider" class="block text-lg font-medium mb-2">Random Mutation Rate</label>
+                    <input type="range" id="randomnessSlider" min="1" max="100" value="10">
+                    <div class="text-secondary">Value: <span id="randomnessValue">10</span></div>
+                </div>
+
+                <button id="resetButton" class="reset-button">
                     Reset Images
                 </button>
             </div>
         </div>
     </div>
-</main>
 
-<footer class="text-center py-6 mt-16">
-    <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
-</footer>
+    <footer class="py-4 px-6 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto text-center text-secondary">
+            <p>&copy; 2024 Alex Alvarez. All rights reserved.</p>
+        </div>
+    </footer>
 
-<script>
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
 
-    menuToggle.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-    });
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.classList.toggle('dark', savedTheme === 'dark');
+        themeToggle.checked = savedTheme === 'light';
 
-    const NUM_IMAGES = 9;
-    const IMAGE_SIZE = 150;
-    let MUTATION_RATE = 0.01;
-    let RANDOM_MUTATION_RATE = 0.01;
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const intensitySlider = document.getElementById('evolutionIntensity');
-        const intensityValue = document.getElementById('intensityValue');
-        const randomnessSlider = document.getElementById('randomnessSlider');
-        const randomnessValue = document.getElementById('randomnessValue');
-        const resetButton = document.getElementById('resetButton');
-
-        // Initialize global MUTATION_RATE and update intensity display
-        MUTATION_RATE = intensitySlider.value / 100;
-        intensityValue.textContent = intensitySlider.value;
-
-        intensitySlider.addEventListener('input', () => {
-            const intensity = intensitySlider.value;
-            MUTATION_RATE = intensity / 100; // Update global MUTATION_RATE
-            intensityValue.textContent = intensity;
+        themeToggle.addEventListener('change', () => {
+            body.classList.toggle('dark');
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
         });
 
-        randomnessSlider.addEventListener('input', () => {
-            const randomness = randomnessSlider.value;
-            RANDOM_MUTATION_RATE = randomness / 1000; // Update global RANDOM_MUTATION_RATE
-            randomnessValue.textContent = randomness;
+        // Mobile Menu
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        let isMenuOpen = false;
+
+        mobileMenuButton.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            mobileMenu.classList.toggle('active');
+            mobileMenuButton.innerHTML = isMenuOpen ? 
+                '<i class="fas fa-times"></i>' : 
+                '<i class="fas fa-bars"></i>';
         });
 
-        resetButton.addEventListener('click', () => {
-            populateImages();
+        document.querySelectorAll('.mobile-menu .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                isMenuOpen = false;
+                mobileMenuButton.innerHTML = '<i class="fas fa-bars"></i>';
+            });
         });
 
-        populateImages(); // Populate images after initialization
-    });
+        // Evolution Algorithm Code
+        const NUM_IMAGES = 9;
+        const IMAGE_SIZE = 100;
+        let MUTATION_RATE = 0.01;
+        let RANDOM_MUTATION_RATE = 0.01;
 
-    function getRandomColor() {
-        const letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    }
-
-    function generateRandomImageData() {
-        const canvas = document.createElement('canvas');
-        canvas.width = IMAGE_SIZE;
-        canvas.height = IMAGE_SIZE;
-        const ctx = canvas.getContext('2d');
-
-        const imageData = ctx.createImageData(IMAGE_SIZE, IMAGE_SIZE);
-        for (let i = 0; i < imageData.data.length; i += 4) {
-            imageData.data[i] = Math.random() * 255;
-            imageData.data[i + 1] = Math.random() * 255;
-            imageData.data[i + 2] = Math.random() * 255;
-            imageData.data[i + 3] = 255;
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
         }
 
-        ctx.putImageData(imageData, 0, 0);
-        return canvas.toDataURL();
-    }
+        function generateRandomImageData() {
+            const canvas = document.createElement('canvas');
+            canvas.width = IMAGE_SIZE;
+            canvas.height = IMAGE_SIZE;
+            const ctx = canvas.getContext('2d');
 
-    function mutateImageDataWithNeighborInfluence(imageData) {
-        const width = IMAGE_SIZE;
-        const height = IMAGE_SIZE;
+            const imageData = ctx.createImageData(IMAGE_SIZE, IMAGE_SIZE);
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                imageData.data[i] = Math.random() * 255;
+                imageData.data[i + 1] = Math.random() * 255;
+                imageData.data[i + 2] = Math.random() * 255;
+                imageData.data[i + 3] = 255;
+            }
 
-        function getPixelIndex(x, y) {
-            return (y * width + x) * 4;
+            ctx.putImageData(imageData, 0, 0);
+            return canvas.toDataURL();
         }
 
-        function getNeighborsColor(x, y) {
-            const neighbors = [];
-            if (x > 0) neighbors.push(getPixelColor(x - 1, y));
-            if (x < width - 1) neighbors.push(getPixelColor(x + 1, y));
-            if (y > 0) neighbors.push(getPixelColor(x, y - 1));
-            if (y < height - 1) neighbors.push(getPixelColor(x, y + 1));
-            if (x > 0 && y > 0) neighbors.push(getPixelColor(x - 1, y - 1));
-            if (x < width - 1 && y > 0) neighbors.push(getPixelColor(x + 1, y - 1));
-            if (x > 0 && y < height - 1) neighbors.push(getPixelColor(x - 1, y + 1));
-            if (x < width - 1 && y < height - 1) neighbors.push(getPixelColor(x + 1, y + 1));
-            return neighbors;
-        }
+        function mutateImageDataWithNeighborInfluence(imageData) {
+            const width = IMAGE_SIZE;
+            const height = IMAGE_SIZE;
 
-        function getPixelColor(x, y) {
-            const idx = getPixelIndex(x, y);
-            return [imageData.data[idx], imageData.data[idx + 1], imageData.data[idx + 2]];
-        }
+            function getPixelIndex(x, y) {
+                return (y * width + x) * 4;
+            }
 
-        function setPixelColor(x, y, color) {
-            const idx = getPixelIndex(x, y);
-            imageData.data[idx] = color[0];
-            imageData.data[idx + 1] = color[1];
-            imageData.data[idx + 2] = color[2];
-        }
+            function getNeighborsColor(x, y) {
+                const neighbors = [];
+                if (x > 0) neighbors.push(getPixelColor(x - 1, y));
+                if (x < width - 1) neighbors.push(getPixelColor(x + 1, y));
+                if (y > 0) neighbors.push(getPixelColor(x, y - 1));
+                if (y < height - 1) neighbors.push(getPixelColor(x, y + 1));
+                if (x > 0 && y > 0) neighbors.push(getPixelColor(x - 1, y - 1));
+                if (x < width - 1 && y > 0) neighbors.push(getPixelColor(x + 1, y - 1));
+                if (x > 0 && y < height - 1) neighbors.push(getPixelColor(x - 1, y + 1));
+                if (x < width - 1 && y < height - 1) neighbors.push(getPixelColor(x + 1, y + 1));
+                return neighbors;
+            }
 
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                if (Math.random() < RANDOM_MUTATION_RATE) {
-                    setPixelColor(x, y, [Math.random() * 255, Math.random() * 255, Math.random() * 255]);
-                } else if (Math.random() < MUTATION_RATE) {
-                    const neighbors = getNeighborsColor(x, y);
-                    const colorFrequencies = {};
-                    neighbors.forEach(color => {
-                        const colorKey = color.join(',');
-                        colorFrequencies[colorKey] = (colorFrequencies[colorKey] || 0) + 1;
-                    });
-                    let dominantColor = null;
-                    let maxCount = -1;
-                    for (const [colorKey, count] of Object.entries(colorFrequencies)) {
-                        if (count > maxCount) {
-                            maxCount = count;
-                            dominantColor = colorKey.split(',').map(Number);
+            function getPixelColor(x, y) {
+                const idx = getPixelIndex(x, y);
+                return [imageData.data[idx], imageData.data[idx + 1], imageData.data[idx + 2]];
+            }
+
+            function setPixelColor(x, y, color) {
+                const idx = getPixelIndex(x, y);
+                imageData.data[idx] = color[0];
+                imageData.data[idx + 1] = color[1];
+                imageData.data[idx + 2] = color[2];
+            }
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    if (Math.random() < RANDOM_MUTATION_RATE) {
+                        setPixelColor(x, y, [Math.random() * 255, Math.random() * 255, Math.random() * 255]);
+                    } else if (Math.random() < MUTATION_RATE) {
+                        const neighbors = getNeighborsColor(x, y);
+                        const colorFrequencies = {};
+                        neighbors.forEach(color => {
+                            const colorKey = color.join(',');
+                            colorFrequencies[colorKey] = (colorFrequencies[colorKey] || 0) + 1;
+                        });
+                        let dominantColor = null;
+                        let maxCount = -1;
+                        for (const [colorKey, count] of Object.entries(colorFrequencies)) {
+                            if (count > maxCount) {
+                                maxCount = count;
+                                dominantColor = colorKey.split(',').map(Number);
+                            }
                         }
-                    }
-                    if (dominantColor) {
-                        setPixelColor(x, y, dominantColor);
+                        if (dominantColor) {
+                            setPixelColor(x, y, dominantColor);
+                        }
                     }
                 }
             }
+            return imageData;
         }
-        return imageData;
-    }
 
-    function evolveImages(event) {
-        const clickedImage = event.target;
-        const canvas = document.createElement('canvas');
-        canvas.width = IMAGE_SIZE;
-        canvas.height = IMAGE_SIZE;
-        const ctx = canvas.getContext('2d');
+        function evolveImages(event) {
+            const clickedImage = event.target;
+            const canvas = document.createElement('canvas');
+            canvas.width = IMAGE_SIZE;
+            canvas.height = IMAGE_SIZE;
+            const ctx = canvas.getContext('2d');
 
-        const parentImage = new Image();
-        parentImage.src = clickedImage.src;
+            const parentImage = new Image();
+            parentImage.src = clickedImage.src;
 
-        parentImage.onload = () => {
-            ctx.drawImage(parentImage, 0, 0);
-            let imageData = ctx.getImageData(0, 0, IMAGE_SIZE, IMAGE_SIZE);
+            parentImage.onload = () => {
+                ctx.drawImage(parentImage, 0, 0);
+                let imageData = ctx.getImageData(0, 0, IMAGE_SIZE, IMAGE_SIZE);
+                populateImages(() => mutateImageDataWithNeighborInfluence(imageData));
+            };
+        }
 
-            populateImages(() => mutateImageDataWithNeighborInfluence(imageData));
-        };
-    }
+        function populateImages(mutateFunction) {
+            const imageGrid = document.getElementById('imageGrid');
+            imageGrid.innerHTML = '';
 
-    function populateImages(mutateFunction) {
-        const imageGrid = document.getElementById('imageGrid');
-        imageGrid.innerHTML = '';
+            for (let i = 0; i < NUM_IMAGES; i++) {
+                const imageContainer = document.createElement('div');
+                imageContainer.classList.add('image-container');
 
-        for (let i = 0; i < NUM_IMAGES; i++) {
-            const imageContainer = document.createElement('div');
-            imageContainer.classList.add('image-container');
+                const img = document.createElement('img');
+                img.classList.add('w-full', 'h-full', 'object-cover');
 
-            const img = document.createElement('img');
-            img.classList.add('hover-scale', 'rounded-lg', 'shadow-md');
+                if (mutateFunction) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = IMAGE_SIZE;
+                    canvas.height = IMAGE_SIZE;
+                    const ctx = canvas.getContext('2d');
 
-            if (mutateFunction) {
-                const canvas = document.createElement('canvas');
-                canvas.width = IMAGE_SIZE;
-                canvas.height = IMAGE_SIZE;
-                const ctx = canvas.getContext('2d');
+                    const mutatedData = mutateFunction();
+                    ctx.putImageData(mutatedData, 0, 0);
+                    img.src = canvas.toDataURL();
+                } else {
+                    img.src = generateRandomImageData();
+                }
 
-                const mutatedData = mutateFunction();
-                ctx.putImageData(mutatedData, 0, 0);
-                img.src = canvas.toDataURL();
-            } else {
-                img.src = generateRandomImageData();
+                img.addEventListener('click', evolveImages);
+                imageContainer.appendChild(img);
+                imageGrid.appendChild(imageContainer);
             }
-
-            img.addEventListener('click', evolveImages);
-            imageContainer.appendChild(img);
-            imageGrid.appendChild(imageContainer);
         }
-    }
-</script>
 
+        // Initialize controls and images
+        document.addEventListener('DOMContentLoaded', () => {
+            const intensitySlider = document.getElementById('evolutionIntensity');
+            const intensityValue = document.getElementById('intensityValue');
+            const randomnessSlider = document.getElementById('randomnessSlider');
+            const randomnessValue = document.getElementById('randomnessValue');
+            const resetButton = document.getElementById('resetButton');
+
+            MUTATION_RATE = intensitySlider.value / 100;
+            intensityValue.textContent = intensitySlider.value;
+
+            intensitySlider.addEventListener('input', () => {
+                const intensity = intensitySlider.value;
+                MUTATION_RATE = intensity / 100;
+                intensityValue.textContent = intensity;
+            });
+
+            randomnessSlider.addEventListener('input', () => {
+                const randomness = randomnessSlider.value;
+                RANDOM_MUTATION_RATE = randomness / 1000;
+                randomnessValue.textContent = randomness;
+            });
+
+            resetButton.addEventListener('click', () => {
+                populateImages();
+            });
+
+            populateImages();
+        });
+    </script>
 </body>
 </html>
