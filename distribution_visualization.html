@@ -318,6 +318,46 @@
                 </div>
             </div>
         </div>
+
+        <!-- Elliptical Distribution Row -->
+        <div class="distribution-row">
+            <div class="distribution-card">
+                <h2>Elliptical Distribution</h2>
+                <div class="flex">
+                    <div class="w-1/2">
+                        <h3 class="text-center mb-2">Top View</h3>
+                        <div id="elliptical-top-plot" class="graph"></div>
+                    </div>
+                    <div class="w-1/2">
+                        <h3 class="text-center mb-2">Side View</h3>
+                        <div id="elliptical-side-plot" class="graph"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <h3>Elliptical Parameters</h3>
+                <div class="control-item">
+                    <label for="majorAxis">Major Axis</label>
+                    <input type="range" id="majorAxis" min="0.5" max="3" step="0.1" value="2">
+                    <div class="value-display">Value: <span id="majorAxis-value">2</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="minorAxis">Minor Axis</label>
+                    <input type="range" id="minorAxis" min="0.5" max="3" step="0.1" value="1">
+                    <div class="value-display">Value: <span id="minorAxis-value">1</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="rotation">Rotation (degrees)</label>
+                    <input type="range" id="rotation" min="0" max="180" step="5" value="0">
+                    <div class="value-display">Value: <span id="rotation-value">0</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="concentration">Concentration</label>
+                    <input type="range" id="concentration" min="0.5" max="2" step="0.1" value="1">
+                    <div class="value-display">Value: <span id="concentration-value">1</span></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <footer class="py-4 px-6 border-t border-gray-800">
@@ -581,7 +621,159 @@
             });
         });
 
+        // Elliptical distribution functions
+        function generateEllipticalPoints(majorAxis, minorAxis, rotation, n = 1000) {
+            const points = [];
+            for (let i = 0; i < n; i++) {
+                // Generate random angle and radius
+                const theta = Math.random() * 2 * Math.PI;
+                const r = Math.sqrt(-2 * Math.log(Math.random())); // Box-Muller transform
+                
+                // Calculate x and y before rotation
+                const x = r * Math.cos(theta) * majorAxis;
+                const y = r * Math.sin(theta) * minorAxis;
+                
+                // Apply rotation
+                const rotRad = (rotation * Math.PI) / 180;
+                const xRot = x * Math.cos(rotRad) - y * Math.sin(rotRad);
+                const yRot = x * Math.sin(rotRad) + y * Math.cos(rotRad);
+                
+                points.push([xRot, yRot]);
+            }
+            return points;
+        }
+
+        function generateSideViewPoints(majorAxis, concentration) {
+            const points = [];
+            for (let x = -4; x <= 4; x += 0.1) {
+                const y = (1 / (majorAxis * Math.sqrt(2 * Math.PI))) * 
+                        Math.exp(-(x * x) / (2 * majorAxis * majorAxis)) * concentration;
+                points.push([x, y]);
+            }
+            return points;
+        }
+
+        function setupEllipticalPlots() {
+            const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+            const width = document.getElementById('elliptical-top-plot').clientWidth - margin.left - margin.right;
+            const height = document.getElementById('elliptical-top-plot').clientHeight - margin.top - margin.bottom;
+
+            // Setup top view
+            const topSvg = d3.select('#elliptical-top-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Setup side view
+            const sideSvg = d3.select('#elliptical-side-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Setup scales for top view
+            const xScaleTop = d3.scaleLinear()
+                .domain([-4, 4])
+                .range([0, width]);
+
+            const yScaleTop = d3.scaleLinear()
+                .domain([-4, 4])
+                .range([height, 0]);
+
+            // Setup scales for side view
+            const xScaleSide = d3.scaleLinear()
+                .domain([-4, 4])
+                .range([0, width]);
+
+            const yScaleSide = d3.scaleLinear()
+                .domain([0, 0.5])  // Adjusted for typical normal distribution height
+                .range([height, 0]);
+
+            // Add axes to top view
+            topSvg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height/2})`)
+                .call(d3.axisBottom(xScaleTop));
+
+            topSvg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(${width/2},0)`)
+                .call(d3.axisLeft(yScaleTop));
+
+            // Add axes to side view
+            sideSvg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(xScaleSide));
+
+            sideSvg.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(yScaleSide));
+
+            return {
+                topSvg,
+                sideSvg,
+                xScaleTop,
+                yScaleTop,
+                xScaleSide,
+                yScaleSide,
+                width,
+                height
+            };
+        }
+
+        function updateEllipticalPlots() {
+            const majorAxis = parseFloat(document.getElementById('majorAxis').value);
+            const minorAxis = parseFloat(document.getElementById('minorAxis').value);
+            const rotation = parseFloat(document.getElementById('rotation').value);
+            const concentration = parseFloat(document.getElementById('concentration').value);
+
+            const topPoints = generateEllipticalPoints(majorAxis, minorAxis, rotation);
+            const sidePoints = generateSideViewPoints(majorAxis, concentration);
+
+            // Update top view
+            ellipticalPlots.topSvg.selectAll('circle').remove();
+            ellipticalPlots.topSvg.selectAll('circle')
+                .data(topPoints)
+                .enter()
+                .append('circle')
+                .attr('cx', d => ellipticalPlots.xScaleTop(d[0]))
+                .attr('cy', d => ellipticalPlots.yScaleTop(d[1]))
+                .attr('r', 1.5)
+                .attr('fill', '#6366f1')
+                .attr('opacity', 0.3);
+
+            // Update side view
+            const line = d3.line()
+                .x(d => ellipticalPlots.xScaleSide(d[0]))
+                .y(d => ellipticalPlots.yScaleSide(d[1]));
+
+            ellipticalPlots.sideSvg.selectAll('.line').remove();
+            ellipticalPlots.sideSvg.append('path')
+                .datum(sidePoints)
+                .attr('class', 'line')
+                .attr('d', line);
+        }
+
+        // Initialize elliptical plots
+        const ellipticalPlots = setupEllipticalPlots();
+
+        // Add event listeners for elliptical distribution controls
+        ['majorAxis', 'minorAxis', 'rotation', 'concentration'].forEach(id => {
+            const input = document.getElementById(id);
+            const display = document.getElementById(`${id}-value`);
+            
+            input.addEventListener('input', (e) => {
+                display.textContent = e.target.value;
+                updateEllipticalPlots();
+            });
+        });
+        
         // Initial update
+        updateEllipticalPlots();
         updateGaussianPlot();
         updateBernoulliPlot();
         updatePoissonPlot();
