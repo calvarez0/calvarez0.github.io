@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>F(AI)ght Club</title>
     <style>
+
+        html, body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
         body {
             background-color: #000;
             color: #0f0;
@@ -14,8 +22,9 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            overflow-x: hidden;
             margin: 0;
-            padding: 20px;
+            padding: 0px;
             overflow: hidden;
         }
 
@@ -31,7 +40,7 @@
             font-size: 1.2em;
             margin-bottom: 0;
             text-align: left;
-            width: 600px;
+            width: auto;
             position: relative;
             margin-left: auto;
             margin-right: auto;
@@ -82,7 +91,7 @@
             background: transparent;
             border: none;
             color: #0f0;
-            padding: 0;
+            padding: 0px;
             font-family: 'Courier New', monospace;
             font-size: 1.2em;
             width: calc(100% - 100px);
@@ -113,18 +122,33 @@
         .club-details {
             display: none;
             text-align: left;
-            padding: 2em;
-            border: 2px solid #0f0;
+            overflow-x: hidden;
             margin-top: 2em;
             animation: fadeIn 2s;
-            width: 600px;
+            width: auto;
             margin-left: auto;
             margin-right: auto;
+            font-size: 1.2em;
         }
 
         @media screen and (max-width: 768px) {
             .club-details {
                 width: 90%;
+                height: auto;
+                font-size: 1em;
+                margin-top: 1em;
+            }
+            .club-details h2 {
+                font-size: 1.4em;
+                margin-top: 0;
+            }
+            .club-details h3 {
+                font-size: 1.2em;
+                margin-top: 1em;
+                margin-bottom: 0.5em;
+            }
+            .club-details p {
+                margin: 0.5em 0;
             }
         }
 
@@ -161,23 +185,21 @@
         </div>
         <div class="club-details" id="club-details">
             <h2>Welcome to F(AI)ght Club</h2>
-            <p>Here are the details of our next gathering:</p>
-            
-            <h3>Whisper Wednesday</h3>
+        
+            <h3>Whisper Wednesdays</h3>
             <p>🗓️ Every Wednesday Night @ 8PM<br>
-            📍 Computer Science Building, Room 101</p>
+            📍 Computer Science Building (PETR), Room 101</p>
             
             <h3>First Lecture Topic</h3>
-            <p>"The Alignment Problem: Understanding AI Safety"<br>
+            <p>"Paretropian Goal Alignment"<br>
             Guest Speaker: Dr. Sarah Chen<br>
             Discussion to follow</p>
             
             <h3>Upcoming Events</h3>
-            <p>• AI Movie Night - "Ex Machina" Screening<br>
             • Neural Network & Chill Social<br>
             • Dinner & Debates: "The Future of AGI"</p>
             
-            <p style="color: #ff0000;">REMEMBER: The first rule of F(AI)ght Club is you do not talk about F(AI)ght Club.</p>
+            <p style="color: #ff0000;">REMEMBER: The first rule of Fight Club is you do not talk about Fight Club.</p>
         </div>
     </div>
 
