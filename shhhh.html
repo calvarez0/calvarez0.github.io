@@ -21,22 +21,25 @@
 
         .container {
             max-width: 800px;
-            text-align: center;
+            width: 100%;
+            position: relative;
+            margin: 0 auto;
         }
 
         .typewriter {
-            display: inline-block;
-            position: relative;
+            display: block;
             font-size: 1.2em;
-            margin-bottom: 2em;
+            margin-bottom: 0;
             text-align: left;
-            max-width: 600px;
+            width: 600px;
+            position: relative;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         @media screen and (max-width: 768px) {
             .typewriter {
-                text-align: center;
-                width: 100%;
+                width: 90%;
             }
             .container {
                 padding: 0 20px;
@@ -52,22 +55,59 @@
             vertical-align: baseline;
         }
 
+        .password-visible::after {
+            display: none;
+        }
+
         .password-container {
-            margin-top: 2em;
+            margin-top: 1em;
             opacity: 0;
             transition: opacity 1s;
+            width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        @media screen and (max-width: 768px) {
+            .password-container {
+                width: 90%;
+            }
         }
 
         .password-box {
             background: transparent;
-            border: 2px solid #0f0;
+            border: none;
             color: #0f0;
-            padding: 10px;
+            padding: 0;
             font-family: 'Courier New', monospace;
             font-size: 1.2em;
-            text-align: center;
-            width: 200px;
-            margin-top: 1em;
+            width: calc(100% - 100px);
+            margin: 0;
+            outline: none;
+            caret-color: transparent;
+            margin-left: 0px;
+        }
+
+        .password-box::placeholder {
+            color: #666;
+        }
+
+        .prompt {
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+        }
+
+        .cursor {
+            content: '▋';
+            display: inline-block;
+            position: absolute;
+            left: 100px;
+            animation: blink 1s infinite;
         }
 
         .club-details {
@@ -77,6 +117,15 @@
             border: 2px solid #0f0;
             margin-top: 2em;
             animation: fadeIn 2s;
+            width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media screen and (max-width: 768px) {
+            .club-details {
+                width: 90%;
+            }
         }
 
         .matrix-bg {
@@ -106,7 +155,9 @@
     <div class="container">
         <div class="typewriter" id="typewriter"></div>
         <div class="password-container" id="password-container">
-            <input type="password" class="password-box" id="password" placeholder="Enter Password">
+            <span class="prompt">password:</span>
+            <input type="password" class="password-box" id="password" placeholder="Enter password">
+            <span class="cursor">▋</span>
         </div>
         <div class="club-details" id="club-details">
             <h2>Welcome to F(AI)ght Club</h2>
@@ -174,12 +225,21 @@
                 setTimeout(typeWriter, 50);
             } else {
                 passwordContainer.style.opacity = '1';
+                typewriterElement.classList.add('password-visible');
             }
         }
 
         // Password verification
         const password = document.getElementById('password');
         const clubDetails = document.getElementById('club-details');
+        const cursor = document.querySelector('.cursor');
+
+        password.addEventListener('input', function() {
+            const charWidth = 11.5; // Adjusted for the width of password dots
+            const initialOffset = 105; // Starting position after "password:"
+            const cursorPos = initialOffset + (this.value.length * charWidth);
+            cursor.style.left = `${cursorPos}px`;
+        });
 
         password.addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
@@ -190,8 +250,9 @@
                 } else {
                     this.value = '';
                     this.placeholder = 'ACCESS DENIED';
+                    cursor.style.left = '100px';
                     setTimeout(() => {
-                        this.placeholder = 'Enter Password';
+                        this.placeholder = 'Enter password';
                     }, 2000);
                 }
             }
