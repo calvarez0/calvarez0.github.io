@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>F(AI)ght Club</title>
     <style>
-        /* Previous styles remain the same */
         html, body {
             overflow-x: hidden;
             margin: 0;
@@ -13,7 +12,8 @@
             width: 100%;
             height: 100%;
         }
-                    body {
+        
+        body {
             background-color: #000;
             color: #0f0;
             font-family: 'Courier New', monospace;
@@ -37,7 +37,7 @@
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start; /* Changed from center to flex-start */
             justify-content: center;
             padding: 0 20px;
             box-sizing: border-box;
@@ -50,59 +50,9 @@
             max-width: 100%;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            min-height: 150px;  /* Adjust based on final content height */
+            min-height: 150px;
             position: relative;
-        }
-
-        .mission-statement {
-            min-height: 120px;  /* Adjust based on final content height */
-        }
-
-        .content-wrapper {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transform: translateY(-10vh); /* Adjust this value to position content higher */
-        }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-            position: relative;
-            margin: 0 auto;
-        }
-
-        .typewriter {
-            display: block;
-            font-size: 1.2em;
-            margin-bottom: 0;
             text-align: left;
-            width: auto;
-            position: relative;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .mission-statement {
-            display: none;
-            font-size: 1.2em;
-            margin-bottom: 0;
-            text-align: left;
-            width: auto;
-            position: relative;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        @media screen and (max-width: 768px) {
-            .typewriter, .mission-statement {
-                width: 90%;
-            }
-            .container {
-                padding: 0 20px;
-            }
         }
 
         .typewriter::after, .mission-statement::after {
@@ -118,23 +68,47 @@
             display: none;
         }
 
+        .mission-statement {
+            min-height: 120px;
+        }
+
+        .content-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start; /* Changed from center to flex-start */
+            transform: translateY(-10vh);
+        }
+
+        .typewriter {
+            display: block;
+            font-size: 1.2em;
+            margin-bottom: 0;
+            text-align: left;
+            width: 100%; /* Changed from auto to 100% */
+            position: relative;
+        }
+
+        .mission-statement {
+            display: none;
+            font-size: 1.2em;
+            margin-bottom: 0;
+            text-align: left;
+            width: 100%; /* Changed from auto to 100% */
+            position: relative;
+        }
+
         .password-container {
             margin-top: 1em;
             opacity: 0;
             transition: opacity 1s;
-            width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            width: 100%; /* Changed from 600px to 100% */
+            max-width: 600px;
             position: relative;
             display: flex;
             align-items: center;
             flex-wrap: nowrap;
-        }
-
-        @media screen and (max-width: 768px) {
-            .password-container {
-                width: 90%;
-            }
         }
 
         .password-box {
@@ -151,6 +125,7 @@
             margin-left: 0px;
         }
 
+        /* Rest of your existing styles remain unchanged */
         .password-box::placeholder {
             color: #666;
         }
@@ -169,15 +144,25 @@
             animation: blink 1s infinite;
         }
 
+        .enter-hint {
+            color: #3a3;
+            font-size: 0.8em;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 4px;
+            font-family: 'Courier New', monospace;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
         .club-details {
             display: none;
             text-align: left;
             overflow-x: hidden;
             margin-top: 2em;
             animation: fadeIn 2s;
-            width: auto;
-            margin-left: auto;
-            margin-right: auto;
+            width: 100%; /* Changed from auto to 100% */
             font-size: 1.2em;
         }
 
@@ -224,6 +209,7 @@
         }
     </style>
 </head>
+<!-- Rest of your HTML and JavaScript remains exactly the same -->
 <body>
     <canvas class="matrix-bg" id="matrix"></canvas>
     <div class="container centered-content">
@@ -232,6 +218,7 @@
             <span class="prompt">password:</span>
             <input type="password" class="password-box" id="password" placeholder="Enter password">
             <span class="cursor">▋</span>
+            <span class="enter-hint">press enter</span>
         </div>
         <div class="mission-statement" id="mission-statement"></div>
         <div class="club-details" id="club-details">
@@ -322,7 +309,9 @@
         const password = document.getElementById('password');
         const cursor = document.querySelector('.cursor');
 
+        // Show enter hint after first character is typed
         password.addEventListener('input', function() {
+            document.querySelector('.enter-hint').style.opacity = this.value.length > 0 ? '1' : '0';
             const charWidth = 11.5;
             const initialOffset = 105;
             const cursorPos = initialOffset + (this.value.length * charWidth);
