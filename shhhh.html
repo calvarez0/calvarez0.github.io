@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>F(AI)ght Club</title>
     <style>
-
+        /* Previous styles remain the same */
         html, body {
             overflow-x: hidden;
             margin: 0;
@@ -13,19 +13,58 @@
             width: 100%;
             height: 100%;
         }
-        body {
+                    body {
             background-color: #000;
             color: #0f0;
             font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            overflow-x: hidden;
-            margin: 0;
-            padding: 0px;
-            overflow: hidden;
+            min-height: 100vh;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: min(800px, 100%);
+            width: 100%;
+            position: relative;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .typewriter, .mission-statement {
+            width: 100%;
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            min-height: 150px;  /* Adjust based on final content height */
+            position: relative;
+        }
+
+        .mission-statement {
+            min-height: 120px;  /* Adjust based on final content height */
+        }
+
+        .content-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transform: translateY(-10vh); /* Adjust this value to position content higher */
         }
 
         .container {
@@ -46,8 +85,19 @@
             margin-right: auto;
         }
 
+        .mission-statement {
+            display: none;
+            font-size: 1.2em;
+            margin-bottom: 0;
+            text-align: left;
+            width: auto;
+            position: relative;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         @media screen and (max-width: 768px) {
-            .typewriter {
+            .typewriter, .mission-statement {
                 width: 90%;
             }
             .container {
@@ -55,7 +105,7 @@
             }
         }
 
-        .typewriter::after {
+        .typewriter::after, .mission-statement::after {
             content: '▋';
             display: inline-block;
             position: relative;
@@ -148,7 +198,7 @@
                 margin-bottom: 0.5em;
             }
             .club-details p {
-                margin: 0.5em 0;
+                margin: 0;
             }
         }
 
@@ -176,13 +226,14 @@
 </head>
 <body>
     <canvas class="matrix-bg" id="matrix"></canvas>
-    <div class="container">
+    <div class="container centered-content">
         <div class="typewriter" id="typewriter"></div>
         <div class="password-container" id="password-container">
             <span class="prompt">password:</span>
             <input type="password" class="password-box" id="password" placeholder="Enter password">
             <span class="cursor">▋</span>
         </div>
+        <div class="mission-statement" id="mission-statement"></div>
         <div class="club-details" id="club-details">
             <h2>Welcome to F(AI)ght Club</h2>
         
@@ -197,7 +248,7 @@
             
             <h3>Upcoming Events</h3>
             • Neural Network & Chill Social<br>
-            • Dinner & Debates: "The Future of AGI"</p>
+            • Dinner & Debates: "The Future of AGI"</p> <br>
             
             <p style="color: #ff0000;">REMEMBER: The first rule of Fight Club is you do not talk about Fight Club.</p>
         </div>
@@ -232,33 +283,48 @@
             }
         }
 
-        // Typewriter effect
-        const text = "The question of whether a computer can think is no more interesting than the question of whether a submarine can swim. \n \n - Edsger W. Dijkstra\n\nDo you seek truth?";
-        let charIndex = 0;
-        const typewriterElement = document.getElementById('typewriter');
-        const passwordContainer = document.getElementById('password-container');
-
-        function typeWriter() {
-            if (charIndex < text.length) {
-                const currentText = text.substring(0, charIndex + 1);
-                const formattedText = currentText.replace(/\n/g, '<br>');
-                typewriterElement.innerHTML = formattedText;
-                charIndex++;
-                setTimeout(typeWriter, 50);
-            } else {
-                passwordContainer.style.opacity = '1';
-                typewriterElement.classList.add('password-visible');
+        // Typewriter effect function
+        function typeWriterEffect(element, text, onComplete) {
+            let charIndex = 0;
+            element.style.display = 'block';
+            
+            function type() {
+                if (charIndex < text.length) {
+                    const currentText = text.substring(0, charIndex + 1);
+                    const formattedText = currentText.replace(/\n/g, '<br>');
+                    element.innerHTML = formattedText;
+                    charIndex++;
+                    setTimeout(type, 50);
+                } else {
+                    element.classList.add('password-visible');
+                    if (onComplete) onComplete();
+                }
             }
+            
+            type();
         }
+
+        // Initial quote and question
+        const initialText = "The question of whether a computer can think is no more interesting than the question of whether a submarine can swim. \n \n - Edsger W. Dijkstra\n\nDo you seek truth?";
+        const missionText = "We are interested in a future where humans can coexist with each other and with AI in peace. We will discuss ideas like superintelligence, the AI war, and longevity biotech. <strong>This club is not for people who want to pad their resume.</strong> This club is for people who want to change the world.";
+        
+        const typewriterElement = document.getElementById('typewriter');
+        const missionElement = document.getElementById('mission-statement');
+        const passwordContainer = document.getElementById('password-container');
+        const clubDetails = document.getElementById('club-details');
+
+        // Start with initial typewriter text
+        typeWriterEffect(typewriterElement, initialText, () => {
+            passwordContainer.style.opacity = '1';
+        });
 
         // Password verification
         const password = document.getElementById('password');
-        const clubDetails = document.getElementById('club-details');
         const cursor = document.querySelector('.cursor');
 
         password.addEventListener('input', function() {
-            const charWidth = 11.5; // Adjusted for the width of password dots
-            const initialOffset = 105; // Starting position after "password:"
+            const charWidth = 11.5;
+            const initialOffset = 105;
             const cursorPos = initialOffset + (this.value.length * charWidth);
             cursor.style.left = `${cursorPos}px`;
         });
@@ -268,7 +334,21 @@
                 if (this.value.toLowerCase() === 'turing') {
                     typewriterElement.style.display = 'none';
                     passwordContainer.style.display = 'none';
-                    clubDetails.style.display = 'block';
+                    
+                    // Show mission statement with typewriter effect
+                    typeWriterEffect(missionElement, missionText, () => {
+                        setTimeout(() => {
+                            clubDetails.style.display = 'block';
+                            // Calculate the scroll position to center the entire content
+                            const containerHeight = document.querySelector('.container').offsetHeight;
+                            const windowHeight = window.innerHeight;
+                            const scrollPosition = (containerHeight - windowHeight) / 2;
+                            window.scrollTo({
+                                top: scrollPosition,
+                                behavior: 'smooth'
+                            });
+                        }, 1000);
+                    });
                 } else {
                     this.value = '';
                     this.placeholder = 'ACCESS DENIED';
@@ -280,9 +360,8 @@
             }
         });
 
-        // Initialize
+        // Initialize matrix effect
         setInterval(drawMatrix, 50);
-        typeWriter();
     </script>
 </body>
 </html>
