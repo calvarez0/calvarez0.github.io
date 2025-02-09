@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F(AI)ght Club</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .typewriter {
+            display: inline-block;
+            position: relative;
+            font-size: 1.2em;
+            margin-bottom: 2em;
+            text-align: left;
+            max-width: 600px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .typewriter {
+                text-align: center;
+                width: 100%;
+            }
+            .container {
+                padding: 0 20px;
+            }
+        }
+
+        .typewriter::after {
+            content: '▋';
+            display: inline-block;
+            position: relative;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: baseline;
+        }
+
+        .password-container {
+            margin-top: 2em;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .password-box {
+            background: transparent;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            text-align: center;
+            width: 200px;
+            margin-top: 1em;
+        }
+
+        .club-details {
+            display: none;
+            text-align: left;
+            padding: 2em;
+            border: 2px solid #0f0;
+            margin-top: 2em;
+            animation: fadeIn 2s;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrix"></canvas>
+    <div class="container">
+        <div class="typewriter" id="typewriter"></div>
+        <div class="password-container" id="password-container">
+            <input type="password" class="password-box" id="password" placeholder="Enter Password">
+        </div>
+        <div class="club-details" id="club-details">
+            <h2>Welcome to F(AI)ght Club</h2>
+            <p>Here are the details of our next gathering:</p>
+            
+            <h3>Whisper Wednesday</h3>
+            <p>🗓️ Every Wednesday Night @ 8PM<br>
+            📍 Computer Science Building, Room 101</p>
+            
+            <h3>First Lecture Topic</h3>
+            <p>"The Alignment Problem: Understanding AI Safety"<br>
+            Guest Speaker: Dr. Sarah Chen<br>
+            Discussion to follow</p>
+            
+            <h3>Upcoming Events</h3>
+            <p>• AI Movie Night - "Ex Machina" Screening<br>
+            • Neural Network & Chill Social<br>
+            • Dinner & Debates: "The Future of AGI"</p>
+            
+            <p style="color: #ff0000;">REMEMBER: The first rule of F(AI)ght Club is you do not talk about F(AI)ght Club.</p>
+        </div>
+    </div>
+
+    <script>
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*()';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        // Typewriter effect
+        const text = "The question of whether a computer can think is no more interesting than the question of whether a submarine can swim. \n \n - Edsger W. Dijkstra\n\nDo you seek truth?";
+        let charIndex = 0;
+        const typewriterElement = document.getElementById('typewriter');
+        const passwordContainer = document.getElementById('password-container');
+
+        function typeWriter() {
+            if (charIndex < text.length) {
+                const currentText = text.substring(0, charIndex + 1);
+                const formattedText = currentText.replace(/\n/g, '<br>');
+                typewriterElement.innerHTML = formattedText;
+                charIndex++;
+                setTimeout(typeWriter, 50);
+            } else {
+                passwordContainer.style.opacity = '1';
+            }
+        }
+
+        // Password verification
+        const password = document.getElementById('password');
+        const clubDetails = document.getElementById('club-details');
+
+        password.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                if (this.value.toLowerCase() === 'turing') {
+                    typewriterElement.style.display = 'none';
+                    passwordContainer.style.display = 'none';
+                    clubDetails.style.display = 'block';
+                } else {
+                    this.value = '';
+                    this.placeholder = 'ACCESS DENIED';
+                    setTimeout(() => {
+                        this.placeholder = 'Enter Password';
+                    }, 2000);
+                }
+            }
+        });
+
+        // Initialize
+        setInterval(drawMatrix, 50);
+        typeWriter();
+    </script>
+</body>
+</html>
