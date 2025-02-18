@@ -221,6 +221,45 @@
         .axis line {
             stroke: #ccc;
         }
+        .stats-display {
+            background-color: var(--background);
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .dark .stats-display {
+            border-color: #444;
+        }
+
+        .axis-label {
+            font-size: 12px;
+            fill: var(--text-primary);
+        }
+
+        .dark .axis-label {
+            fill: #f5f5f7;
+        }
+
+        .regression-line path {
+            stroke-dasharray: 4,2;
+        }
+
+        .select-control {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: var(--background);
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .dark .select-control {
+            border-color: #444;
+        }
+
     </style>
 </head>
 <body>
@@ -283,6 +322,50 @@
                     <label for="kurtosis">Kurtosis (4th moment)</label>
                     <input type="range" id="kurtosis" min="-3" max="10" step="0.1" value="3">
                     <div class="value-display">Value: <span id="kurtosis-value">3</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Correlation (r and r²) Row -->
+        <div class="distribution-row">
+            <div class="distribution-card">
+                <h2>Correlation Visualization</h2>
+                <div id="correlation-plot" class="graph"></div>
+            </div>
+            <div class="controls">
+                <h3>Correlation Parameters</h3>
+                <div class="control-item">
+                    <label for="correlation-mode">Set by:</label>
+                    <select id="correlation-mode" class="select-control">
+                        <option value="r">r (coefficient)</option>
+                        <option value="r2">r² (determination)</option>
+                    </select>
+                </div>
+                <div class="control-item" id="r-control">
+                    <label for="correlation">Correlation coefficient (r)</label>
+                    <input type="range" id="correlation" min="-1" max="1" step="0.05" value="0.7">
+                    <div class="value-display">Value: <span id="correlation-value">0.7</span></div>
+                </div>
+                <div class="control-item" id="r2-control" style="display: none;">
+                    <label for="r-squared-input">Coefficient of determination (r²)</label>
+                    <input type="range" id="r-squared-input" min="0" max="1" step="0.01" value="0.49">
+                    <div class="value-display">Value: <span id="r-squared-input-value">0.49</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="numPoints">Number of Points</label>
+                    <input type="range" id="numPoints" min="20" max="200" step="10" value="100">
+                    <div class="value-display">Value: <span id="numPoints-value">100</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="randomSeed">Random Seed</label>
+                    <input type="range" id="randomSeed" min="1" max="100" step="1" value="42">
+                    <div class="value-display">Value: <span id="randomSeed-value">42</span></div>
+                </div>
+                <div class="control-item">
+                    <div class="stats-display">
+                        <p>r: <span id="actual-r">0.7</span></p>
+                        <p>r²: <span id="r-squared">0.49</span></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -771,9 +854,244 @@
                 updateEllipticalPlots();
             });
         });
+
+        // Correlation visualization functions
+        function generateCorrelatedPoints(r, numPoints, seed) {
+            // Set random seed
+            Math.seedrandom(seed);
+            
+            const points = [];
+            const stdDev = 1;
+            const mean = 0;
+            
+            for (let i = 0; i < numPoints; i++) {
+                // Generate independent standard normal variables using Box-Muller transform
+                const u1 = Math.random();
+                const u2 = Math.random();
+                
+                const z1 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+                const z2 = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2);
+                
+                // Apply correlation
+                const x = z1;
+                const y = r * z1 + Math.sqrt(1 - r * r) * z2;
+                
+                points.push([x, y]);
+            }
+            
+            return points;
+        }
+
+        function calculateActualCorrelation(points) {
+            const n = points.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+            
+            for (let i = 0; i < n; i++) {
+                const x = points[i][0];
+                const y = points[i][1];
+                
+                sumX += x;
+                sumY += y;
+                sumXY += x * y;
+                sumX2 += x * x;
+                sumY2 += y * y;
+            }
+            
+            const numerator = n * sumXY - sumX * sumY;
+            const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+            
+            return denominator === 0 ? 0 : numerator / denominator;
+        }
+
+        function setupCorrelationPlot() {
+            const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+            const width = document.getElementById('correlation-plot').clientWidth - margin.left - margin.right;
+            const height = document.getElementById('correlation-plot').clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select('#correlation-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Setup scales
+            const xScale = d3.scaleLinear()
+                .domain([-3, 3])
+                .range([0, width]);
+
+            const yScale = d3.scaleLinear()
+                .domain([-3, 3])
+                .range([height, 0]);
+
+            // Add axes
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height/2})`)
+                .call(d3.axisBottom(xScale));
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(${width/2},0)`)
+                .call(d3.axisLeft(yScale));
+
+            // Add axis labels
+            svg.append('text')
+                .attr('class', 'axis-label')
+                .attr('text-anchor', 'middle')
+                .attr('x', width / 2)
+                .attr('y', height + margin.bottom - 10)
+                .text('X Variable');
+
+            svg.append('text')
+                .attr('class', 'axis-label')
+                .attr('text-anchor', 'middle')
+                .attr('transform', `translate(${-margin.left + 15},${height/2}) rotate(-90)`)
+                .text('Y Variable');
+
+            // Add regression line group
+            svg.append('g')
+                .attr('class', 'regression-line');
+
+            return {
+                svg,
+                xScale,
+                yScale,
+                width,
+                height
+            };
+        }
+
+        function updateCorrelationPlot() {
+            const mode = document.getElementById('correlation-mode').value;
+            let correlation;
+            
+            if (mode === 'r') {
+                correlation = parseFloat(document.getElementById('correlation').value);
+            } else {
+                // Calculate r from r² input
+                const rSquaredInput = parseFloat(document.getElementById('r-squared-input').value);
+                correlation = Math.sqrt(rSquaredInput);
+                // Use the sign from the correlation input to determine direction
+                if (document.getElementById('correlation').value < 0) {
+                    correlation = -correlation;
+                }
+            }
+            
+            const numPoints = parseInt(document.getElementById('numPoints').value);
+            const randomSeed = parseInt(document.getElementById('randomSeed').value);
+            
+            // Generate correlated data points
+            const points = generateCorrelatedPoints(correlation, numPoints, randomSeed);
+            
+            // Calculate actual correlation
+            const actualR = calculateActualCorrelation(points);
+            const rSquared = actualR * actualR;
+            
+            // Update statistics display
+            document.getElementById('actual-r').textContent = actualR.toFixed(3);
+            document.getElementById('r-squared').textContent = rSquared.toFixed(3);
+            
+            // Update plot
+            correlationPlot.svg.selectAll('circle').remove();
+            
+            // Plot points
+            correlationPlot.svg.selectAll('circle')
+                .data(points)
+                .enter()
+                .append('circle')
+                .attr('cx', d => correlationPlot.xScale(d[0]))
+                .attr('cy', d => correlationPlot.yScale(d[1]))
+                .attr('r', 3)
+                .attr('fill', '#6366f1')
+                .attr('opacity', 0.7);
+            
+            // Calculate and draw regression line
+            const xValues = points.map(d => d[0]);
+            const yValues = points.map(d => d[1]);
+            
+            // Simple linear regression
+            const xMean = d3.mean(xValues);
+            const yMean = d3.mean(yValues);
+            const numerator = d3.sum(points.map((d, i) => (d[0] - xMean) * (d[1] - yMean)));
+            const denominator = d3.sum(xValues.map(x => Math.pow(x - xMean, 2)));
+            
+            const slope = denominator === 0 ? 0 : numerator / denominator;
+            const intercept = yMean - slope * xMean;
+            
+            // Domain boundaries
+            const xMin = correlationPlot.xScale.domain()[0];
+            const xMax = correlationPlot.xScale.domain()[1];
+            
+            // Regression line points
+            const lineData = [
+                [xMin, slope * xMin + intercept],
+                [xMax, slope * xMax + intercept]
+            ];
+            
+            const line = d3.line()
+                .x(d => correlationPlot.xScale(d[0]))
+                .y(d => correlationPlot.yScale(d[1]));
+            
+            // Draw regression line
+            correlationPlot.svg.select('.regression-line').selectAll('*').remove();
+            correlationPlot.svg.select('.regression-line')
+                .append('path')
+                .datum(lineData)
+                .attr('d', line)
+                .attr('stroke', '#6366f1')  // Changed to blue
+                .attr('stroke-width', 2)
+                .attr('fill', 'none');
+        }
+
+        // Add to the beginning of your script (after existing utility functions)
+        // Add seedrandom library 
+        function seedRandom(seed) {
+            // A simple seeded random function
+            let state = seed;
+            return function() {
+                state = (state * 9301 + 49297) % 233280;
+                return state / 233280;
+            };
+        }
+
+        // Make seedrandom available
+        Math.seedrandom = function(seed) {
+            const generator = seedRandom(seed);
+            Math.random = generator;
+            return generator;
+        };
+
+        // Initialize correlation plot
+        const correlationPlot = setupCorrelationPlot();
+
+        // Setup event handler for mode selector
+        document.getElementById('correlation-mode').addEventListener('change', function() {
+            if (this.value === 'r') {
+                document.getElementById('r-control').style.display = 'block';
+                document.getElementById('r2-control').style.display = 'none';
+            } else {
+                document.getElementById('r-control').style.display = 'none';
+                document.getElementById('r2-control').style.display = 'block';
+            }
+            updateCorrelationPlot();
+        });
+
+        // Add event listeners for correlation controls
+        ['correlation', 'numPoints', 'randomSeed', 'r-squared-input'].forEach(id => {
+            const input = document.getElementById(id);
+            const display = document.getElementById(`${id}-value`);
+            
+            input.addEventListener('input', (e) => {
+                display.textContent = e.target.value;
+                updateCorrelationPlot();
+            });
+        });
         
+                
         // Initial update
         updateEllipticalPlots();
+        updateCorrelationPlot();
         updateGaussianPlot();
         updateBernoulliPlot();
         updatePoissonPlot();
