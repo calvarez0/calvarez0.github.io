@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boid Simulation</title>
+    <title>BOID + Perception Delay Simulation</title>
     <link rel="icon" type="image/x-icon" href="assets/icon.png">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -201,7 +201,7 @@
     <main class="pt-24">
         <section class="py-4 px-6">
             <div class="max-w-6xl mx-auto">
-                <h1 class="section-title">Boid Simulation</h1>
+                <h1 class="section-title">BOID + Perception Delay Simulation</h1>
                 <div class="controls mb-4">
                     <label for="num-boids">Number of Boids: <span id="num-boids-value">100</span></label>
                     <input type="range" id="num-boids" min="1" max="200" value="100" class="w-full">
@@ -497,8 +497,6 @@
                 }
                 this.ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-primary');
                 this.ctx.font = '24px Inter';
-                this.ctx.fillText(`Perception Delay: ${this.perception_delay} frames`, 10, 30);
-                this.ctx.fillText(`Number of Boids: ${this.num_boids}`, 10, 60);
             }
             
             pause() {
