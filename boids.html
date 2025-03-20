@@ -15,6 +15,7 @@
             --text-secondary: #86868b;
             --background: #ffffff;
             --accent: #0071e3;
+            --control-bg: #f3f4f6;
         }
  
         .dark {
@@ -22,6 +23,7 @@
             --text-secondary: #86868b;
             --background: #000000;
             --accent: #0071e3;
+            --control-bg: #1f2937;
         }
 
         body {
@@ -29,6 +31,13 @@
             background-color: var(--background);
             color: var(--text-primary);
             transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .control-panel {
+            background-color: var(--control-bg);
+            transition: background-color 0.3s ease;
+            border-radius: 0.5rem;
+            padding: 1rem;
         }
 
         .section-title {
@@ -211,7 +220,7 @@
                     
                     <!-- Controls on the right -->
                     <div class="md:w-1/4 controls mt-4 md:mt-0 flex flex-col justify-start">
-                        <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+                        <div class="control-panel">
                             <h3 class="text-xl font-semibold mb-4">Controls</h3>
                             
                             <div class="mb-6">
