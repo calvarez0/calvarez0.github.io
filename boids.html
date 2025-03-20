@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boid Simulation</title>
+    <link rel="icon" type="image/x-icon" href="assets/icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --background: #ffffff;
+            --accent: #0071e3;
+        }
+ 
+        .dark {
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --background: #000000;
+            --accent: #0071e3;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .section-title {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+            line-height: 1.1;
+        }
+
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 36px;
+            }
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--accent);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .theme-switch {
+            width: 50px;
+            height: 26px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--text-secondary);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--background);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Mobile menu styles */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background);
+            z-index: 40;
+            padding-top: 5rem;
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-menu-button {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .desktop-menu {
+                display: none;
+            }
+
+            .mobile-menu .nav-link {
+                display: block;
+                padding: 1rem;
+                text-align: center;
+                font-size: 1.25rem;
+            }
+        }
+
+        #boid-canvas {
+            background-color: var(--background);
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .overflow-x-auto {
+            overflow-x: auto;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="fixed w-full backdrop-blur-md bg-opacity-70 z-50 border-b border-gray-800">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="/index.html" class="text-2xl font-semibold">AA</a>
+                <div class="desktop-menu hidden md:flex space-x-8">
+                    <a href="/index.html" class="nav-link">Home</a>
+                    <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
+                    <a href="demographic_iq.html" class="nav-link">Demographic IQ</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <button class="mobile-menu-button md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="space-y-4">
+            <a href="/index.html" class="nav-link">Home</a>
+            <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
+            <a href="demographic_iq.html" class="nav-link">Demographic IQ</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="pt-24">
+        <section class="py-4 px-6">
+            <div class="max-w-6xl mx-auto">
+                <h1 class="section-title">Boid Simulation</h1>
+                <div class="controls mb-4">
+                    <label for="num-boids">Number of Boids: <span id="num-boids-value">100</span></label>
+                    <input type="range" id="num-boids" min="1" max="200" value="100" class="w-full">
+                    <label for="perception-delay" class="mt-2 block">Perception Delay: <span id="perception-delay-value">5</span></label>
+                    <input type="range" id="perception-delay" min="0" max="100" value="5" class="w-full">
+                </div>
+                <div class="overflow-x-auto flex justify-center">
+                    <canvas id="boid-canvas" width="1600" height="1000"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-4 px-6 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto text-center text-secondary">
+            <p>&copy; 2025 Alex Alvarez. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        let isMenuOpen = false;
+
+        mobileMenuButton.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            mobileMenu.classList.toggle('active');
+            mobileMenuButton.innerHTML = isMenuOpen ? 
+                '<i class="fas fa-times"></i>' : 
+                '<i class="fas fa-bars"></i>';
+        });
+
+        document.querySelectorAll('.mobile-menu .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                isMenuOpen = false;
+                mobileMenuButton.innerHTML = '<i class="fas fa-bars"></i>';
+            });
+        });
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.classList.toggle('dark', savedTheme === 'dark');
+        themeToggle.checked = savedTheme === 'light';
+
+        themeToggle.addEventListener('change', () => {
+            body.classList.toggle('dark');
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // Boid Class
+        class Boid {
+            constructor(x, y, dx, dy, maxlen = 150) {  // Increased history length to accommodate higher delay values
+                this.x = x;
+                this.y = y;
+                this.dx = dx;
+                this.dy = dy;
+                this.position_history = [];
+                this.velocity_history = [];
+                this.maxlen = maxlen;
+                // Initialize history with more positions to handle high delay values
+                for (let i = 0; i < maxlen; i++) {
+                    this.position_history.push([x, y]);
+                    this.velocity_history.push([dx, dy]);
+                }
+            }
+
+            updateHistory() {
+                this.position_history.push([this.x, this.y]);
+                this.velocity_history.push([this.dx, this.dy]);
+                if (this.position_history.length > this.maxlen) {
+                    this.position_history.shift();
+                    this.velocity_history.shift();
+                }
+            }
+
+            getDelayedPosition(delay) {
+                // Safely get the position history with bounds checking
+                const index = Math.min(this.position_history.length - 1, Math.max(0, this.position_history.length - delay - 1));
+                return this.position_history[index];
+            }
+
+            getDelayedVelocity(delay) {
+                // Safely get the velocity history with bounds checking
+                const index = Math.min(this.velocity_history.length - 1, Math.max(0, this.velocity_history.length - delay - 1));
+                return this.velocity_history[index];
+            }
+        }
+
+        // Boid Simulation Class
+        class BoidSimulation {
+            constructor(canvas, num_boids = 100, perception_delay = 5) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.width = canvas.width;
+                this.height = canvas.height;
+                this.num_boids = num_boids;
+                this.perception_delay = perception_delay;
+                this.visual_range = 75;
+                this.visual_range_sq = this.visual_range * this.visual_range;
+                this.cell_size = this.visual_range;
+                this.boids = [];
+                this.is_running = true;
+                this.initBoids();
+            }
+
+            initBoids() {
+                this.boids = [];
+                for (let i = 0; i < this.num_boids; i++) {
+                    const x = Math.random() * this.width;
+                    const y = Math.random() * this.height;
+                    const dx = Math.random() * 10 - 5;
+                    const dy = Math.random() * 10 - 5;
+                    this.boids.push(new Boid(x, y, dx, dy));
+                }
+            }
+
+            buildGrid() {
+                const grid = {};
+                for (const boid of this.boids) {
+                    const cellX = Math.floor(boid.x / this.cell_size);
+                    const cellY = Math.floor(boid.y / this.cell_size);
+                    const key = `${cellX},${cellY}`;
+                    if (!grid[key]) grid[key] = [];
+                    grid[key].push(boid);
+                }
+                return grid;
+            }
+
+            getNeighbors(boid, grid) {
+                const neighbors = [];
+                const cellX = Math.floor(boid.x / this.cell_size);
+                const cellY = Math.floor(boid.y / this.cell_size);
+                for (let i = cellX - 1; i <= cellX + 1; i++) {
+                    for (let j = cellY - 1; j <= cellY + 1; j++) {
+                        const key = `${i},${j}`;
+                        if (grid[key]) {
+                            for (const other of grid[key]) {
+                                if (other !== boid) {
+                                    const [delayed_x, delayed_y] = other.getDelayedPosition(this.perception_delay);
+                                    const dx = boid.x - delayed_x;
+                                    const dy = boid.y - delayed_y;
+                                    if (dx * dx + dy * dy < this.visual_range_sq) {
+                                        neighbors.push({
+                                            boid: other,
+                                            delayed_x,
+                                            delayed_y,
+                                            delayed_velocity: other.getDelayedVelocity(this.perception_delay)
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return neighbors;
+            }
+
+            flyTowardsCenter(boid, neighbors) {
+                let centerX = 0, centerY = 0, num = 0;
+                const factor = 0.005;
+                for (const n of neighbors) {
+                    centerX += n.delayed_x;
+                    centerY += n.delayed_y;
+                    num++;
+                }
+                if (num > 0) {
+                    centerX /= num;
+                    centerY /= num;
+                    boid.dx += (centerX - boid.x) * factor;
+                    boid.dy += (centerY - boid.y) * factor;
+                }
+            }
+
+            avoidOthers(boid, neighbors) {
+                const minDist = 20, minDistSq = minDist * minDist, factor = 0.05;
+                let moveX = 0, moveY = 0;
+                for (const n of neighbors) {
+                    const dx = boid.x - n.delayed_x;
+                    const dy = boid.y - n.delayed_y;
+                    if (dx * dx + dy * dy < minDistSq) {
+                        moveX += dx;
+                        moveY += dy;
+                    }
+                }
+                boid.dx += moveX * factor;
+                boid.dy += moveY * factor;
+            }
+
+            matchVelocity(boid, neighbors) {
+                let avgDX = 0, avgDY = 0, num = 0;
+                const factor = 0.05;
+                for (const n of neighbors) {
+                    const [dx, dy] = n.delayed_velocity;
+                    avgDX += dx;
+                    avgDY += dy;
+                    num++;
+                }
+                if (num > 0) {
+                    avgDX /= num;
+                    avgDY /= num;
+                    boid.dx += (avgDX - boid.dx) * factor;
+                    boid.dy += (avgDY - boid.dy) * factor;
+                }
+            }
+
+            keepWithinBounds(boid) {
+                const margin = 200, turn = 1.5;  // Increased turn force
+                
+                // Check if boid is completely out of bounds and reset if needed
+                if (boid.x < -this.width || boid.x > this.width * 2 || 
+                    boid.y < -this.height || boid.y > this.height * 2) {
+                    // Reset to a random position within bounds
+                    boid.x = Math.random() * (this.width - 2 * margin) + margin;
+                    boid.y = Math.random() * (this.height - 2 * margin) + margin;
+                    boid.dx = Math.random() * 10 - 5;
+                    boid.dy = Math.random() * 10 - 5;
+                    
+                    // Reset history with new position
+                    for (let i = 0; i < boid.position_history.length; i++) {
+                        boid.position_history[i] = [boid.x, boid.y];
+                        boid.velocity_history[i] = [boid.dx, boid.dy];
+                    }
+                    return;
+                }
+                
+                // Normal boundary behavior
+                if (boid.x < margin) boid.dx += turn;
+                if (boid.x > this.width - margin) boid.dx -= turn;
+                if (boid.y < margin) boid.dy += turn;
+                if (boid.y > this.height - margin) boid.dy -= turn;
+            }
+
+            limitSpeed(boid) {
+                const limit = 10;
+                const speed = Math.sqrt(boid.dx * boid.dx + boid.dy * boid.dy);
+                if (speed > limit) {
+                    boid.dx = (boid.dx / speed) * limit;
+                    boid.dy = (boid.dy / speed) * limit;
+                }
+            }
+
+            update() {
+                if (!this.is_running) return;
+                
+                const grid = this.buildGrid();
+                for (const boid of this.boids) {
+                    const neighbors = this.getNeighbors(boid, grid);
+                    this.flyTowardsCenter(boid, neighbors);
+                    this.avoidOthers(boid, neighbors);
+                    this.matchVelocity(boid, neighbors);
+                    this.keepWithinBounds(boid);
+                    this.limitSpeed(boid);
+                    boid.x += boid.dx;
+                    boid.y += boid.dy;
+                    boid.updateHistory();
+                }
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                for (const boid of this.boids) {
+                    const angle = Math.atan2(boid.dy, boid.dx);
+                    const size = 4;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(
+                        boid.x + Math.cos(angle) * size * 2,
+                        boid.y + Math.sin(angle) * size * 2
+                    );
+                    this.ctx.lineTo(
+                        boid.x + Math.cos(angle + 2.4) * size,
+                        boid.y + Math.sin(angle + 2.4) * size
+                    );
+                    this.ctx.lineTo(
+                        boid.x + Math.cos(angle - 2.4) * size,
+                        boid.y + Math.sin(angle - 2.4) * size
+                    );
+                    this.ctx.closePath();
+                    this.ctx.fillStyle = 'rgb(85, 140, 244)';
+                    this.ctx.fill();
+
+                    // Get position with safe bounds checking
+                    const [dx, dy] = boid.getDelayedPosition(this.perception_delay);
+                    this.ctx.beginPath();
+                    this.ctx.arc(dx, dy, 2, 0, 2 * Math.PI);
+                    this.ctx.fillStyle = 'rgb(255, 100, 100)';
+                    this.ctx.fill();
+                }
+                this.ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-primary');
+                this.ctx.font = '24px Inter';
+                this.ctx.fillText(`Perception Delay: ${this.perception_delay} frames`, 10, 30);
+                this.ctx.fillText(`Number of Boids: ${this.num_boids}`, 10, 60);
+            }
+            
+            pause() {
+                this.is_running = false;
+            }
+            
+            resume() {
+                this.is_running = true;
+            }
+            
+            reset() {
+                this.initBoids();
+            }
+        }
+
+        // Initialize Simulation
+        const canvas = document.getElementById('boid-canvas');
+        const numBoidsSlider = document.getElementById('num-boids');
+        const numBoidsValue = document.getElementById('num-boids-value');
+        const delaySlider = document.getElementById('perception-delay');
+        const delayValue = document.getElementById('perception-delay-value');
+
+        // Track whether sliders are being dragged
+        let isNumBoidsSliderDragging = false;
+        let isDelaySliderDragging = false;
+        let sliderTimeout = null;
+
+        let simulation = new BoidSimulation(canvas, parseInt(numBoidsSlider.value), parseInt(delaySlider.value));
+
+        function animate() {
+            simulation.update();
+            simulation.draw();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Function to reset simulation after slider interaction finishes
+        function resetAfterDelay() {
+            if (sliderTimeout) {
+                clearTimeout(sliderTimeout);
+            }
+            
+            sliderTimeout = setTimeout(() => {
+                if (!isNumBoidsSliderDragging && !isDelaySliderDragging) {
+                    simulation.reset();
+                    simulation.resume();
+                }
+            }, 500); // Wait 500ms after slider stops moving
+        }
+
+        // Slider Event Listeners with improved dragging detection
+        numBoidsSlider.addEventListener('mousedown', () => {
+            isNumBoidsSliderDragging = true;
+            simulation.pause(); // Pause while dragging
+        });
+        
+        numBoidsSlider.addEventListener('mouseup', () => {
+            isNumBoidsSliderDragging = false;
+            simulation.num_boids = parseInt(numBoidsSlider.value);
+            resetAfterDelay();
+        });
+        
+        numBoidsSlider.addEventListener('input', () => {
+            numBoidsValue.textContent = numBoidsSlider.value;
+        });
+        
+        delaySlider.addEventListener('mousedown', () => {
+            isDelaySliderDragging = true;
+            simulation.pause(); // Pause while dragging
+        });
+        
+        delaySlider.addEventListener('mouseup', () => {
+            isDelaySliderDragging = false;
+            simulation.perception_delay = parseInt(delaySlider.value);
+            resetAfterDelay();
+        });
+        
+        delaySlider.addEventListener('input', () => {
+            delayValue.textContent = delaySlider.value;
+        });
+        
+        // Handle case when user leaves the page with mouse button still down
+        document.addEventListener('mouseup', () => {
+            if (isNumBoidsSliderDragging) {
+                isNumBoidsSliderDragging = false;
+                simulation.num_boids = parseInt(numBoidsSlider.value);
+                resetAfterDelay();
+            }
+            
+            if (isDelaySliderDragging) {
+                isDelaySliderDragging = false;
+                simulation.perception_delay = parseInt(delaySlider.value);
+                resetAfterDelay();
+            }
+        });
+    </script>
+</body>
+</html>
