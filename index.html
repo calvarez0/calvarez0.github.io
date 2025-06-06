@@ -32,7 +32,7 @@
         }
 
         .section-title {
-            font-size: 48px;
+            font-size: 24px;
             font-weight: 700;
             letter-spacing: -0.015em;
             line-height: 1.1;
@@ -40,7 +40,7 @@
 
         @media (max-width: 768px) {
             .section-title {
-                font-size: 36px;
+                font-size: 24px;
             }
         }
 
@@ -260,6 +260,25 @@
                 display: block;
             }
         }
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+            padding-bottom: 2rem; /* Add some space before footer */
+        }
+
+        footer {
+            margin-top: auto;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
@@ -299,24 +318,25 @@
         <section class="py-4 px-6">
             <div class="max-w-6xl mx-auto">
                 <div class="space-y-6">
-                    <h1 class="section-title">Alex Alvarez</h1>
-                    <img src="assets/profile.png" alt="Alex Alvarez" class="profile-img float-left w-48 mr-4 mb-2 rounded-lg shadow-lg">
-                    <p class="text-xl text-secondary">Undergrad @ Texas A&M University
-                        <br>Researcher @ <a href="https://yschoe.github.io/" target="_blank" class="link">Brain Networks Lab</a> & <a href="https://sites.google.com/tamu.edu/yamauchi-cognitive-science-lab/research?authuser=0" target="_blank" class="link">Cognitive Science Lab</a>
+                    <!-- <h1 class="section-title">Alex Alvarez</h1> -->
+                    <img src="assets/profile3.jpg" alt="Alex Alvarez" class="profile-img float-left w-56 mr-4 mb-2 rounded-lg shadow-lg">
+                    <!-- <p class="text-xl text-secondary">Undergrad @ Texas A&M University
+                        <br> -->
 
                     
-                    </p>
+                    <!-- </p> -->
                     <div class="mt-4 space-y-3 text-secondary">
-                        <p class="text-lg">I study computer science, psychology, and mathematics at Texas A&M University. 
+                        <h2 class="section-title"> Alex Alvarez </h2>
+                        <p class="text-lg">I'm an undergrad researcher at the <a href="https://yschoe.github.io/" target="_blank" class="link">Brain Networks Lab</a> & <a href="https://sites.google.com/tamu.edu/yamauchi-cognitive-science-lab/research?authuser=0" target="_blank" class="link">Cognitive Science Lab</a> at Texas A&M University. 
                             In the past I built and sold some companies but at the moment I'm focusing on AI research. 
                             I'm especially interested in foundational principles of intelligence and learning emergent in AI and neuroscience.
                         </p>
                         <p class="text-lg">
                             I came to America when I was eight years old as a <a href="https://en.wikipedia.org/wiki/Wet_feet,_dry_feet_policy" target="_blank" class="link">political refugee from Cuba</a>. 
                             I'd like to one day provide Cuban students with the same education and resources that I had access to in America.
+                            I'm always looking to chat with people who think differently  <b>caalvarez [at] mgh [dot] harvard [dot] edu</b>
                         </p>
-                        <br>
-                        <p class="text-lg">I'm always looking to chat with people who think differently  <b>caalvarez [at] mgh [dot] harvard [dot] edu</b></p>
+                        <!-- <p class="text-lg">I'm always looking to chat with people who think differently  <b>caalvarez [at] mgh [dot] harvard [dot] edu</b></p> -->
                     </div>
                     <p class="text-lg"><b>News</b></p>
                         <a href="https://medium.com/@0xalexrez/your-mind-is-a-storm-856e57553070" target="_blank" class="news-link">Essay on Fernando Pessoa and consciousness.</a> <br>
@@ -411,8 +431,16 @@
                 </p>
             </div>
         </section>
+
+        
     </main>
 
+    
+<footer class="py-4 px-6 border-t border-gray-800">
+            <div class="max-w-6xl mx-auto text-center text-secondary">
+                <p>I never saved anything for the swim back.</p>
+            </div>
+        </footer>
     <script>
         // Mobile Menu Toggle
         const mobileMenuButton = document.querySelector('.mobile-menu-button');
