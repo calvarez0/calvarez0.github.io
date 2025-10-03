@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeatBreeder - Evolve Percussion Sounds</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 900px;
+        }
+
+        .sidebar {
+            width: 400px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .settings-panel {
+            position: fixed;
+            right: -380px;
+            top: 0;
+            width: 380px;
+            height: 100vh;
+            background: #2a2a2a;
+            padding: 20px;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .settings-panel.open {
+            right: 0;
+        }
+
+        .settings-toggle {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #4CAF50;
+            color: white;
+            padding: 15px 10px;
+            border: none;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            z-index: 999;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .settings-toggle:hover {
+            background: #45a049;
+            padding-left: 15px;
+        }
+
+        .settings-panel h3 {
+            margin-top: 0;
+            color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        .setting-group {
+            margin-bottom: 25px;
+        }
+
+        .setting-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .setting-group input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .setting-group input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .range-value {
+            display: inline-block;
+            float: right;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .activation-checkboxes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .activation-checkboxes label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .activation-checkboxes input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            flex: 1;
+            padding: 8px;
+            background: #333;
+            border: 1px solid #555;
+            color: #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: #444;
+            border-color: #4CAF50;
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+            color: #4CAF50;
+            font-size: 18px;
+        }
+
+        #network-viz {
+            width: 100%;
+            height: 400px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .network-info {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .network-info div {
+            margin: 5px 0;
+        }
+
+        .node-legend, .connection-legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .evolve-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .evolve-btn:hover {
+            background: #45a049;
+        }
+
+        .reset-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .reset-btn:hover {
+            background: #da190b;
+        }
+
+        .save-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: #0b7dda;
+        }
+
+        .info {
+            text-align: center;
+            color: #888;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .sound-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sound-item {
+            background: #2a2a2a;
+            border: 3px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .sound-item:hover {
+            border-color: #555;
+            transform: translateY(-2px);
+        }
+
+        .sound-item.selected {
+            border-color: #4CAF50;
+            background: #2a3a2a;
+        }
+
+        .sound-item.playing {
+            border-color: #2196F3;
+            background: #2a2a3a;
+        }
+
+        canvas {
+            width: 100%;
+            height: 80px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .sound-info {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+        }
+
+        .generation-info {
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stat-item {
+            background: #1a1a1a;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 12px;
+        }
+
+        .stat-value {
+            color: #4CAF50;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <h1>🥁 BeatBreeder</h1>
+        <div class="subtitle">Evolve Percussion Sounds with CPPN-NEAT</div>
+
+        <div class="generation-info">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-label">Generation</div>
+                    <div class="stat-value" id="generation">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Selected</div>
+                    <div class="stat-value" id="selected-count">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Avg Complexity</div>
+                    <div class="stat-value" id="avg-complexity">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="button-group">
+                <button class="evolve-btn" onclick="evolve()">Evolve Selected</button>
+                <button class="reset-btn" onclick="reset()">New Population</button>
+                <button class="save-btn" onclick="saveSelected()">Save Selected</button>
+            </div>
+            <div class="info">
+                Click on any sound to play it and select it for evolution.
+            </div>
+        </div>
+
+        <div class="sound-grid" id="sound-grid"></div>
+    </div>
+
+    <div class="sidebar">
+        <h2>🧠 Network Topology</h2>
+        <canvas id="network-viz"></canvas>
+
+        <div class="node-legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #2196F3;"></div>
+                <span>Input</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4CAF50;"></div>
+                <span>Output</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FF9800;"></div>
+                <span>Hidden</span>
+            </div>
+        </div>
+
+        <div class="network-info" id="network-info">
+            <div><strong>Click a sound to view its network</strong></div>
+        </div>
+    </div>
+
+    <script src="beatbreeder.js"></script>
+</body>
+</html>
