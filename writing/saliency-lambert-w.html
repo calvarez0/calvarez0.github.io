@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saliency Thresholds in Neural Code - Alex Alvarez</title>
+    <link rel="icon" type="image/x-icon" href="../assets/icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Pro:wght@400;600;700&display=swap');
+
+        :root {
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --background: #ffffff;
+            --accent: #0071e3;
+            --code-bg: #f5f5f7;
+        }
+
+        .dark {
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1a6;
+            --background: #000000;
+            --accent: #0071e3;
+            --code-bg: #1d1d1f;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            line-height: 1.6;
+        }
+
+        .article-content {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.125rem;
+            line-height: 1.8;
+            max-width: 42rem;
+            margin: 0 auto;
+        }
+
+        .article-content h1 {
+            font-family: 'Inter', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .article-content h2 {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            letter-spacing: -0.015em;
+        }
+
+        .article-content h3 {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .article-content p {
+            margin-bottom: 1.5rem;
+            text-align: justify;
+        }
+
+        .article-content .abstract {
+            background-color: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            font-size: 1rem;
+        }
+
+        .article-content .equation {
+            overflow-x: auto;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        .article-content a {
+            color: var(--accent);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s ease;
+        }
+
+        .article-content a:hover {
+            border-bottom-color: var(--accent);
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--accent);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .theme-switch {
+            width: 50px;
+            height: 26px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--text-secondary);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--background);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .figure {
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .figure img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .figure-caption {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .references {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .references li {
+            margin-bottom: 0.75rem;
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background);
+            z-index: 40;
+            padding-top: 5rem;
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-menu-button {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .article-content h1 {
+                font-size: 2rem;
+            }
+
+            .article-content h2 {
+                font-size: 1.5rem;
+            }
+
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .desktop-menu {
+                display: none;
+            }
+
+            .mobile-menu .nav-link {
+                display: block;
+                padding: 1rem;
+                text-align: center;
+                font-size: 1.25rem;
+            }
+        }
+
+        .keywords {
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        .author-info {
+            text-align: center;
+            color: var(--text-secondary);
+            margin: 1rem 0 2rem 0;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="fixed w-full backdrop-blur-md bg-opacity-70 z-50 border-b border-gray-800">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="/index.html" class="text-2xl font-semibold">AA</a>
+                <div class="desktop-menu hidden md:flex space-x-8">
+                    <a href="/index.html" class="nav-link">Home</a>
+                    <a href="https://alexrez.substack.com/" class="nav-link">Writing</a>
+                    <a href="/demographic_iq.html" class="nav-link">Demographic IQ</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <button class="mobile-menu-button md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="mobile-menu">
+        <div class="space-y-4">
+            <a href="/index.html" class="nav-link">Home</a>
+            <a href="https://alexrez.substack.com/" class="nav-link">Writing</a>
+            <a href="/demographic_iq.html" class="nav-link">Demographic IQ</a>
+        </div>
+    </div>
+
+    <main class="pt-24 pb-16 px-6">
+        <article class="article-content">
+            <h1>Saliency Thresholds in Neural Code and its Relation to the Power-Law, Gaussian, and Lambert W Function</h1>
+
+            <div class="author-info">
+                Alex Alvarez, Jin Hyun Park, Yoonsuck Choe<br>
+                <em>Symmetry and Geometry in Neural Representations</em><br>
+                Extended Abstract Track, 2025
+            </div>
+
+            <div class="abstract">
+                <strong>Abstract:</strong> The cortical neurons' response properties are peculiar in that despite the variability in the stimulus distribution the response has a stereotypic heavy-tail distribution. For example, the orientation energy model of visual cortical response results in an invariant power-law-like response distribution, regardless of the stimulus image. An interesting observation is that when this response distribution is compared with a normal (Gaussian) distribution with a matched standard deviation, the intersection where the power law distribution exceeds the matched Gaussian distribution is linearly correlated with the saliency threshold. (The same orientation energy model, when fed with a white noise image, results in a normal-distribution-like response, justifying its use as a baseline.) Further analysis reveals that this intersection point can be analytically computed using the Lambert W function, and it is also linearly correlated with the standard deviation of the response. These results point to an interesting theoretical juncture where the power law, Gaussian, and Lambert W function meets, and relates to an important threshold in neural code.
+            </div>
+
+            <p class="keywords"><strong>Keywords:</strong> Power law, Gaussian, Lambert W function, Saliency, Neural code</p>
+
+            <h2>1. Introduction</h2>
+
+            <p>
+                The cortical neurons' response distribution is quite different from that of the natural stimulus, exhibiting a stereotypical shape. For example, the neural response distribution of primary visual cortex (V1) models similar to <a href="#geisler2001">Geisler et al. (2001)</a> that use Gabor filtering gives a power-law-like response distribution regardless of the stimulus, while the intensity distribution of the stimuli themselves vary widely. Recordings in visual cortical neurons in the macaque exhibit sparse activity, with high kurtosis <a href="#vinje2000">(Vinje and Gallant, 2000)</a>. These response distributions have a characteristic "heavy tail" compared to a normal (Gaussian) distribution: either lognormal, or α-stable family of distributions that include the power law <a href="#lehky2011">(Lehky et al., 2011)</a>.
+            </p>
+
+            <p>
+                Is there a functional significance to the response level at which the response distribution becomes heavy tail, i.e., the intersection point of the response distribution and the baseline Gaussian distribution? To answer this question, we will explore various computational results and theoretical open questions relating to this, most notably the relationship between power law, Gaussian, Lambert W function, and saliency thresholds in neural code.
+            </p>
+
+            <h2>2. Background and Related Works</h2>
+
+            <p>
+                <a href="#lee2003">Lee and Choe (2003)</a> made the first discovery of the power-law-like heavy-tail response property and its functional significance in visual cortical response models based on <a href="#geisler2001">Geisler et al. (2001)</a>. The model was a simple series of convolutions, first with a difference-of-Gaussian to simulate the lateral geniculate nucleus, followed by orientated Gabor filters to mimic primary visual cortical response, giving \(E\), the orientation energy.
+            </p>
+
+            <p>
+                There were three main findings in this paper: (1) the response has a power-law-like distribution, (2) when compared to a Gaussian distribution with equal standard-deviation, the larger intersection point ('\(L_2\)') is linearly correlated with the saliency threshold of the response when compared to the human selected threshold, and (3) the \(L_2\) intersection point is linearly correlated with the standard deviation of the response. In fact, it was determined that the threshold can be approximated \(\theta = 1.37\sigma - 2176.69\), simply using the standard deviation of the response \(\sigma\).
+            </p>
+
+            <p>
+                The Gaussian sounds like a good first approximation as a baseline, but why does it make sense as a baseline? <a href="#sarma2006">Sarma and Choe (2006)</a> showed that when the same visual cortical response model is presented with white-noise images, the response distribution mimics the Gaussian. This provides empirical justification, since white-noise images do not have any salient edges.
+            </p>
+
+            <h2>3. Further Observations with Recurrent CNN</h2>
+
+            <p>
+                Such power-law response we have seen above is not limited to the orientation energy model. Experiments with a biologically motivated cortical map model known as GCAL (gain control, adaptation, and lateral: <a href="#stevens2013">Stevens et al., 2013</a>) also resulted in power-law-like response in the model trained with natural images <a href="#park2009">(Park et al., 2009)</a>.
+            </p>
+
+            <p>
+                An interesting question is whether modern deep learning vision models like the Convolutional Neural Networks <a href="#lecun1989">(LeCun et al., 1989;</a> <a href="#krizhevsky2012">Krizhevsky et al., 2012)</a> exhibit similar power-law-like response, since it is well-known that the convolution kernels in the CNN trained with natural images resemble those in V1 <a href="#zeiler2014">(Zeiler and Fergus, 2014)</a>.
+            </p>
+
+            <p>
+                The initial answer is "No", since our first attempt resulted in a Gaussian-like response distribution. However, incorporating the lateral connections (or horizontal connections) in the visual cortex as in the GCAL model <a href="#stevens2013">(Stevens et al., 2013)</a>, we were able to elicit a power-law response distribution using the CNN. An existing model called Recurrent CNN <a href="#liang2015">(RCNN: Liang and Hu, 2015)</a> can be reinterpreted as implementing lateral connections. Using this, we conducted three experiments with results showing that when the network is untrained, or when white-noise images are presented to a trained RCNN, regardless of the number of loops, the response is Gaussian. When natural images are presented to a trained RCNN, initially the response is close to Gaussian, but as the loop increases it approaches the power law.
+            </p>
+
+            <h2>4. Relation to Lambert W Function and Invariance in Neural Thresholding</h2>
+
+            <p>
+                In an attempt to compute \(L_2\) analytically, another ubiquitous mathematical function emerged, the Lambert W. The Lambert W function is a function \(W(z)\) satisfying \(W(z)e^{W(z)} = z\). Note that this is similar to \(e^{\ln(x)} = x\), and it can be thought of as an extended Log function: \(y = e^x\) and \(y = xe^x\) vs. \(\ln(x)\) and \(W(x)\), respectively. With this, we can attempt to solve:
+            </p>
+
+            <div class="equation">
+                $$c\frac{1}{x^a} = \frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{x^2}{2\sigma^2}}$$
+            </div>
+
+            <p>
+                which then gives:
+            </p>
+
+            <div class="equation">
+                $$x = \pm\sqrt{-a\sigma^2 W\left(-\frac{(c\sigma\sqrt{2\pi})^{2/a}}{a\sigma^2}\right)}$$
+            </div>
+
+            <p>
+                where \(c\) is a normalization factor, \(a\) is the power law exponent, \(\sigma\) = standard deviation (0 mean, and in case responses are non-negative, let it be a half normal distribution).
+            </p>
+
+            <p>
+                Just like the power law and Gaussian, the Lambert W function seems ubiquitous in science and engineering <a href="#katsimpiri2016">(Katsimpiri et al., 2016)</a> with multiple applications in pure and applied mathematics, including solving transcendental equations where the unknown appears both in an exponential (such as the exponentially decaying tails of the Gaussian) and algebraically (such as the polynomially decaying tails of the power law) <a href="#corless1996">(Corless et al., 1996)</a>. In nature, the Lambert W emerges naturally in instances where exponential processes and polynomial processes meet (e.g., Brain oxygen/BOLD coupling, enzyme kinetics, and evolutionary models).
+            </p>
+
+            <p>
+                Next, the observation that the intersection point \(L_2\) is also linearly correlated with the standard deviation of the response seem to point to an invariant property regardless of the input stimulus, i.e. \(\frac{\theta}{\sigma} = c\), where \(\theta\) is the saliency threshold (\(\sim L_2\)), \(\sigma\) is the standard deviation, and \(c\) is some constant. This kind of invariance can greatly simplify downstream processing in the visual system. Furthermore, the threshold can be readily computed: <a href="#lee2003">Lee and Choe (2003)</a> observed that \(\sigma\) can be easily computed in neural circuits, given quadratic activation functions and square root activation functions. An open-ended question is whether this kind of approach is universal, e.g., employed across different sensory modalities, and different levels of processing.
+            </p>
+
+            <h2>5. Conclusion</h2>
+
+            <p>
+                The contribution of this extended abstract in the context of existing works can be summarized as follows:
+            </p>
+
+            <p>
+                <strong>(1) Known result:</strong> the relationship between power-law-like neural response and the use of the Gaussian as a baseline for saliency threshold.
+            </p>
+
+            <p>
+                <strong>(2) Known result:</strong> linear correlation among perceptual threshold, intersection point of power-law vs. Gaussian, and standard deviation of the response.
+            </p>
+
+            <p>
+                <strong>(3) New computational results:</strong> Recurrent CNN activity starts with Gaussian-like and progressively becomes power-law-like through the loops.
+            </p>
+
+            <p>
+                <strong>(4) New theoretical insights:</strong> Lambert W function provides an analytical solution for the computation of the intersection point.
+            </p>
+
+            <p>
+                This leads to <strong>(5) Open-ended questions:</strong> deep fundamental entanglement among power-law, Gaussian, Lambert W function, and thresholds in neural code, and potential connections to criticality and self-organization in nature <a href="#beggs2022">(Beggs, 2022)</a>.
+            </p>
+
+            <h2>References</h2>
+
+            <div class="references">
+                <p id="beggs2022">Beggs, J. M. (2022). <em>The cortex and the critical point: understanding the power of emergence.</em> MIT Press.</p>
+
+                <p id="corless1996">Corless, R. M., Gonnet, G. H., Hare, D. E., Jeffrey, D. J., & Knuth, D. E. (1996). On the lambert w function. <em>Advances in Computational mathematics</em>, 5(1), 329-359.</p>
+
+                <p id="geisler2001">Geisler, W. S., Perry, J. S., Super, B. J., & Gallogly, D. P. (2001). Edge Co-occurrence in natural images predicts contour grouping performance. <em>Vision Research</em>, 41, 711-724.</p>
+
+                <p id="katsimpiri2016">Katsimpiri, C., Nastou, P. E., Pardalos, P. M., & Stamatiou, Y. C. (2016). The ubiquitous lambert function and its classes in sciences and engineering. In <em>Contributions in Mathematics and Engineering: In Honor of Constantin Carathéodory</em> (pp. 323-342). Springer.</p>
+
+                <p id="krizhevsky2012">Krizhevsky, A., Sutskever, I., & Hinton, G. E. (2012). Imagenet classification with deep convolutional neural networks. In <em>Advances in Neural Information Processing Systems</em> (Vol. 25).</p>
+
+                <p id="lecun1989">LeCun, Y., Boser, B., Denker, J., Henderson, D., Howard, R., Hubbard, W., & Jackel, L. (1989). Handwritten digit recognition with a back-propagation network. <em>Advances in neural information processing systems</em>, 2, 396-404.</p>
+
+                <p id="lee2003">Lee, H. C., & Choe, Y. (2003). Detecting salient contours using orientation energy distribution. In <em>Proceedings of the International Joint Conference on Neural Networks</em> (pp. 206-211). IEEE.</p>
+
+                <p id="lehky2011">Lehky, S. R., Kiani, R., Esteky, H., & Tanaka, K. (2011). Statistics of visual responses in primate inferotemporal cortex to object stimuli. <em>Journal of Neurophysiology</em>, 106(3), 1097-1117.</p>
+
+                <p id="liang2015">Liang, M., & Hu, X. (2015). Recurrent convolutional neural network for object recognition. In <em>Proceedings of the IEEE conference on computer vision and pattern recognition</em> (pp. 3367-3375).</p>
+
+                <p id="park2009">Park, C., Bai, Y. H., & Choe, Y. (2009). Tactile or visual?: Stimulus characteristics determine receptive field type in a self-organizing map model of cortical development. In <em>Proceedings of the 2009 IEEE Symposium on Computational Intelligence for Multimedia Signal and Vision Processing</em> (pp. 6-13).</p>
+
+                <p id="sarma2006">Sarma, S., & Choe, Y. (2006). Salience in orientation-filter response measured as suspicious coincidence in natural images. In <em>Proceedings of the 21st National Conference on Artificial Intelligence (AAAI 2006)</em> (pp. 193-198).</p>
+
+                <p id="stevens2013">Stevens, J. L. R., Law, J. S., Antolík, J., & Bednar, J. A. (2013). Mechanisms for stable, robust, and adaptive development of orientation maps in the primary visual cortex. <em>Journal of Neuroscience</em>, 33(40), 15747-15766.</p>
+
+                <p id="vinje2000">Vinje, W. E., & Gallant, J. L. (2000). Sparse coding and decorrelation in primary visual cortex during natural vision. <em>Science</em>, 287(5456), 1273-1276.</p>
+
+                <p id="zeiler2014">Zeiler, M. D., & Fergus, R. (2014). Visualizing and understanding convolutional networks. In <em>European conference on computer vision</em> (pp. 818-833). Springer.</p>
+            </div>
+
+            <hr style="margin: 3rem 0; border: 0; border-top: 1px solid var(--text-secondary);">
+
+            <p style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+                <a href="../assets/Lambert Submission.pdf" target="_blank">Download PDF version</a>
+            </p>
+        </article>
+    </main>
+
+    <footer class="py-4 px-6 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto text-center text-secondary">
+            <p>I never saved anything for the swim back.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        let isMenuOpen = false;
+
+        mobileMenuButton.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            mobileMenu.classList.toggle('active');
+            mobileMenuButton.innerHTML = isMenuOpen ?
+                '<i class="fas fa-times"></i>' :
+                '<i class="fas fa-bars"></i>';
+        });
+
+        document.querySelectorAll('.mobile-menu .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                isMenuOpen = false;
+                mobileMenuButton.innerHTML = '<i class="fas fa-bars"></i>';
+            });
+        });
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.classList.toggle('dark', savedTheme === 'dark');
+        themeToggle.checked = savedTheme === 'light';
+
+        themeToggle.addEventListener('change', () => {
+            body.classList.toggle('dark');
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+        });
+    </script>
+</body>
+</html>
