@@ -1,0 +1,262 @@
+:root{
+  --bg:#0a0a0a;
+  --fg:#f5f5f5;
+  --accent:#9aa0a6;       /* progress color, updates per-section */
+  --rule:#222;
+  --max-w: 1040px;
+  --pad: clamp(18px, 3vw, 40px);
+  --lead: 1.65;
+  --speed: 500ms;
+}
+
+/* Scroll snapping between sections */
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+html, body {
+  height: 100%;
+  background: #000000;
+  color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Spline Sans", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  line-height: var(--lead);
+  margin: 0;
+}
+
+/* Layout container - removed, sections are now full-width with content constrained inside */
+
+/* Book-ish center column on wide screens */
+@media (min-width: 1200px){
+  section > div,
+  section > article {
+    padding-right: calc(var(--pad) * 2.5);
+  }
+}
+
+/* Section styling */
+section {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0;
+  border-bottom: none;
+  width: 100%;
+  margin: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+section > div,
+section > article {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
+
+/* Typographic system */
+.eyebrow {
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-size: .8rem;
+  opacity: .7;
+  margin-bottom: 1rem;
+}
+
+h1, h2 {
+  margin: 0 0 .8rem;
+  line-height: 1.1;
+}
+
+h1 {
+  font-size: clamp(42px, 8vw, 120px);
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+h2 {
+  font-size: clamp(28px, 4.2vw, 56px);
+  font-weight: 600;
+}
+
+h3 {
+  font-size: clamp(22px, 3vw, 36px);
+  font-weight: 600;
+  margin: 1.5rem 0 .8rem;
+  line-height: 1.2;
+}
+
+p, li, figcaption {
+  font-size: clamp(17px, 1.5vw, 20px);
+  max-width: 70ch;
+}
+
+.lede {
+  font-size: clamp(20px, 2vw, 24px);
+  opacity: .95;
+}
+
+/* Ornate script highlights */
+.ornate {
+  font-family: "Mea Culpa", "Brush Script MT", cursive;
+  font-size: 1.1em;
+  letter-spacing: 0;
+  font-weight: 400;
+  display: inline-block;
+  transform: translateY(.05em);
+}
+
+/* Optional literary pull for longform sections */
+.serif {
+  font-family: "Literata", Georgia, "Times New Roman", serif;
+}
+
+/* Panel class removed - seamless with background */
+
+/* Sticky corner label (like "Intro") */
+.corner {
+  position: fixed;
+  top: 14px;
+  right: 66px; /* leave space for progress bar */
+  font-style: italic;
+  font-weight: 600;
+  opacity: .6;
+  pointer-events: none;
+  z-index: 40;
+}
+
+/* Right-side segmented progress */
+.progress {
+  position: fixed;
+  inset: 0 18px 0 auto;
+  width: 10px;
+  display: grid;
+  align-items: start;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.progress-track {
+  justify-self: end;
+  width: 2px;
+  height: min(78vh, 600px);
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      color-mix(in lab, var(--fg) 25%, transparent) 0 46px,
+      transparent 46px 54px
+    );
+  position: relative;
+  margin-top: 12vh; /* give some breathing at top */
+  overflow: hidden;
+}
+
+.progress-fill {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%;
+  height: 0%;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* Section tick segments (colored by each section's accent, sized proportionally) */
+.tick {
+  position: absolute;
+  /* width, height, positioning set via JS based on section size */
+}
+
+/* Nav (optional) */
+nav {
+  position: fixed;
+  left: 16px;
+  top: 14px;
+  z-index: 60;
+  display: flex;
+  gap: .8rem;
+  align-items: center;
+}
+nav a {
+  text-decoration: none;
+  color: inherit;
+  opacity: .7;
+  font-weight: 600;
+  padding: .3rem .5rem;
+  border-radius: 6px;
+}
+nav a:focus-visible { outline: 2px solid var(--fg); }
+
+/* Links */
+a {
+  color: inherit;
+  text-underline-offset: .2em;
+}
+a:hover { text-decoration-thickness: 2px; }
+
+/* Media block - seamless images */
+figure.photo {
+  margin: 2rem 0;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+.polaroid {
+  width: min(720px, 90%);
+  display: block;
+  margin: 0 auto;
+}
+.polaroid > div {
+  width: 100%;
+  display: block;
+}
+
+.polaroid img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 0;
+  display: block;
+}
+
+figcaption {
+  opacity: .8;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Project image layouts */
+.project-images {
+  display: grid;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.image-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.project-image {
+  width: 100%;
+}
+
+.project-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

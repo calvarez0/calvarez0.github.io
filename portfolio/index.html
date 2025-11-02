@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Alex Alvarez – Digital Portfolio</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&family=Spline+Sans:wght@300;400;600;700&family=Literata:opsz,wght@7..72,400;7..72,700&display=swap" rel="stylesheet">
+
+<!-- Stylesheets -->
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav aria-label="Sections">
+  <a href="#intro" title="Intro">Intro</a>
+  <a href="#you-axis" title="YOU–AXIS">YOU–AXIS</a>
+  <a href="#lambert" title="Lambert Paper">Lambert</a>
+  <a href="#beatbreeder" title="BeatBreeder">BeatBreeder</a>
+  <a href="#volk" title="Volk">Volk</a>
+  <a href="#molly" title="Molly & The Mop">Molly</a>
+  <a href="#cuba" title="On Cuba">Cuba</a>
+  <a href="#credits" title="Credits">Credits</a>
+</nav>
+
+<div class="corner" id="cornerLabel">Intro</div>
+
+<!-- Right progress bar -->
+<div class="progress" aria-hidden="true">
+  <div class="progress-track" id="track">
+    <div class="progress-fill" id="fill"></div>
+    <!-- ticks are injected by JS to match section offsets -->
+  </div>
+</div>
+
+<!-- Sections
+     Each section defines its color theme via data attributes.
+     data-bg / data-fg control page colors; data-accent controls the progress color.
+-->
+
+<section id="intro" class="wrap"
+  data-title="Intro"
+  data-bg="#000000" data-fg="#f5f5f5" data-accent="#9aa0a6"
+  style="background: #000000;">
+  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; text-align: center;">
+    <div style="width: min(500px, 90%);">
+      <img src="assets/dispo_sqr.jpg" alt="Alex Alvarez" style="width: 100%; height: auto;">
+    </div>
+    <h2 class="serif" style="margin: 0;">
+      Alex Alvarez
+    </h2>
+    <div class="eyebrow" style="margin: 0;">Digital Portfolio for MIT Media Lab</div>
+  </div>
+</section>
+
+<section id="you-axis" class="wrap panel"
+  data-title="YOU–AXIS"
+  data-bg="#2d8ef4" data-fg="#0a0a0a" data-accent="#0a0a0a">
+  <div>
+    <div class="eyebrow">2025 — Alex Alvarez &amp; Samhita Bollepally</div>
+    <h1>
+      <span class="ornate">You</span>&nbsp;–&nbsp;AXIS
+    </h1>
+    <p class="lede">
+      What does <em>you</em> look like in semantic embedding space?
+    </p>
+  </div>
+</section>
+
+<section id="lambert" class="wrap"
+  data-title="Lambert Paper"
+  data-bg="#fff8e7" data-fg="#1a1a1a" data-accent="#2d8ef4">
+  <article>
+    <div class="eyebrow">NeurIPS 2025 Workshop · Neural Representations</div>
+    <h2>Saliency Thresholds in Neural Code</h2>
+    <p class="lede">
+      A computational framework linking the Lambert W function, power-law response distributions,
+      and saliency thresholds in neural code.
+    </p>
+
+    <p>
+      Co-authored with Jin Hyun Park and Yoonsuck Choe, this work was accepted to the
+      NeurIPS 2025 Workshop on Symmetry and Geometry in Neural Representations. We introduce
+      a novel mathematical framework that connects three fundamental aspects of neural computation:
+      the Lambert W function, power-law distributions in neural responses, and the concept of
+      saliency thresholds.
+    </p>
+
+    <figure class="photo">
+      <div class="polaroid">
+        <div>
+          <img src="../assets/Lambert Submission.pdf" alt="Lambert W Function Visualization" style="width: 100%; height: auto; object-fit: contain;">
+        </div>
+      </div>
+      <figcaption>Mathematical framework connecting Lambert W, power-law distributions, and saliency thresholds.</figcaption>
+    </figure>
+
+    <p>
+      The Lambert W function appears naturally in systems where exponential growth is constrained
+      by feedback mechanisms. Our work demonstrates how this mathematical structure underlies
+      the emergence of power-law response distributions in neural populations and provides a
+      principled approach to understanding what makes neural signals "salient" or meaningful
+      in the context of information processing.
+    </p>
+
+    <p>
+      This research bridges theoretical neuroscience, information theory, and computational
+      modeling, offering new insights into how biological neural networks efficiently represent
+      and process information through structured response distributions.
+    </p>
+  </article>
+</section>
+
+<section id="beatbreeder" class="wrap panel"
+  data-title="BeatBreeder"
+  data-bg="#000000" data-fg="#f5f5f5" data-accent="#8b2635">
+  <article>
+    <div class="eyebrow">2024 · Interactive Evolution Project</div>
+    <h2>BeatBreeder</h2>
+    <p class="lede">
+      Evolving percussion sounds through interactive selection using CPPN-NEAT
+      (Compositional Pattern Producing Networks with NeuroEvolution of Augmenting Topologies).
+    </p>
+
+    <figure class="photo">
+      <div class="polaroid">
+        <div>
+          <img src="../assets/beatbreeder-screenshot.png" alt="BeatBreeder Interface" style="width: 100%; height: auto;">
+        </div>
+      </div>
+      <figcaption>Interactive evolution interface for exploring the space of percussion sounds.</figcaption>
+    </figure>
+
+    <p>
+      BeatBreeder is an open-ended creative tool that applies evolutionary computation to sound design.
+      Users can evolve unique percussion sounds by selecting their favorites from each generation,
+      allowing the system to breed increasingly complex and interesting sonic textures.
+    </p>
+
+    <h3>How It Works</h3>
+    <p>
+      The system uses CPPNs (Compositional Pattern Producing Networks) to generate audio waveforms.
+      Each network takes time as input and outputs audio samples. Through NEAT (NeuroEvolution of
+      Augmenting Topologies), the network topology evolves over generations, starting simple and
+      growing more complex based on user selections.
+    </p>
+
+    <p>
+      This approach mirrors biological evolution: mutations introduce variations, crossover combines
+      successful patterns, and human aesthetic judgment acts as the selection pressure. The result
+      is an exploration of sound space that would be impossible to navigate through traditional
+      parameter-tweaking interfaces.
+    </p>
+
+    <p>
+      Check out the <a href="../openendedness/beatbreeder.html">live demo</a> to evolve your own sounds.
+    </p>
+  </article>
+</section>
+
+<section id="volk" class="wrap panel"
+  data-title="Volk"
+  data-bg="#2d8ef4" data-fg="#0a0a0a" data-accent="#000000">
+  <article>
+    <div class="eyebrow">2019 – 2023 · E-commerce & Marketing</div>
+    <h2>Volk</h2>
+    <p class="lede">
+      Building, scaling, and exiting e-commerce brands through organic social media marketing
+      during the early era of TikTok and Instagram's creator economy.
+    </p>
+
+    <h3>The Journey</h3>
+    <p>
+      From December 2019 to December 2023, my friends and I built multiple e-commerce brands
+      that collectively achieved over 100 million impressions and millions of organic followers
+      across social platforms. We pioneered what would later become formalized as "organic social
+      media marketing"&mdash;a strategy that has since become standard practice in digital commerce.
+    </p>
+
+    <div class="project-images">
+      <figure class="photo">
+        <div class="polaroid">
+          <div>
+            <img src="assets/packets_sqr.jpg" alt="Volk product packages" style="width: 100%; height: auto;">
+          </div>
+        </div>
+        <figcaption>Physical products ready for shipment.</figcaption>
+      </figure>
+
+      <div class="image-row">
+        <figure class="photo">
+          <div class="polaroid">
+            <div>
+              <img src="../assets/volk-social-1.png" alt="Volk social media presence" style="width: 100%; height: auto;">
+            </div>
+          </div>
+          <figcaption>Building community through authentic content.</figcaption>
+        </figure>
+
+        <figure class="photo">
+          <div class="polaroid">
+            <div>
+              <img src="../assets/volk-social-2.png" alt="Volk brand engagement" style="width: 100%; height: auto;">
+            </div>
+          </div>
+          <figcaption>Organic growth across platforms.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <h3>What We Built</h3>
+    <p>
+      We didn't just sell products&mdash;we built brands with distinct personalities and loyal communities.
+      Our approach was unconventional for the time: instead of paid advertising, we focused on creating
+      entertaining, shareable content that happened to feature our products. We treated social media
+      accounts as entertainment channels first and storefronts second.
+    </p>
+
+    <p>
+      This strategy paid off. Multiple six and seven-figure exits validated our approach, and the
+      methodology we developed through trial and error in the "wild west era" of social commerce
+      has since become a standard playbook in the industry.
+    </p>
+
+    <h3>Lessons Learned</h3>
+    <p>
+      Beyond the financial success, Volk taught me about rapid iteration, understanding audience
+      psychology, and building systems that scale. It was a masterclass in pattern recognition&mdash;identifying
+      what content would resonate before it went viral, understanding platform algorithms through
+      empirical testing, and adapting quickly to changing dynamics.
+    </p>
+
+    <p>
+      While I'm no longer actively involved in e-commerce, the experience of building something
+      from zero to millions of impressions, managing teams, and navigating high-stakes exits has
+      been invaluable. It taught me that interesting problems exist everywhere, and that the
+      principles of experimentation, measurement, and iteration apply just as well to building
+      businesses as they do to research.
+    </p>
+  </article>
+</section>
+
+<section id="molly" class="wrap"
+  data-title="Molly & The Mop"
+  data-bg="#fff8e7" data-fg="#1a1a1a" data-accent="#ff6b6b">
+  <article>
+    <div class="eyebrow">2022 – 2023 · Service Marketplace</div>
+    <h2>Molly &amp; The Mop</h2>
+    <p class="lede">
+      Connecting commercial and residential service providers with clients through
+      a social-first marketplace platform.
+    </p>
+
+    <figure class="photo">
+      <div class="polaroid">
+        <div>
+          <img src="../assets/molly-website.gif" alt="Molly & The Mop website" style="width: 100%; height: auto;">
+        </div>
+      </div>
+      <figcaption>The platform that connected service providers with local clients.</figcaption>
+    </figure>
+
+    <h3>The Vision</h3>
+    <p>
+      Molly &amp; The Mop began with a simple observation: local service providers&mdash;cleaners,
+      landscapers, handymen&mdash;often lacked an effective way to reach customers beyond word-of-mouth,
+      while customers struggled to find reliable, vetted service providers in their area.
+    </p>
+
+    <p>
+      We built an online platform that solved both sides of this problem. Service providers could
+      create profiles, showcase their work, and receive bookings directly through the platform.
+      Customers could browse verified providers, read reviews, and schedule services with confidence.
+    </p>
+
+    <h3>Growth & Community</h3>
+    <p>
+      The company grew to 15+ employees and built a social media following of over 85,000 people.
+      We leveraged the same organic content strategy from Volk, but adapted it for the service
+      industry&mdash;sharing satisfying before/after transformations, highlighting local providers,
+      and building a community around home improvement and maintenance.
+    </p>
+
+    <p>
+      What started as a simple marketplace evolved into a trusted brand in the Houston area.
+      Our social presence drove consistent organic traffic to the platform, and our focus on
+      vetting quality providers built trust on both sides of the marketplace.
+    </p>
+
+    <h3>The Exit</h3>
+    <p>
+      In December 2023, we sold Molly &amp; The Mop to a private local cleaning company. They
+      saw value not just in the technology platform, but in the community and brand we'd built.
+      The customer base, provider network, and social media presence provided them with immediate
+      market presence and credibility.
+    </p>
+
+    <p>
+      This venture reinforced lessons about marketplace dynamics, two-sided network effects, and
+      the importance of brand in commodity service industries. It was rewarding to build something
+      that genuinely helped local businesses grow while making it easier for people to maintain
+      their homes and workspaces.
+    </p>
+  </article>
+</section>
+
+<section id="cuba" class="wrap"
+  data-title="On Cuba"
+  data-bg="#8b2635" data-fg="#f5f5f5" data-accent="#ffd700">
+  <article class="serif">
+    <div class="eyebrow">Heritage · Identity · Home</div>
+    <h2>On Cuba</h2>
+    <p class="lede">
+      Where you come from shapes who you become, even when home is somewhere you've never lived.
+    </p>
+
+    <figure class="photo">
+      <div style="width: min(500px, 90%); margin: 0 auto;">
+        <img src="assets/abo_sqr.jpg" alt="Cuba" style="width: 100%; height: auto;">
+      </div>
+      <figcaption style="margin-top: 1rem;"></figcaption>
+    </figure>
+
+    <p>
+      Cuba is more than a place on a map&mdash;it's a thread woven through everything I am.
+      The stories passed down at family dinners, the resilience built into our DNA, the particular
+      way exile shapes identity across generations. Being Cuban-American means carrying two worlds:
+      one you inherit through memory and narrative, another you build with your own hands.
+    </p>
+
+    <p>
+      There's a specific kind of hunger that comes from diaspora. Not for food, but for connection
+      to something larger than yourself. For understanding where the values you hold came from,
+      why certain struggles feel familiar even when they're new, how your family's history of
+      adaptation and perseverance shows up in the way you approach problems.
+    </p>
+
+    <p>
+      My grandparents left everything behind for the promise of freedom and opportunity. That
+      leap&mdash;that willingness to start over with nothing&mdash;echoes forward. It shows up
+      in how I think about risk, about building things from scratch, about the difference between
+      comfort and growth. The entrepreneurial spirit wasn't learned from business books; it was
+      inherited from people who rebuilt their entire lives in a new language, new country, new world.
+    </p>
+
+    <p>
+      Cuba taught me that home isn't just geography. It's the music that feels like memory even
+      when you're hearing it for the first time. It's the food that tastes like belonging. It's
+      the understanding that sometimes the most important things we carry are the ones we can't see&mdash;language,
+      culture, the stories of who came before and what they sacrificed so we could be here.
+    </p>
+  </article>
+</section>
+
+<section id="reflection" class="wrap"
+  data-title="Reflection"
+  data-bg="#000000" data-fg="#f5f5f5" data-accent="#666666"
+  style="background: #000000;">
+  <div style="position: relative; z-index: 2;">
+    <figure class="photo">
+      <div style="width: min(500px, 90%); margin: 0 auto;">
+        <img src="assets/dad_sqr.jpg" alt="Reflection" style="width: 100%; height: auto;">
+      </div>
+      <figcaption style="margin-top: 1rem;"></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="credits" class="wrap"
+  data-title="Credits"
+  data-bg="#fff8e7" data-fg="#1a1a1a" data-accent="#8b2635">
+  <div>
+    <h2>Credits &amp; Notes</h2>
+    <p>
+      I really really want to change the world. Because I believe it, I think I will and because I think I will, I believe it. 
+    </p>
+    <p class="serif">
+      Designed to be a living document that grows with new projects and research.
+    </p>
+    <p>
+      <strong>Contact:</strong> <a href="mailto:caalvarez@mgh.harvard.edu">caalvarez@mgh.harvard.edu</a> ·
+      <a href="https://linkedin.com/in/calexalvarez">LinkedIn</a> ·
+      <a href="https://alexrez.com">alexrez.com</a>
+    </p>
+  </div>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
