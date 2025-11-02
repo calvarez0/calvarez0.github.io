@@ -11,68 +11,36 @@
             padding: 20px;
             background: #1a1a1a;
             color: #e0e0e0;
-            display: flex;
+            display: grid;
+            grid-template-columns: 350px 1fr 420px;
             gap: 20px;
-            align-items: flex-start;
-        }
-
-        .main-content {
-            flex: 1;
-            max-width: 900px;
-        }
-
-        .sidebar {
-            width: 400px;
-            background: #2a2a2a;
-            border-radius: 8px;
-            padding: 20px;
-            position: sticky;
-            top: 20px;
-            height: fit-content;
-            max-height: calc(100vh - 40px);
-            overflow-y: auto;
+            height: 100vh;
+            overflow: hidden;
+            box-sizing: border-box;
         }
 
         .settings-panel {
-            position: fixed;
-            right: -380px;
-            top: 0;
-            width: 380px;
-            height: 100vh;
             background: #2a2a2a;
+            border-radius: 8px;
             padding: 20px;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
-            transition: right 0.3s ease;
-            overflow-y: auto;
-            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        .settings-panel.open {
-            right: 0;
+        .main-content {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
         }
 
-        .settings-toggle {
-            position: fixed;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #4CAF50;
-            color: white;
-            padding: 15px 10px;
-            border: none;
-            border-radius: 8px 0 0 8px;
-            cursor: pointer;
-            z-index: 999;
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .settings-toggle:hover {
-            background: #45a049;
-            padding-left: 15px;
+        .sidebar {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .settings-panel h3 {
@@ -80,6 +48,12 @@
             color: #4CAF50;
             border-bottom: 2px solid #4CAF50;
             padding-bottom: 10px;
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+            color: #4CAF50;
+            font-size: 18px;
         }
 
         .setting-group {
@@ -99,21 +73,34 @@
             margin-bottom: 5px;
         }
 
-        .setting-group input[type="number"] {
-            width: 100%;
-            padding: 8px;
-            background: #1a1a1a;
-            border: 1px solid #444;
-            color: #e0e0e0;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
         .range-value {
             display: inline-block;
             float: right;
             color: #4CAF50;
             font-weight: bold;
+        }
+
+        .activation-controls {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .select-btn {
+            flex: 1;
+            padding: 6px;
+            background: #333;
+            border: 1px solid #555;
+            color: #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+
+        .select-btn:hover {
+            background: #444;
+            border-color: #4CAF50;
         }
 
         .activation-checkboxes {
@@ -123,6 +110,8 @@
             background: #1a1a1a;
             padding: 10px;
             border-radius: 4px;
+            overflow-y: auto;
+            max-height: 400px;
         }
 
         .activation-checkboxes label {
@@ -161,69 +150,25 @@
             border-color: #4CAF50;
         }
 
-        .sidebar h2 {
-            margin-top: 0;
-            color: #4CAF50;
-            font-size: 18px;
-        }
-
-        #network-viz {
-            width: 100%;
-            height: 400px;
-            background: #1a1a1a;
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-
-        .network-info {
-            font-size: 12px;
-            color: #888;
-        }
-
-        .network-info div {
-            margin: 5px 0;
-        }
-
-        .node-legend, .connection-legend {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin: 10px 0;
-            padding: 10px;
-            background: #1a1a1a;
-            border-radius: 4px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 11px;
-        }
-
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        h1 {
-            text-align: center;
-            color: #4CAF50;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #888;
-            margin-bottom: 30px;
-        }
-
         .controls {
             background: #2a2a2a;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
+        }
+
+        .controls h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin: 0 0 5px 0;
+            font-size: 28px;
+        }
+
+        .controls .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 20px;
+            font-size: 14px;
         }
 
         .button-group {
@@ -282,11 +227,13 @@
             font-size: 14px;
         }
 
+
         .sound-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
-            margin-bottom: 20px;
+            flex: 1;
+            overflow-y: auto;
         }
 
         .sound-item {
@@ -329,7 +276,7 @@
         }
 
         .generation-info {
-            background: #2a2a2a;
+            background: #1a1a1a;
             padding: 10px;
             border-radius: 6px;
             text-align: center;
@@ -344,9 +291,7 @@
         }
 
         .stat-item {
-            background: #1a1a1a;
             padding: 8px 16px;
-            border-radius: 4px;
         }
 
         .stat-label {
@@ -359,12 +304,52 @@
             font-size: 18px;
             font-weight: bold;
         }
+
+        #network-viz {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            background: #1a1a1a;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .network-info {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .network-info div {
+            margin: 5px 0;
+        }
+
+        .node-legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body>
-    <div class="main-content">
-        <h1>🥁 BeatBreeder</h1>
-        <div class="subtitle">Evolve Percussion Sounds with CPPN-NEAT</div>
+    <div class="settings-panel">
+        <h3>⚙️ Evolution Settings</h3>
 
         <div class="generation-info">
             <div class="stats">
@@ -377,13 +362,86 @@
                     <div class="stat-value" id="selected-count">0</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">Avg Complexity</div>
+                    <div class="stat-label">Complexity</div>
                     <div class="stat-value" id="avg-complexity">0</div>
                 </div>
             </div>
         </div>
 
+        <div class="setting-group">
+            <label>
+                Weight Mutation Rate
+                <span class="range-value" id="weight-mut-val">0.80</span>
+            </label>
+            <input type="range" id="weight-mutation" min="0" max="1" step="0.05" value="0.8"
+                   oninput="updateSetting('weight-mutation', this.value)">
+        </div>
+
+        <div class="setting-group">
+            <label>
+                Weight Mutation Power
+                <span class="range-value" id="weight-power-val">0.50</span>
+            </label>
+            <input type="range" id="weight-power" min="0" max="2" step="0.1" value="0.5"
+                   oninput="updateSetting('weight-power', this.value)">
+        </div>
+
+        <div class="setting-group">
+            <label>
+                Add Connection Rate
+                <span class="range-value" id="add-conn-val">0.15</span>
+            </label>
+            <input type="range" id="add-connection" min="0" max="1" step="0.05" value="0.15"
+                   oninput="updateSetting('add-connection', this.value)">
+        </div>
+
+        <div class="setting-group">
+            <label>
+                Add Node Rate
+                <span class="range-value" id="add-node-val">0.10</span>
+            </label>
+            <input type="range" id="add-node" min="0" max="1" step="0.02" value="0.1"
+                   oninput="updateSetting('add-node', this.value)">
+        </div>
+
+        <div class="setting-group">
+            <label>
+                Change Activation Rate
+                <span class="range-value" id="change-act-val">0.10</span>
+            </label>
+            <input type="range" id="change-activation" min="0" max="1" step="0.05" value="0.1"
+                   oninput="updateSetting('change-activation', this.value)">
+        </div>
+
+        <div class="setting-group">
+            <label>
+                Initial Mutation Count
+                <span class="range-value" id="init-mut-val">3</span>
+            </label>
+            <input type="range" id="init-mutations" min="0" max="10" step="1" value="3"
+                   oninput="updateSetting('init-mutations', this.value)">
+        </div>
+
+        <div class="setting-group">
+            <label>Available Activation Functions</label>
+            <div class="activation-controls">
+                <button class="select-btn" onclick="selectAllActivations()">Select All</button>
+                <button class="select-btn" onclick="deselectAllActivations()">Deselect All</button>
+            </div>
+            <div class="activation-checkboxes" id="activation-functions"></div>
+        </div>
+
+        <div class="preset-buttons">
+            <button class="preset-btn" onclick="loadPreset('default')">Default</button>
+            <button class="preset-btn" onclick="loadPreset('diverse')">Diverse</button>
+            <button class="preset-btn" onclick="loadPreset('stable')">Stable</button>
+        </div>
+    </div>
+
+    <div class="main-content">
         <div class="controls">
+            <h1>🥁 BeatBreeder</h1>
+            <div class="subtitle">Evolve Percussion Sounds with CPPN-NEAT</div>
             <div class="button-group">
                 <button class="evolve-btn" onclick="evolve()">Evolve Selected</button>
                 <button class="reset-btn" onclick="reset()">New Population</button>

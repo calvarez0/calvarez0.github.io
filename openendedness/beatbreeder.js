@@ -13,18 +13,79 @@ let population = [];
 let selectedIndex = null; // Changed to single selection
 let nextInnovation = 0;
 
-// Activation functions for CPPNs (biased toward percussion-like sounds)
+// NEAT configuration (user-adjustable)
+let neatConfig = {
+    weightMutationRate: 0.8,
+    weightMutationPower: 0.5,
+    addConnectionRate: 0.15,
+    addNodeRate: 0.1,
+    changeActivationRate: 0.1,
+    initialMutations: 3,
+    enabledActivations: new Set(['sine', 'square', 'sawtooth', 'triangle', 'gaussian', 'sigmoid', 'abs', 'linear', 'step', 'noise'])
+};
+
+// Activation functions for CPPNs (massive variety for complex sounds)
 const activationFunctions = {
+    // Basic waves
     sine: (x) => Math.sin(x * Math.PI),
+    cosine: (x) => Math.cos(x * Math.PI),
     square: (x) => x > 0 ? 1 : -1,
     sawtooth: (x) => (x % 2) - 1,
     triangle: (x) => 2 * Math.abs(x % 2 - 1) - 1,
+
+    // Smooth functions
     gaussian: (x) => Math.exp(-x * x),
     sigmoid: (x) => 2 / (1 + Math.exp(-4.9 * x)) - 1,
+    tanh: (x) => Math.tanh(x),
+    softplus: (x) => Math.log(1 + Math.exp(x)) / 5,
+
+    // Sharp/percussive functions
     abs: (x) => Math.abs(x),
-    linear: (x) => Math.max(-1, Math.min(1, x)),
     step: (x) => x > 0 ? 0.5 : -0.5,
-    noise: (x) => (Math.random() * 2 - 1) * Math.exp(-x * x * 2) // Decaying noise for percussion
+    ramp: (x) => Math.max(0, Math.min(1, x)),
+    spike: (x) => Math.exp(-Math.abs(x) * 5),
+    hat: (x) => Math.max(0, 1 - Math.abs(x)),
+
+    // Harmonic/complex
+    sin2x: (x) => Math.sin(2 * x * Math.PI),
+    sin3x: (x) => Math.sin(3 * x * Math.PI),
+    sin5x: (x) => Math.sin(5 * x * Math.PI),
+    cos2x: (x) => Math.cos(2 * x * Math.PI),
+
+    // Polynomial
+    square_x: (x) => x * x * Math.sign(x),
+    cube: (x) => x * x * x,
+    inv: (x) => x === 0 ? 0 : Math.max(-1, Math.min(1, 1 / (x * 5))),
+
+    // Modulation/texture
+    sinc: (x) => x === 0 ? 1 : Math.sin(Math.PI * x * 3) / (Math.PI * x * 3),
+    ripple: (x) => Math.sin(x * x * 10) * Math.exp(-Math.abs(x)),
+    chirp: (x) => Math.sin(x * x * x * 20),
+
+    // Noise/organic
+    noise: (x) => (Math.random() * 2 - 1) * Math.exp(-x * x * 2),
+    warble: (x) => Math.sin(x * Math.PI) * (1 + 0.3 * Math.sin(x * 20)),
+    gravel: (x) => Math.sign(Math.sin(x * 50)) * Math.exp(-Math.abs(x)),
+
+    // Percussive envelopes
+    pluck: (x) => Math.sin(x * Math.PI * 2) * Math.exp(-Math.abs(x) * 8),
+    thump: (x) => (1 - Math.abs(x)) * Math.exp(-x * x * 5),
+    click: (x) => Math.abs(x) < 0.1 ? (1 - Math.abs(x) * 10) : 0,
+    snap: (x) => Math.exp(-Math.abs(x) * 20) * Math.sin(x * 100),
+
+    // Complex combinations
+    wobble: (x) => Math.sin(x * Math.PI) * Math.sin(x * x * 15),
+    flutter: (x) => Math.sin(x * Math.PI) + 0.3 * Math.sin(x * 17 * Math.PI),
+    growl: (x) => Math.tanh(Math.sin(x * 3) * 3) * Math.exp(-Math.abs(x)),
+    buzz: (x) => Math.sign(Math.sin(x * Math.PI * 40)) * (1 - Math.abs(x)),
+
+    // Misc interesting
+    linear: (x) => Math.max(-1, Math.min(1, x)),
+    clamp: (x) => Math.max(-0.5, Math.min(0.5, x * 2)),
+    fold: (x) => {
+        let v = x % 2;
+        return v > 1 ? 2 - v : v < -1 ? -2 - v : v;
+    }
 };
 
 const activationNames = Object.keys(activationFunctions);
@@ -156,11 +217,14 @@ class CPPN {
     }
 
     mutate() {
+        // Get enabled activation functions
+        const enabledActivations = Array.from(neatConfig.enabledActivations);
+
         // Mutate weights
-        if (Math.random() < 0.8) {
+        if (Math.random() < neatConfig.weightMutationRate) {
             for (const conn of this.connections) {
                 if (Math.random() < 0.9) {
-                    conn.weight += (Math.random() * 2 - 1) * 0.5;
+                    conn.weight += (Math.random() * 2 - 1) * neatConfig.weightMutationPower;
                     conn.weight = Math.max(-3, Math.min(3, conn.weight));
                 } else {
                     conn.weight = Math.random() * 4 - 2;
@@ -169,7 +233,7 @@ class CPPN {
         }
 
         // Add connection
-        if (Math.random() < 0.15) {
+        if (Math.random() < neatConfig.addConnectionRate) {
             const nodeIds = Array.from(this.nodes.keys());
             if (nodeIds.length >= 2) {
                 const from = nodeIds[Math.floor(Math.random() * nodeIds.length)];
@@ -182,10 +246,10 @@ class CPPN {
         }
 
         // Add node
-        if (Math.random() < 0.1 && this.connections.length > 0) {
+        if (Math.random() < neatConfig.addNodeRate && this.connections.length > 0) {
             const conn = this.connections[Math.floor(Math.random() * this.connections.length)];
-            if (conn.enabled) {
-                const activation = activationNames[Math.floor(Math.random() * activationNames.length)];
+            if (conn.enabled && enabledActivations.length > 0) {
+                const activation = enabledActivations[Math.floor(Math.random() * enabledActivations.length)];
                 const newNode = this.addNode('hidden', activation);
 
                 conn.enabled = false;
@@ -195,11 +259,11 @@ class CPPN {
         }
 
         // Mutate activation functions
-        if (Math.random() < 0.1) {
+        if (Math.random() < neatConfig.changeActivationRate && enabledActivations.length > 0) {
             const hiddenNodes = Array.from(this.nodes.values()).filter(n => n.type === 'hidden');
             if (hiddenNodes.length > 0) {
                 const node = hiddenNodes[Math.floor(Math.random() * hiddenNodes.length)];
-                node.activation = activationNames[Math.floor(Math.random() * activationNames.length)];
+                node.activation = enabledActivations[Math.floor(Math.random() * enabledActivations.length)];
             }
         }
     }
@@ -322,7 +386,7 @@ function initializePopulation() {
         const cppn = createMinimalCPPN();
 
         // Apply several mutations to create variety
-        for (let j = 0; j < 3; j++) {
+        for (let j = 0; j < neatConfig.initialMutations; j++) {
             cppn.mutate();
         }
 
@@ -562,7 +626,145 @@ function drawNetworkTopology(cppn) {
     `;
 }
 
+// Settings panel functions
+function updateSetting(settingId, value) {
+    const numValue = parseFloat(value);
+
+    switch(settingId) {
+        case 'weight-mutation':
+            neatConfig.weightMutationRate = numValue;
+            document.getElementById('weight-mut-val').textContent = numValue.toFixed(2);
+            break;
+        case 'weight-power':
+            neatConfig.weightMutationPower = numValue;
+            document.getElementById('weight-power-val').textContent = numValue.toFixed(2);
+            break;
+        case 'add-connection':
+            neatConfig.addConnectionRate = numValue;
+            document.getElementById('add-conn-val').textContent = numValue.toFixed(2);
+            break;
+        case 'add-node':
+            neatConfig.addNodeRate = numValue;
+            document.getElementById('add-node-val').textContent = numValue.toFixed(2);
+            break;
+        case 'change-activation':
+            neatConfig.changeActivationRate = numValue;
+            document.getElementById('change-act-val').textContent = numValue.toFixed(2);
+            break;
+        case 'init-mutations':
+            neatConfig.initialMutations = parseInt(value);
+            document.getElementById('init-mut-val').textContent = value;
+            break;
+    }
+}
+
+function toggleActivation(name, checked) {
+    if (checked) {
+        neatConfig.enabledActivations.add(name);
+    } else {
+        neatConfig.enabledActivations.delete(name);
+    }
+}
+
+function selectAllActivations() {
+    activationNames.forEach(name => {
+        neatConfig.enabledActivations.add(name);
+        const checkbox = document.getElementById(`act-${name}`);
+        if (checkbox) checkbox.checked = true;
+    });
+}
+
+function deselectAllActivations() {
+    activationNames.forEach(name => {
+        neatConfig.enabledActivations.delete(name);
+        const checkbox = document.getElementById(`act-${name}`);
+        if (checkbox) checkbox.checked = false;
+    });
+}
+
+
+function loadPreset(presetName) {
+    switch(presetName) {
+        case 'default':
+            neatConfig.weightMutationRate = 0.8;
+            neatConfig.weightMutationPower = 0.5;
+            neatConfig.addConnectionRate = 0.15;
+            neatConfig.addNodeRate = 0.1;
+            neatConfig.changeActivationRate = 0.1;
+            neatConfig.initialMutations = 3;
+            neatConfig.enabledActivations = new Set(['sine', 'square', 'sawtooth', 'triangle', 'gaussian', 'sigmoid', 'abs', 'linear', 'step', 'noise']);
+            break;
+        case 'diverse':
+            // Higher mutation rates for more variety
+            neatConfig.weightMutationRate = 0.95;
+            neatConfig.weightMutationPower = 1.2;
+            neatConfig.addConnectionRate = 0.3;
+            neatConfig.addNodeRate = 0.2;
+            neatConfig.changeActivationRate = 0.25;
+            neatConfig.initialMutations = 6;
+            neatConfig.enabledActivations = new Set(['sine', 'square', 'sawtooth', 'triangle', 'gaussian', 'sigmoid', 'abs', 'linear', 'step', 'noise']);
+            break;
+        case 'stable':
+            // Lower mutation rates for gradual evolution
+            neatConfig.weightMutationRate = 0.6;
+            neatConfig.weightMutationPower = 0.3;
+            neatConfig.addConnectionRate = 0.05;
+            neatConfig.addNodeRate = 0.03;
+            neatConfig.changeActivationRate = 0.05;
+            neatConfig.initialMutations = 2;
+            neatConfig.enabledActivations = new Set(['sine', 'square', 'sawtooth', 'triangle', 'gaussian', 'sigmoid']);
+            break;
+    }
+    updateSettingsUI();
+}
+
+function updateSettingsUI() {
+    document.getElementById('weight-mutation').value = neatConfig.weightMutationRate;
+    document.getElementById('weight-mut-val').textContent = neatConfig.weightMutationRate.toFixed(2);
+
+    document.getElementById('weight-power').value = neatConfig.weightMutationPower;
+    document.getElementById('weight-power-val').textContent = neatConfig.weightMutationPower.toFixed(2);
+
+    document.getElementById('add-connection').value = neatConfig.addConnectionRate;
+    document.getElementById('add-conn-val').textContent = neatConfig.addConnectionRate.toFixed(2);
+
+    document.getElementById('add-node').value = neatConfig.addNodeRate;
+    document.getElementById('add-node-val').textContent = neatConfig.addNodeRate.toFixed(2);
+
+    document.getElementById('change-activation').value = neatConfig.changeActivationRate;
+    document.getElementById('change-act-val').textContent = neatConfig.changeActivationRate.toFixed(2);
+
+    document.getElementById('init-mutations').value = neatConfig.initialMutations;
+    document.getElementById('init-mut-val').textContent = neatConfig.initialMutations;
+
+    // Update checkboxes
+    activationNames.forEach(name => {
+        const checkbox = document.getElementById(`act-${name}`);
+        if (checkbox) {
+            checkbox.checked = neatConfig.enabledActivations.has(name);
+        }
+    });
+}
+
+function initializeSettingsPanel() {
+    const container = document.getElementById('activation-functions');
+
+    activationNames.forEach(name => {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `act-${name}`;
+        checkbox.checked = neatConfig.enabledActivations.has(name);
+        checkbox.onchange = (e) => toggleActivation(name, e.target.checked);
+
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(name));
+        container.appendChild(label);
+    });
+}
+
 // Initialize on load
 window.addEventListener('load', () => {
+    initializeSettingsPanel();
     initializePopulation();
 });

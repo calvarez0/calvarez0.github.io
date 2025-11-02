@@ -4,6 +4,7 @@
   const fill = document.getElementById('fill');
   const track = document.getElementById('track');
   const corner = document.getElementById('cornerLabel');
+  const progressContainer = document.querySelector('.progress');
 
   // Create tick segments for each section (proportional to section height)
   const ticks = sections.map(() => {
@@ -35,15 +36,52 @@
       ticks[i].style.borderRadius = '0';
       ticks[i].style.transform = 'none';
 
-      // Use each section's accent for its tick color
-      const accent = sec.dataset.accent || getComputedStyle(document.documentElement).getPropertyValue('--accent');
-      ticks[i].style.background = accent;
-      ticks[i].style.opacity = '0.4';
+      // Use each section's background color for its tick
+      const bg = sec.dataset.bg || '#9aa0a6';
+      ticks[i].style.background = bg;
+      ticks[i].style.opacity = '0.5';
     });
   }
 
   addEventListener('resize', positionTicks);
   addEventListener('load', positionTicks);
+
+  // Interactive drag functionality
+  let isDragging = false;
+
+  function scrollToPosition(clientY) {
+    const trackRect = track.getBoundingClientRect();
+    const trackTop = trackRect.top;
+    const trackHeight = trackRect.height;
+    const relativeY = clientY - trackTop;
+    const percentage = Math.max(0, Math.min(1, relativeY / trackHeight));
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo({ top: percentage * docHeight, behavior: 'auto' });
+  }
+
+  track.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    progressContainer.classList.add('active');
+    scrollToPosition(e.clientY);
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+      scrollToPosition(e.clientY);
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      progressContainer.classList.remove('active');
+    }
+  });
+
+  track.addEventListener('click', (e) => {
+    scrollToPosition(e.clientY);
+  });
 
   // Update fill height on scroll
   function updateFill() {
@@ -63,7 +101,8 @@
     if (fg) sec.style.color = fg;
   });
 
-  // Update corner label based on current section
+  // Update corner label and nav colors based on current section
+  const nav = document.querySelector('nav');
   const io = new IntersectionObserver((entries) => {
     const best = entries
       .filter(e => e.isIntersecting)
@@ -72,6 +111,13 @@
 
     const sec = best.target;
     if (sec.dataset.title) corner.textContent = sec.dataset.title;
+
+    // Update nav and corner colors to match section text color
+    const fg = sec.dataset.fg;
+    if (fg) {
+      corner.style.color = fg;
+      nav.style.color = fg;
+    }
   }, { rootMargin: '-30% 0px -40% 0px', threshold: [0, .25, .5, .75, 1] });
 
   sections.forEach(s => io.observe(s));

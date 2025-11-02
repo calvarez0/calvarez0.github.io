@@ -46,7 +46,7 @@ section {
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 0;
+  padding: 80px 0 40px 0;
   border-bottom: none;
   width: 100%;
   margin: 0;
@@ -131,6 +131,7 @@ p, li, figcaption {
   opacity: .6;
   pointer-events: none;
   z-index: 40;
+  transition: color 0.1s ease;
 }
 
 /* Right-side segmented progress */
@@ -142,6 +143,12 @@ p, li, figcaption {
   align-items: start;
   z-index: 50;
   pointer-events: none;
+  transition: width 0.2s ease;
+}
+
+.progress.active {
+  width: 40px;
+  pointer-events: auto;
 }
 
 .progress-track {
@@ -157,7 +164,18 @@ p, li, figcaption {
     );
   position: relative;
   margin-top: 12vh; /* give some breathing at top */
-  overflow: hidden;
+  overflow: visible;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: width 0.2s ease;
+}
+
+.progress.active .progress-track {
+  width: 8px;
+}
+
+.progress-track:hover {
+  width: 4px;
 }
 
 .progress-fill {
@@ -169,10 +187,16 @@ p, li, figcaption {
   border-radius: 2px;
 }
 
-/* Section tick segments (colored by each section's accent, sized proportionally) */
+/* Section tick segments (colored by each section's background, sized proportionally) */
 .tick {
   position: absolute;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
   /* width, height, positioning set via JS based on section size */
+}
+
+.progress.active .tick {
+  opacity: 0.8 !important;
 }
 
 /* Nav (optional) */
@@ -184,6 +208,7 @@ nav {
   display: flex;
   gap: .8rem;
   align-items: center;
+  transition: color 0.1s ease;
 }
 nav a {
   text-decoration: none;
@@ -192,8 +217,9 @@ nav a {
   font-weight: 600;
   padding: .3rem .5rem;
   border-radius: 6px;
+  transition: color 0.1s ease;
 }
-nav a:focus-visible { outline: 2px solid var(--fg); }
+nav a:focus-visible { outline: 2px solid currentColor; }
 
 /* Links */
 a {
