@@ -1,24 +1,201 @@
-/* --- Configuration-free section theming & progress --- */
+/* --- Custom scrolling implementation --- */
 (() => {
+  const container = document.getElementById('scroll-container');
   const sections = [...document.querySelectorAll('section')];
   const fill = document.getElementById('fill');
   const track = document.getElementById('track');
   const corner = document.getElementById('cornerLabel');
   const progressContainer = document.querySelector('.progress');
 
+  let scrollY = 0;
+  let maxScroll = 0;
+  let isScrolling = false;
+  let scrollTimeout;
+
+  // Calculate max scroll based on container height
+  function updateMaxScroll() {
+    maxScroll = container.scrollHeight - window.innerHeight;
+  }
+
+  // Update the visual position of the container
+  function updateContainerPosition() {
+    container.style.transform = `translateY(${-scrollY}px)`;
+  }
+
+  // Find the nearest section and snap only if between sections
+  function snapToNearestSection() {
+    const viewportTop = scrollY;
+    const viewportBottom = scrollY + window.innerHeight;
+    const viewportHeight = window.innerHeight;
+
+    // Check if viewport is showing parts of multiple sections (between sections)
+    let sectionsInView = [];
+
+    sections.forEach((sec, index) => {
+      const secTop = sec.offsetTop;
+      const secBottom = secTop + sec.offsetHeight;
+
+      // Check if any part of this section is visible
+      if (viewportBottom > secTop && viewportTop < secBottom) {
+        sectionsInView.push({
+          section: sec,
+          index,
+          top: secTop,
+          bottom: secBottom
+        });
+      }
+    });
+
+    // Only snap if we're showing parts of 2+ sections (between sections)
+    if (sectionsInView.length > 1) {
+      // We're between sections. Find the boundary between them.
+
+      // Sort by index to get them in order
+      sectionsInView.sort((a, b) => a.index - b.index);
+
+      const firstSection = sectionsInView[0];
+      const secondSection = sectionsInView[1];
+
+      // The boundary is where first section ends and second begins
+      const boundary = secondSection.top;
+
+      // Calculate what % of each section is visible
+      const firstVisibleHeight = Math.min(viewportBottom, firstSection.bottom) - Math.max(viewportTop, firstSection.top);
+      const secondVisibleHeight = Math.min(viewportBottom, secondSection.bottom) - Math.max(viewportTop, secondSection.top);
+
+      // Snap to whichever section has more visible content
+      if (secondVisibleHeight > firstVisibleHeight) {
+        // More of the second section is visible - snap forward to it
+        animateScrollTo(secondSection.top);
+      } else {
+        // More of the first section is visible - stay in it
+        // BUT: position so we can see the bottom of the first section (not the top)
+        // Calculate scroll position that puts the bottom of first section at bottom of viewport
+        const targetScroll = firstSection.bottom - viewportHeight;
+
+        // Make sure we don't scroll past the top of the first section
+        const minScroll = firstSection.top;
+        const finalScroll = Math.max(minScroll, targetScroll);
+
+        animateScrollTo(finalScroll);
+      }
+    }
+    // If only one section is visible, don't snap - let them read freely
+  }
+
+  // Smooth animation to target scroll position
+  function animateScrollTo(target) {
+    const start = scrollY;
+    const distance = target - start;
+    const duration = 300; // ms
+    const startTime = performance.now();
+
+    function animate(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Ease out cubic
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      scrollY = start + distance * ease;
+      scrollY = Math.max(0, Math.min(scrollY, maxScroll));
+
+      updateContainerPosition();
+      updateFill();
+      updateActiveSection();
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  // Handle wheel events for custom scrolling
+  function handleWheel(e) {
+    e.preventDefault();
+
+    // Clear existing timeout
+    clearTimeout(scrollTimeout);
+    isScrolling = true;
+
+    // Update scroll position (instant, no smoothing)
+    scrollY += e.deltaY;
+    scrollY = Math.max(0, Math.min(scrollY, maxScroll));
+
+    updateContainerPosition();
+    updateFill();
+    updateActiveSection();
+
+    // Set timeout to snap after scrolling stops
+    scrollTimeout = setTimeout(() => {
+      isScrolling = false;
+      snapToNearestSection();
+    }, 150);
+  }
+
+  // Handle touch events for mobile
+  let touchStartY = 0;
+  let touchStartScrollY = 0;
+
+  function handleTouchStart(e) {
+    touchStartY = e.touches[0].clientY;
+    touchStartScrollY = scrollY;
+    clearTimeout(scrollTimeout);
+  }
+
+  function handleTouchMove(e) {
+    e.preventDefault();
+    const touchY = e.touches[0].clientY;
+    const deltaY = touchStartY - touchY;
+
+    scrollY = touchStartScrollY + deltaY;
+    scrollY = Math.max(0, Math.min(scrollY, maxScroll));
+
+    updateContainerPosition();
+    updateFill();
+    updateActiveSection();
+  }
+
+  function handleTouchEnd(e) {
+    scrollTimeout = setTimeout(() => {
+      snapToNearestSection();
+    }, 150);
+  }
+
+  // Attach wheel and touch listeners
+  window.addEventListener('wheel', handleWheel, { passive: false });
+  window.addEventListener('touchstart', handleTouchStart, { passive: false });
+  window.addEventListener('touchmove', handleTouchMove, { passive: false });
+  window.addEventListener('touchend', handleTouchEnd, { passive: false });
+
   // Create tick segments for each section (proportional to section height)
   const ticks = sections.map(() => {
-    const el = document.createElement('div');
-    el.className = 'tick';
-    track.appendChild(el);
-    return el;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tick';
+    wrapper.style.position = 'absolute';
+    wrapper.style.right = '0';
+    wrapper.style.overflow = 'hidden';
+
+    const fill = document.createElement('div');
+    fill.className = 'tick-fill';
+    fill.style.position = 'absolute';
+    fill.style.top = '0';
+    fill.style.left = '0';
+    fill.style.width = '100%';
+    fill.style.height = '0%';
+
+    wrapper.appendChild(fill);
+    track.appendChild(wrapper);
+    return { wrapper, fill };
   });
 
   // Position ticks based on actual section heights
   function positionTicks() {
     const trackRect = track.getBoundingClientRect();
     const trackHeight = trackRect.height;
-    const docHeight = document.documentElement.scrollHeight;
+    const docHeight = container.scrollHeight;
 
     sections.forEach((sec, i) => {
       const sectionStart = sec.offsetTop;
@@ -28,23 +205,30 @@
       const startPercent = (sectionStart / docHeight) * 100;
       const heightPercent = (sectionHeight / docHeight) * 100;
 
-      // Position the tick
-      ticks[i].style.top = `${(startPercent / 100) * trackHeight}px`;
-      ticks[i].style.height = `${(heightPercent / 100) * trackHeight}px`;
-      ticks[i].style.width = '2px';
-      ticks[i].style.right = '0';
-      ticks[i].style.borderRadius = '0';
-      ticks[i].style.transform = 'none';
+      // Position the tick wrapper
+      const wrapper = ticks[i].wrapper;
+      const fillEl = ticks[i].fill;
+
+      wrapper.style.top = `${(startPercent / 100) * trackHeight}px`;
+      wrapper.style.height = `${(heightPercent / 100) * trackHeight}px`;
+      wrapper.style.width = '2px';
+      wrapper.style.borderRadius = '0';
 
       // Use each section's background color for its tick
       const bg = sec.dataset.bg || '#9aa0a6';
-      ticks[i].style.background = bg;
-      ticks[i].style.opacity = '0.5';
+      wrapper.style.background = 'rgba(128, 128, 128, 0.3)'; // Dim background
+      fillEl.style.background = bg; // Bright fill color
     });
   }
 
-  addEventListener('resize', positionTicks);
-  addEventListener('load', positionTicks);
+  addEventListener('resize', () => {
+    updateMaxScroll();
+    positionTicks();
+  });
+  addEventListener('load', () => {
+    updateMaxScroll();
+    positionTicks();
+  });
 
   // Interactive drag functionality
   let isDragging = false;
@@ -55,8 +239,11 @@
     const trackHeight = trackRect.height;
     const relativeY = clientY - trackTop;
     const percentage = Math.max(0, Math.min(1, relativeY / trackHeight));
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    window.scrollTo({ top: percentage * docHeight, behavior: 'auto' });
+
+    scrollY = percentage * maxScroll;
+    updateContainerPosition();
+    updateFill();
+    updateActiveSection();
   }
 
   track.addEventListener('mousedown', (e) => {
@@ -83,15 +270,40 @@
     scrollToPosition(e.clientY);
   });
 
-  // Update fill height on scroll
+  // Update fill height based on scroll position
   function updateFill() {
-    const doc = document.documentElement;
-    const max = doc.scrollHeight - window.innerHeight;
-    const pct = Math.max(0, Math.min(1, window.scrollY / max));
+    // Update each section's tick fill based on scroll progress through that section
+    sections.forEach((sec, i) => {
+      const sectionStart = sec.offsetTop;
+      const sectionEnd = sectionStart + sec.offsetHeight;
+      const viewportBottom = scrollY + window.innerHeight;
+
+      let fillPercent = 0;
+
+      if (scrollY >= sectionEnd) {
+        // Completely scrolled past this section
+        fillPercent = 100;
+      } else if (viewportBottom <= sectionStart) {
+        // Haven't reached this section yet
+        fillPercent = 0;
+      } else {
+        // Currently in this section - calculate progress
+        const visibleEnd = Math.min(viewportBottom, sectionEnd);
+        const sectionHeight = sec.offsetHeight;
+
+        // Calculate how much of the section has been scrolled through
+        const scrolledThrough = visibleEnd - sectionStart;
+        fillPercent = Math.max(0, Math.min(100, (scrolledThrough / sectionHeight) * 100));
+      }
+
+      ticks[i].fill.style.height = fillPercent + '%';
+    });
+
+    // Also update the main fill for backwards compatibility
+    const pct = maxScroll > 0 ? Math.max(0, Math.min(1, scrollY / maxScroll)) : 0;
     fill.style.height = (pct * 100) + '%';
+    fill.style.opacity = '0'; // Hide the main fill since we're using ticks now
   }
-  addEventListener('scroll', updateFill, { passive: true });
-  addEventListener('load', updateFill);
 
   // Apply background colors directly to sections
   sections.forEach(sec => {
@@ -103,25 +315,55 @@
 
   // Update corner label and nav colors based on current section
   const nav = document.querySelector('nav');
-  const io = new IntersectionObserver((entries) => {
-    const best = entries
-      .filter(e => e.isIntersecting)
-      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-    if (!best) return;
 
-    const sec = best.target;
-    if (sec.dataset.title) corner.textContent = sec.dataset.title;
+  function updateActiveSection() {
+    const viewportCenter = scrollY + window.innerHeight / 2;
+
+    let activeSection = sections[0];
+    for (const sec of sections) {
+      const secTop = sec.offsetTop;
+      const secBottom = secTop + sec.offsetHeight;
+
+      if (viewportCenter >= secTop && viewportCenter < secBottom) {
+        activeSection = sec;
+        break;
+      }
+    }
+
+    if (activeSection && activeSection.dataset.title) {
+      corner.textContent = activeSection.dataset.title;
+    }
 
     // Update nav and corner colors to match section text color
-    const fg = sec.dataset.fg;
+    const fg = activeSection.dataset.fg;
     if (fg) {
       corner.style.color = fg;
       nav.style.color = fg;
     }
-  }, { rootMargin: '-30% 0px -40% 0px', threshold: [0, .25, .5, .75, 1] });
+  }
 
-  sections.forEach(s => io.observe(s));
+  // Handle anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = anchor.getAttribute('href').substring(1);
+      const targetSection = document.getElementById(targetId);
 
-  // Initial tick positions after fonts/layout settle
-  window.setTimeout(positionTicks, 400);
+      if (targetSection) {
+        scrollY = targetSection.offsetTop;
+        scrollY = Math.max(0, Math.min(scrollY, maxScroll));
+        updateContainerPosition();
+        updateFill();
+        updateActiveSection();
+      }
+    });
+  });
+
+  // Initial setup
+  window.setTimeout(() => {
+    updateMaxScroll();
+    positionTicks();
+    updateFill();
+    updateActiveSection();
+  }, 100);
 })();

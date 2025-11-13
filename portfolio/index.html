@@ -15,11 +15,11 @@
 
 <nav aria-label="Sections">
   <a href="#intro" title="Intro">Intro</a>
+  <a href="#salience" title="Salience">Salience</a>
   <a href="#you-axis" title="YOU–AXIS">You-Axis</a>
-  <a href="#lambert" title="Lambert Paper">Lambert</a>
   <a href="#beatbreeder" title="BeatBreeder">BeatBreeder</a>
-  <a href="#volk" title="Volk">Volk</a>
   <a href="#molly" title="Molly & The Mop">Molly</a>
+  <a href="#volk" title="Volk">Volk</a>
   <a href="#cuba" title="On Cuba">Cuba</a>
   <a href="#credits" title="Credits">Credits</a>
 </nav>
@@ -34,6 +34,7 @@
   </div>
 </div>
 
+<div id="scroll-container">
 <!-- Sections
      Each section defines its color theme via data attributes.
      data-bg / data-fg control page colors; data-accent controls the progress color.
@@ -54,6 +55,41 @@
   </div>
 </section>
 
+<section id="salience" class="wrap"
+  data-title="Salience"
+  data-bg="#fff8e7" data-fg="#1a1a1a" data-accent="#2d8ef4">
+  <article>
+    <div class="eyebrow">NeurIPS 2025 Workshop on Symmetry and Geometry in Neural Representations</div>
+    <h2>Saliency Thresholds in Neural Code and its Relation to the Power-Law, Gaussian, and Lambert W Function</h2>
+    <p class="lede">
+      Alex Alvarez*, Jin Hyun Park*, and Yoonsuck Choe
+    </p>
+
+    <p>
+      Accepted to the <a href="https://www.neurreps.org/">NeurIPS 2025 Workshop on Symmetry and Geometry in Neural Representations</a>.
+      We epxlore a theoretical juncture where the power law, Gaussian distribution, and Lambert W
+      function converge unify the saliency thresholds in neural code.
+    </p>
+
+    <p>
+      The Lambert W function emerges naturally in instances where exponential processes (like the Gaussian's
+      exponentially decaying tails) and polynomial processes (like the power law's polynomially decaying tails)
+      meet.
+    </p>
+
+    <p>
+      Our results point to a biologically plausible invariant property in neural thresholding that could greatly simplify downstream
+      processing in visual systems and potentially generalizes across different sensory modalities and
+      processing levels.
+    </p>
+
+    <p style="margin-top: 2rem;">
+      <strong>→ <a href="../writing/saliency-lambert-w.html" style="color: #2d8ef4; text-decoration: underline;">Read the full paper</a></strong> ·
+      <a href="https://openreview.net/forum?id=cjo2oadaRz&referrer=%5Bthe%20profile%20of%20Alex%20Alvarez%5D(%2Fprofile%3Fid%3D~Alex_Alvarez1)" style="color: #2d8ef4; text-decoration: underline;">Access PDF</a>
+    </p>
+  </article>
+</section>
+
 <section id="you-axis" class="wrap panel"
   data-title="YOU–AXIS"
   data-bg="#2d8ef4" data-fg="#0a0a0a" data-accent="#0a0a0a">
@@ -68,45 +104,48 @@
   </div>
 </section>
 
-<section id="lambert" class="wrap"
-  data-title="Lambert Paper"
-  data-bg="#fff8e7" data-fg="#1a1a1a" data-accent="#2d8ef4">
+<section id="harvard" class="wrap"
+  data-title="Harvard Research"
+  data-bg="#8b2635" data-fg="#f5f5f5" data-accent="#ffd700">
   <article>
-    <div class="eyebrow">NeurIPS 2025 Workshop · Symmetry and Geometry in Neural Representations</div>
-    <h2>Saliency Thresholds in Neural Code and its Relation to the Power-Law, Gaussian, and Lambert W Function</h2>
+    <div class="eyebrow">Harvard Medical School / Massachusetts General Hospital</div>
+    <h2>Harvard Research</h2>
     <p class="lede">
-      Alex Alvarez, Jin Hyun Park, & Yoonsuck Choe
+      Research conducted at Harvard Medical School / Massachusetts General Hospital.
     </p>
+  </article>
+</section>
 
-    <p>
-      Accepted to the NeurIPS 2025 Workshop on Symmetry and Geometry in Neural Representations.
-      This work explores a theoretical juncture where the power law, Gaussian distribution, and Lambert W
-      function converge to relate to saliency thresholds in neural code.
+<section id="addiction" class="wrap panel"
+  data-title="Addiction Research"
+  data-bg="#f5f5f5" data-fg="#1a1a1a" data-accent="#8b2635">
+  <article>
+    <h2>Addiction Research</h2>
+    <p class="lede">
+      Studies on addiction mechanisms and interventions.
     </p>
+  </article>
+</section>
 
-    <!-- <p>
-      The cortical neurons' response properties are peculiar: despite variability in stimulus distribution,
-      the response has a stereotypic heavy-tail distribution. We show that when this power-law-like response distribution
-      is compared with a matched Gaussian distribution, the intersection point is linearly correlated with the saliency
-      threshold. This intersection can be analytically computed using the Lambert W function and is also linearly
-      correlated with the standard deviation of the response.
-    </p> -->
-
-    <p>
-      The Lambert W function emerges naturally in instances where exponential processes (like the Gaussian's
-      exponentially decaying tails) and polynomial processes (like the power law's polynomially decaying tails)
-      meet—appearing across diverse phenomena from brain oxygen coupling to enzyme kinetics and evolutionary models.
+<section id="spectral-bias" class="wrap"
+  data-title="Spectral Bias"
+  data-bg="#000000" data-fg="#f5f5f5" data-accent="#2d8ef4">
+  <article>
+    <h2>Spectral Bias in Neural Networks</h2>
+    <p class="lede">
+      Investigation of spectral bias phenomena in deep learning systems and their implications
+      for learning dynamics.
     </p>
+  </article>
+</section>
 
-    <p>
-      These results point to an invariant property in neural thresholding that could greatly simplify downstream
-      processing in biological visual systems and potentially extends across different sensory modalities and
-      processing levels.
-    </p>
-
-    <p style="margin-top: 2rem;">
-      <strong>→ <a href="../writing/saliency-lambert-w.html" style="color: #2d8ef4; text-decoration: underline;">Read the full paper</a></strong> ·
-      <a href="../assets/Lambert Submission.pdf" style="color: #2d8ef4; text-decoration: underline;">Download PDF</a>
+<section id="brain-hypothesis" class="wrap panel"
+  data-title="Brain Hypothesis"
+  data-bg="#2d8ef4" data-fg="#0a0a0a" data-accent="#000000">
+  <article>
+    <h2>Brain Hypothesis Paper Presentation</h2>
+    <p class="lede">
+      Theoretical work on neural computation and brain function.
     </p>
   </article>
 </section>
@@ -158,91 +197,76 @@
   </article>
 </section>
 
-<section id="volk" class="wrap panel"
-  data-title="Volk"
-  data-bg="#2d8ef4" data-fg="#0a0a0a" data-accent="#000000">
+<section id="demographic-iq" class="wrap"
+  data-title="Demographic IQ"
+  data-bg="#fff8e7" data-fg="#1a1a1a" data-accent="#2d8ef4">
   <article>
-    <!-- <div class="eyebrow">2019 – 2023 · E-commerce & Marketing</div> -->
-    <h2>Volk</h2>
+    <h2>Demographic IQ</h2>
     <p class="lede">
-      From December 2019 to December 2023 I built multiple e-commerce brands
-      that collectively achieved over 100 million impressions and millions of organic followers
-      across social platforms. My friends and I pioneered "organic social media marketing" during the wild wild west era of social media ads. It’s now a widely used and formalized marketing strategy. It was a lot of fun but I’m no longer interested in it.
+      [Project description to be added]
     </p>
-
-    <!-- <h3>The Journey</h3> -->
-    <!-- <p>
-      From December 2019 to December 2023 I built multiple e-commerce brands
-      that collectively achieved over 100 million impressions and millions of organic followers
-      across social platforms. My friends and I pioneered "organic social media marketing" during the wild wild west era of social media ads. It’s now a widely used and formalized marketing strategy. It was a lot of fun but I’m no longer interested in it.
-    </p> -->
-
-    <div class="project-images">
-      <figure class="photo">
-        <div class="polaroid">
-          <div>
-            <img src="assets/packets_sqr.jpg" alt="Volk product packages" style="width: 100%; height: auto;">
-          </div>
-        </div>
-        <figcaption>When I used to package everything from my apartment.</figcaption>
-      </figure>
-
-      <div class="image-row">
-        <figure class="photo">
-          <div class="polaroid">
-            <div>
-              <img src="../assets/volk-social-1.png" alt="Volk social media presence" style="width: 100%; height: auto;">
-            </div>
-          </div>
-          <figcaption>Building community through authentic content.</figcaption>
-        </figure>
-
-        <figure class="photo">
-          <div class="polaroid">
-            <div>
-              <img src="../assets/volk-social-2.png" alt="Volk brand engagement" style="width: 100%; height: auto;">
-            </div>
-          </div>
-          <figcaption>Organic growth across platforms.</figcaption>
-        </figure>
-      </div>
-    </div>
-<!-- 
-    <h3>What We Built</h3>
-    <p>
-      We didn't just sell products&mdash;we built brands with distinct personalities and loyal communities.
-      Our approach was unconventional for the time: instead of paid advertising, we focused on creating
-      entertaining, shareable content that happened to feature our products. We treated social media
-      accounts as entertainment channels first and storefronts second.
-    </p>
-
-    <p>
-      This strategy paid off. Multiple six and seven-figure exits validated our approach, and the
-      methodology we developed through trial and error in the "wild west era" of social commerce
-      has since become a standard playbook in the industry.
-    </p> -->
-<!-- 
-    <h3>Lessons Learned</h3>
-    <p>
-      Beyond the financial success, Volk taught me about rapid iteration, understanding audience
-      psychology, and building systems that scale. It was a masterclass in pattern recognition&mdash;identifying
-      what content would resonate before it went viral, understanding platform algorithms through
-      empirical testing, and adapting quickly to changing dynamics.
-    </p>
-
-    <p>
-      While I'm no longer actively involved in e-commerce, the experience of building something
-      from zero to millions of impressions, managing teams, and navigating high-stakes exits has
-      been invaluable. It taught me that interesting problems exist everywhere, and that the
-      principles of experimentation, measurement, and iteration apply just as well to building
-      businesses as they do to research.
-    </p> -->
   </article>
 </section>
 
-<section id="molly" class="wrap"
+<section id="its-pandor" class="wrap panel"
+  data-title="ITS / Pandor"
+  data-bg="#2d8ef4" data-fg="#0a0a0a" data-accent="#000000">
+  <article>
+    <h2>ITS / Pandor Education AI</h2>
+    <p class="lede">
+      Intelligent Tutoring System that evolved into Pandor, an education AI platform.
+      Exploring adaptive learning and personalized educational experiences.
+    </p>
+  </article>
+</section>
+
+<section id="zyntora" class="wrap"
+  data-title="Zyntora"
+  data-bg="#f5f5f5" data-fg="#1a1a1a" data-accent="#8b2635">
+  <article>
+    <h2>Zyntora</h2>
+    <p class="lede">
+      [Project description to be added]
+    </p>
+  </article>
+</section>
+
+<section id="neural-compass" class="wrap panel"
+  data-title="Neural Compass"
+  data-bg="#fff8e7" data-fg="#1a1a1a" data-accent="#2d8ef4">
+  <article>
+    <h2>Neural Compass</h2>
+    <p class="lede">
+      [Project description to be added]
+    </p>
+  </article>
+</section>
+
+<section id="evolvable-fashion" class="wrap"
+  data-title="Evolvable Fashion"
+  data-bg="#2d8ef4" data-fg="#0a0a0a" data-accent="#000000">
+  <article>
+    <h2>Evolvable Fashion</h2>
+    <p class="lede">
+      Applying evolutionary algorithms to fashion design and wearable aesthetics.
+    </p>
+  </article>
+</section>
+
+<section id="evolutionary-drug-discovery" class="wrap panel"
+  data-title="Drug Discovery"
+  data-bg="#8b2635" data-fg="#f5f5f5" data-accent="#ffd700">
+  <article>
+    <h2>Evolutionary Drug Discovery</h2>
+    <p class="lede">
+      Using evolutionary computation for molecular design and drug discovery optimization.
+    </p>
+  </article>
+</section>
+
+<section id="molly" class="wrap panel"
   data-title="Molly & The Mop"
-  data-bg="#fff8e7" data-fg="#1a1a1a" data-accent="#ff6b6b">
+  data-bg="#2d8ef4" data-fg="#0a0a0a" data-accent="#000000">
   <article>
     <!-- <div class="eyebrow">2022 – 2023 · Service Marketplace</div> -->
     <h2>Molly &amp; The Mop</h2>
@@ -304,6 +328,88 @@
   </article>
 </section>
 
+<section id="volk" class="wrap"
+  data-title="Volk"
+  data-bg="#fff8e7" data-fg="#1a1a1a" data-accent="#8b2635">
+  <article>
+    <!-- <div class="eyebrow">2019 – 2023 · E-commerce & Marketing</div> -->
+    <h2>Volk</h2>
+    <p class="lede">
+      From December 2019 to December 2023 I built multiple e-commerce brands
+      that collectively achieved over 100 million impressions and millions of organic followers
+      across social platforms. My friends and I pioneered "organic social media marketing" during the wild wild west era of social media ads. It's now a widely used and formalized marketing strategy. It was a lot of fun but I'm no longer interested in it.
+    </p>
+
+    <!-- <h3>The Journey</h3> -->
+    <!-- <p>
+      From December 2019 to December 2023 I built multiple e-commerce brands
+      that collectively achieved over 100 million impressions and millions of organic followers
+      across social platforms. My friends and I pioneered "organic social media marketing" during the wild wild west era of social media ads. It's now a widely used and formalized marketing strategy. It was a lot of fun but I'm no longer interested in it.
+    </p> -->
+
+    <div class="project-images">
+      <figure class="photo">
+        <div class="polaroid">
+          <div>
+            <img src="assets/packets_sqr.jpg" alt="Volk product packages" style="width: 100%; height: auto;">
+          </div>
+        </div>
+        <figcaption>When I used to package everything from my apartment.</figcaption>
+      </figure>
+
+      <div class="image-row">
+        <figure class="photo">
+          <div class="polaroid">
+            <div>
+              <img src="../assets/volk-social-1.png" alt="Volk social media presence" style="width: 100%; height: auto;">
+            </div>
+          </div>
+          <figcaption>Building community through authentic content.</figcaption>
+        </figure>
+
+        <figure class="photo">
+          <div class="polaroid">
+            <div>
+              <img src="../assets/volk-social-2.png" alt="Volk brand engagement" style="width: 100%; height: auto;">
+            </div>
+          </div>
+          <figcaption>Organic growth across platforms.</figcaption>
+        </figure>
+      </div>
+    </div>
+<!--
+    <h3>What We Built</h3>
+    <p>
+      We didn't just sell products&mdash;we built brands with distinct personalities and loyal communities.
+      Our approach was unconventional for the time: instead of paid advertising, we focused on creating
+      entertaining, shareable content that happened to feature our products. We treated social media
+      accounts as entertainment channels first and storefronts second.
+    </p>
+
+    <p>
+      This strategy paid off. Multiple six and seven-figure exits validated our approach, and the
+      methodology we developed through trial and error in the "wild west era" of social commerce
+      has since become a standard playbook in the industry.
+    </p> -->
+<!--
+    <h3>Lessons Learned</h3>
+    <p>
+      Beyond the financial success, Volk taught me about rapid iteration, understanding audience
+      psychology, and building systems that scale. It was a masterclass in pattern recognition&mdash;identifying
+      what content would resonate before it went viral, understanding platform algorithms through
+      empirical testing, and adapting quickly to changing dynamics.
+    </p>
+
+    <p>
+      While I'm no longer actively involved in e-commerce, the experience of building something
+      from zero to millions of impressions, managing teams, and navigating high-stakes exits has
+      been invaluable. It taught me that interesting problems exist everywhere, and that the
+      principles of experimentation, measurement, and iteration apply just as well to building
+      businesses as they do to research.
+    </p> -->
+  </article>
+</section>
+
 <section id="cuba" class="wrap"
   data-title="On Cuba"
   data-bg="#8b2635" data-fg="#f5f5f5" data-accent="#ffd700">
@@ -354,7 +460,7 @@
       I really really want to change the world. Because I believe it, I think I will and because I think I will, I believe it. 
     </p>
     <p class="serif">
-      This is not even close to being complete but it represents what I was envisioning for the digital portfolio.
+      Read my research manifesto here.
     </p>
     <p>
       <strong>Contact:</strong> <a href="mailto:caalvarez@mgh.harvard.edu">caalvarez@mgh.harvard.edu</a> ·
@@ -364,6 +470,7 @@
     </p>
   </div>
 </section>
+</div>
 
 <script src="script.js"></script>
 </body>
