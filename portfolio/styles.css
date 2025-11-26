@@ -295,3 +295,66 @@ figcaption {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* Polaroid frame with white border */
+.polaroid-frame {
+  background: white;
+  padding: 16px 16px 48px 16px; /* thicker bottom border like a real polaroid */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  width: min(500px, 90%);
+  box-sizing: border-box;
+}
+
+/* Polaroid development effect for intro */
+.polaroid-develop {
+  position: relative;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.polaroid-develop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(185, 200, 140, 0.85) 0%,
+    rgba(175, 195, 145, 0.8) 50%,
+    rgba(190, 205, 150, 0.75) 100%);
+  mix-blend-mode: normal;
+  pointer-events: none;
+  animation: fade-overlay 3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  z-index: 2;
+}
+
+.polaroid-develop img {
+  animation: develop 3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes develop {
+  0% {
+    filter: sepia(0.5) saturate(0.3) brightness(1.2) contrast(0.7) hue-rotate(15deg);
+    opacity: 0.4;
+  }
+  50% {
+    filter: sepia(0.3) saturate(0.6) brightness(1.1) contrast(0.85) hue-rotate(8deg);
+    opacity: 0.7;
+  }
+  100% {
+    filter: sepia(0) saturate(1) brightness(1) contrast(1) hue-rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-overlay {
+  0% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
