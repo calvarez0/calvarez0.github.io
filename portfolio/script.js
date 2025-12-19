@@ -221,9 +221,46 @@
     });
   }
 
+  // Track the current centered section to preserve on resize/zoom
+  let resizeTimeout;
   addEventListener('resize', () => {
-    updateMaxScroll();
-    positionTicks();
+    // Find which section is currently centered
+    const viewportCenter = scrollY + window.innerHeight / 2;
+    let centerSection = sections[0];
+    let centerSectionProgress = 0;
+
+    for (const sec of sections) {
+      const secTop = sec.offsetTop;
+      const secBottom = secTop + sec.offsetHeight;
+
+      if (viewportCenter >= secTop && viewportCenter < secBottom) {
+        centerSection = sec;
+        // Calculate how far through this section we are (0 to 1)
+        centerSectionProgress = (viewportCenter - secTop) / sec.offsetHeight;
+        break;
+      }
+    }
+
+    // Clear existing timeout
+    clearTimeout(resizeTimeout);
+
+    // Debounce the recalculation slightly
+    resizeTimeout = setTimeout(() => {
+      updateMaxScroll();
+      positionTicks();
+
+      // Recalculate scroll position to maintain the same section position
+      const newSectionTop = centerSection.offsetTop;
+      const newSectionHeight = centerSection.offsetHeight;
+      const newViewportCenter = newSectionTop + (newSectionHeight * centerSectionProgress);
+
+      scrollY = newViewportCenter - window.innerHeight / 2;
+      scrollY = Math.max(0, Math.min(scrollY, maxScroll));
+
+      updateContainerPosition();
+      updateFill();
+      updateActiveSection();
+    }, 10);
   });
   addEventListener('load', () => {
     updateMaxScroll();
@@ -366,4 +403,160 @@
     updateFill();
     updateActiveSection();
   }, 100);
+})();
+
+/* --- Favorites Expansion --- */
+(() => {
+  // Rainbow colors that are visible against beige background
+  const rainbowColors = [
+    '#cc0000', // red
+    '#d94d00', // red-orange
+    '#cc6600', // orange
+    '#b8860b', // dark goldenrod
+    '#997a00', // dark yellow
+    '#008000', // green
+    '#006b6b', // teal
+    '#0080cc', // blue
+    '#0000cc', // dark blue
+    '#4b0082', // indigo
+    '#6a0dad', // purple
+    '#8b008b', // dark magenta
+    '#cc0066', // magenta-red
+    '#b30047'  // deep pink
+  ];
+
+  // Shuffle array function
+  function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
+  // Get all favorite items and assign random colors
+  const favoriteItems = document.querySelectorAll('.favorite-item');
+  const shuffledColors = shuffleArray(rainbowColors);
+
+  favoriteItems.forEach((item, index) => {
+    // Assign random color from shuffled array, cycling if needed
+    const color = shuffledColors[index % shuffledColors.length];
+    item.style.color = color;
+    // Store original color for hover effect
+    item.dataset.originalColor = color;
+  });
+
+  // Placeholder data for each category
+  const favoritesData = {
+    concerts: [
+      { title: "Bob Dylan – The 30th Anniversary Concert", year: "1992", url: "#" },
+      { title: "RAYE - Live at Montreux Jazz Festival", year: "2024", url: "#" },
+      { title: "Placeholder Concert 3", year: "2020", url: "#" }
+    ],
+    movies: [
+      { title: "Placeholder Movie 1", year: "2010", url: "#" },
+      { title: "Placeholder Movie 2", year: "2015", url: "#" },
+      { title: "Placeholder Movie 3", year: "2020", url: "#" }
+    ],
+    albums: [
+      { title: "Placeholder Album 1", year: "2018", url: "#" },
+      { title: "Placeholder Album 2", year: "2019", url: "#" },
+      { title: "Placeholder Album 3", year: "2021", url: "#" }
+    ],
+    books: [
+      { title: "Placeholder Book 1", year: "2010", url: "#" },
+      { title: "Placeholder Book 2", year: "2012", url: "#" },
+      { title: "Placeholder Book 3", year: "2016", url: "#" }
+    ],
+    videos: [
+      { title: "Placeholder Video 1", year: "2020", url: "#" },
+      { title: "Placeholder Video 2", year: "2021", url: "#" },
+      { title: "Placeholder Video 3", year: "2022", url: "#" }
+    ],
+    history: [
+      { title: "Placeholder Historical Figure 1", year: "", url: "#" },
+      { title: "Placeholder Historical Figure 2", year: "", url: "#" },
+      { title: "Placeholder Historical Figure 3", year: "", url: "#" }
+    ],
+    wikipedia: [
+      { title: "Placeholder Wikipedia Page 1", year: "", url: "#" },
+      { title: "Placeholder Wikipedia Page 2", year: "", url: "#" },
+      { title: "Placeholder Wikipedia Page 3", year: "", url: "#" }
+    ],
+    musicians: [
+      { title: "Placeholder Musician 1", year: "", url: "#" },
+      { title: "Placeholder Musician 2", year: "", url: "#" },
+      { title: "Placeholder Musician 3", year: "", url: "#" }
+    ],
+    researchers: [
+      { title: "Placeholder Researcher 1", year: "", url: "#" },
+      { title: "Placeholder Researcher 2", year: "", url: "#" },
+      { title: "Placeholder Researcher 3", year: "", url: "#" }
+    ],
+    artists: [
+      { title: "Placeholder Artist 1", year: "", url: "#" },
+      { title: "Placeholder Artist 2", year: "", url: "#" },
+      { title: "Placeholder Artist 3", year: "", url: "#" }
+    ],
+    papers: [
+      { title: "Placeholder Paper 1", year: "2020", url: "#" },
+      { title: "Placeholder Paper 2", year: "2021", url: "#" },
+      { title: "Placeholder Paper 3", year: "2022", url: "#" }
+    ],
+    designers: [
+      { title: "Placeholder Designer 1", year: "", url: "#" },
+      { title: "Placeholder Designer 2", year: "", url: "#" },
+      { title: "Placeholder Designer 3", year: "", url: "#" }
+    ],
+    philosophers: [
+      { title: "Placeholder Philosopher 1", year: "", url: "#" },
+      { title: "Placeholder Philosopher 2", year: "", url: "#" },
+      { title: "Placeholder Philosopher 3", year: "", url: "#" }
+    ],
+    fighters: [
+      { title: "Placeholder Fighter 1", year: "", url: "#" },
+      { title: "Placeholder Fighter 2", year: "", url: "#" },
+      { title: "Placeholder Fighter 3", year: "", url: "#" }
+    ]
+  };
+
+  // Track which items are currently expanded
+  const expandedItems = new Set();
+
+  favoriteItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const category = item.dataset.category;
+
+      // Check if this item is already expanded
+      if (expandedItems.has(category)) {
+        // Collapse it
+        const expandedSpan = document.getElementById(`expanded-${category}`);
+        if (expandedSpan) {
+          expandedSpan.remove();
+        }
+        expandedItems.delete(category);
+      } else {
+        // Expand it
+        const data = favoritesData[category] || [];
+        const expandedSpan = document.createElement('span');
+        expandedSpan.id = `expanded-${category}`;
+        expandedSpan.style.color = '#1a1a1a';
+        expandedSpan.style.fontWeight = 'normal';
+
+        // Create the list
+        const links = data.map(dataItem => {
+          const yearText = dataItem.year ? ` (${dataItem.year})` : '';
+          return `<a href="${dataItem.url}" style="color: inherit; text-decoration: underline;">${dataItem.title}${yearText}</a>`;
+        }).join(', ');
+
+        expandedSpan.innerHTML = `: ${links}`;
+
+        // Insert after the clicked item
+        item.after(expandedSpan);
+        expandedItems.add(category);
+      }
+    });
+  });
 })();

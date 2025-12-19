@@ -82,31 +82,91 @@ h1, h2 {
 }
 
 h1 {
-  font-size: clamp(42px, 8vw, 120px);
+  font-size: 2.625rem;
   font-weight: 700;
   letter-spacing: -.02em;
 }
 
+@media (min-width: 768px) {
+  h1 {
+    font-size: 4rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  h1 {
+    font-size: 5.5rem;
+  }
+}
+
 h2 {
-  font-size: clamp(28px, 4.2vw, 56px);
+  font-size: 1.75rem;
   font-weight: 600;
 }
 
+@media (min-width: 768px) {
+  h2 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  h2 {
+    font-size: 3.5rem;
+  }
+}
+
 h3 {
-  font-size: clamp(22px, 3vw, 36px);
+  font-size: 1.375rem;
   font-weight: 600;
   margin: 1.5rem 0 .8rem;
   line-height: 1.2;
 }
 
+@media (min-width: 768px) {
+  h3 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  h3 {
+    font-size: 2.25rem;
+  }
+}
+
 p, li, figcaption {
-  font-size: clamp(17px, 1.5vw, 20px);
+  font-size: 1.0625rem;
   max-width: 70ch;
 }
 
+@media (min-width: 768px) {
+  p, li, figcaption {
+    font-size: 1.125rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  p, li, figcaption {
+    font-size: 1.25rem;
+  }
+}
+
 .lede {
-  font-size: clamp(20px, 2vw, 24px);
+  font-size: 1.25rem;
   opacity: .95;
+}
+
+@media (min-width: 768px) {
+  .lede {
+    font-size: 1.375rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .lede {
+    font-size: 1.5rem;
+  }
 }
 
 /* Ornate script highlights */
@@ -246,6 +306,7 @@ figure.photo {
 }
 .polaroid {
   width: min(720px, 90%);
+  max-width: 720px;
   display: block;
   margin: 0 auto;
 }
@@ -302,6 +363,7 @@ figcaption {
   padding: 16px 16px 48px 16px; /* thicker bottom border like a real polaroid */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   width: min(500px, 90%);
+  max-width: 500px;
   box-sizing: border-box;
 }
 
@@ -357,4 +419,71 @@ figcaption {
   100% {
     opacity: 0;
   }
+}
+/* Cuba: two-column layout */
+.cuba-layout{
+  display: grid;
+  grid-template-columns: minmax(360px, 520px) 1fr;
+  gap: 2.5rem;
+  align-items: start;
+  margin-top: 2rem;
+}
+
+.cuba-figure{
+  justify-items: start;   /* stop centering inside the figure */
+  width: 100%;
+}
+
+.cuba-img{
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  display: block;
+}
+
+.cuba-figure figcaption{
+  text-align: left;
+  max-width: none;
+}
+
+.cuba-text p{
+  max-width: none;        /* let the right column breathe */
+}
+
+/* Stack on mobile */
+@media (max-width: 768px){
+  .cuba-layout{ grid-template-columns: 1fr; }
+  .cuba-figure{ justify-items: center; }
+  .cuba-figure figcaption{ text-align: center; }
+}
+
+/* Responsive video container */
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Favorite items styling */
+.favorite-item {
+  cursor: pointer;
+  font-weight: 600;
+  transition: filter 0.2s ease;
+}
+
+.favorite-item:hover {
+  filter: brightness(0.7);
 }
