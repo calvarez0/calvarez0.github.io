@@ -452,72 +452,93 @@
     concerts: [
       { title: "Bob Dylan – The 30th Anniversary Concert", year: "1992", url: "#" },
       { title: "RAYE - Live at Montreux Jazz Festival", year: "2024", url: "#" },
-      { title: "Placeholder Concert 3", year: "2020", url: "#" }
+      { title: "tracy chapman live?", year: "2020", url: "#" },
+      { title: "Radiohead live", year: "2020", url: "#" },
+      { title: "Bad bunny tiny desk", year: "2020", url: "#" }
     ],
     movies: [
-      { title: "Placeholder Movie 1", year: "2010", url: "#" },
-      { title: "Placeholder Movie 2", year: "2015", url: "#" },
-      { title: "Placeholder Movie 3", year: "2020", url: "#" }
+      { title: "Gattaca", year: "2020", url: "#" },
+      { title: "City of Gods", year: "2010", url: "#" },
+      { title: "Fight Club", year: "2015", url: "#" }
     ],
     albums: [
-      { title: "Placeholder Album 1", year: "2018", url: "#" },
-      { title: "Placeholder Album 2", year: "2019", url: "#" },
-      { title: "Placeholder Album 3", year: "2021", url: "#" }
+      // find a way to dadd artist
+      { title: "The Freewheelin' Bob Dylan", year: "2018", url: "#" },
+      { title: "REWORK", year: "2012", url: "#" },
+      { title: "Daisy", year: "2019", url: "#" },
+      { title: "One Night Stand", year: "1963", url: "#" },
+      { title: "Dummy", year: "1994", url: "#" },
+      { title: "Drukqs", year: "2001", url: "#" },
+      { title: "The Deep End", year: "2018", url: "#" },
+      { title: "Le Tigre", year: "1999", url: "#" },
+      { title: "Mezzanine", year: "1998", url: "#" },
+      { title: "Sings Again", year: "1986", url: "#" },
+      { title: "Breath From Another", year: "1998", url: "#" }
+
     ],
     books: [
-      { title: "Placeholder Book 1", year: "2010", url: "#" },
-      { title: "Placeholder Book 2", year: "2012", url: "#" },
+      // add author
+      { title: "Man's Search For Meaning", year: "2010", url: "#" },
+      { title: "", year: "2012", url: "#" },
       { title: "Placeholder Book 3", year: "2016", url: "#" }
     ],
     videos: [
-      { title: "Placeholder Video 1", year: "2020", url: "#" },
+      { title: "Miracle on Six Train", year: "2020", url: "#" },
       { title: "Placeholder Video 2", year: "2021", url: "#" },
       { title: "Placeholder Video 3", year: "2022", url: "#" }
     ],
     history: [
-      { title: "Placeholder Historical Figure 1", year: "", url: "#" },
-      { title: "Placeholder Historical Figure 2", year: "", url: "#" },
-      { title: "Placeholder Historical Figure 3", year: "", url: "#" }
+      { title: "Lee Kuan Yew", year: "", url: "#" },
+      { title: "Alexander The Great", year: "", url: "#" },
+      { title: "", year: "", url: "#" }
     ],
     wikipedia: [
-      { title: "Placeholder Wikipedia Page 1", year: "", url: "#" },
-      { title: "Placeholder Wikipedia Page 2", year: "", url: "#" },
-      { title: "Placeholder Wikipedia Page 3", year: "", url: "#" }
+      { title: "Chet Baker", year: "", url: "#" },
+      { title: "Nia (Cuban Lady)", year: "", url: "#" },
+      { title: "Tracy Mcgrady", year: "", url: "#" }
     ],
     musicians: [
-      { title: "Placeholder Musician 1", year: "", url: "#" },
-      { title: "Placeholder Musician 2", year: "", url: "#" },
-      { title: "Placeholder Musician 3", year: "", url: "#" }
+      { title: "Bob Dylan", year: "", url: "#" },
+      { title: "Arca", year: "", url: "#" },
+      { title: "Jai Paul", year: "", url: "#" }
     ],
     researchers: [
-      { title: "Placeholder Researcher 1", year: "", url: "#" },
-      { title: "Placeholder Researcher 2", year: "", url: "#" },
-      { title: "Placeholder Researcher 3", year: "", url: "#" }
+      { title: "Sam Gershman", year: "", url: "#" },
+      { title: "Max Tegmark", year: "", url: "#" },
+      { title: "Sebastian Seung", year: "", url: "#" }
     ],
     artists: [
-      { title: "Placeholder Artist 1", year: "", url: "#" },
-      { title: "Placeholder Artist 2", year: "", url: "#" },
-      { title: "Placeholder Artist 3", year: "", url: "#" }
+      { title: "Leonardo DaVinci", year: "", url: "#" },
+      { title: "Basquiat", year: "", url: "#" },
+      { title: "Caravaggio", year: "", url: "#" },
+      { title: "Banksy", year: "", url: "#" },
     ],
     papers: [
-      { title: "Placeholder Paper 1", year: "2020", url: "#" },
+      { title: "Platonic Representation Hypothesis", year: "2020", url: "#" },
       { title: "Placeholder Paper 2", year: "2021", url: "#" },
       { title: "Placeholder Paper 3", year: "2022", url: "#" }
     ],
     designers: [
-      { title: "Placeholder Designer 1", year: "", url: "#" },
-      { title: "Placeholder Designer 2", year: "", url: "#" },
-      { title: "Placeholder Designer 3", year: "", url: "#" }
+      { title: "Steve Jobs", year: "", url: "#" },
+      { title: "Leonardo Davinci", year: "", url: "#" },
+      { title: "Virgil Abloh", year: "", url: "#" }
     ],
     philosophers: [
-      { title: "Placeholder Philosopher 1", year: "", url: "#" },
+      { title: "Marcus Aurelius", year: "", url: "#" },
       { title: "Placeholder Philosopher 2", year: "", url: "#" },
       { title: "Placeholder Philosopher 3", year: "", url: "#" }
     ],
     fighters: [
-      { title: "Placeholder Fighter 1", year: "", url: "#" },
-      { title: "Placeholder Fighter 2", year: "", url: "#" },
-      { title: "Placeholder Fighter 3", year: "", url: "#" }
+      { title: "Rickson Gracie", year: "", url: "#" },
+      { title: "Mike Tyson", year: "", url: "#" },
+      { title: "Achilles", year: "", url: "#" },
+      { title: "Muhammad Ali", year: "", url: "#" }
+    ],
+    dj: [
+      { title: "the one sent to julian", year: "", url: "#" },
+      { title: "arca boiler room", year: "", url: "#" },
+      { title: "japanese guy in bathroom", year: "", url: "#" },
+      { title: "fabrica del arte?", year: "", url: "#" }
     ]
   };
 
