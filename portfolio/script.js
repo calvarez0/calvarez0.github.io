@@ -171,12 +171,12 @@
   window.addEventListener('touchend', handleTouchEnd, { passive: false });
 
   // Create tick segments for each section (proportional to section height)
-  const ticks = sections.map(() => {
+  const ticks = sections.map((sec) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'tick';
     wrapper.style.position = 'absolute';
     wrapper.style.right = '0';
-    wrapper.style.overflow = 'hidden';
+    wrapper.style.overflow = 'visible';
 
     const fill = document.createElement('div');
     fill.className = 'tick-fill';
@@ -185,10 +185,17 @@
     fill.style.left = '0';
     fill.style.width = '100%';
     fill.style.height = '0%';
+    fill.style.overflow = 'hidden';
+
+    // Add section title label
+    const label = document.createElement('div');
+    label.className = 'tick-label';
+    label.textContent = sec.dataset.title || '';
 
     wrapper.appendChild(fill);
+    wrapper.appendChild(label);
     track.appendChild(wrapper);
-    return { wrapper, fill };
+    return { wrapper, fill, label };
   });
 
   // Position ticks based on actual section heights
@@ -267,6 +274,26 @@
     positionTicks();
   });
 
+  // Proximity hover detection (50px range)
+  const HOVER_DISTANCE = 50;
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+      scrollToPosition(e.clientY);
+      return;
+    }
+
+    // Calculate distance from right edge of window to mouse
+    const distanceFromRight = window.innerWidth - e.clientX;
+
+    // If within 50px of the scrollbar area, add hover class
+    if (distanceFromRight <= HOVER_DISTANCE + 60) { // 60 accounts for the scrollbar position
+      progressContainer.classList.add('hover');
+    } else {
+      progressContainer.classList.remove('hover');
+    }
+  });
+
   // Interactive drag functionality
   let isDragging = false;
 
@@ -288,12 +315,6 @@
     progressContainer.classList.add('active');
     scrollToPosition(e.clientY);
     e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-      scrollToPosition(e.clientY);
-    }
   });
 
   document.addEventListener('mouseup', () => {
@@ -376,6 +397,11 @@
     if (fg) {
       corner.style.color = fg;
       nav.style.color = fg;
+
+      // Update all tick labels to match current section text color
+      ticks.forEach(tick => {
+        tick.label.style.color = fg;
+      });
     }
   }
 
@@ -450,95 +476,119 @@
   // Placeholder data for each category
   const favoritesData = {
     concerts: [
-      { title: "Bob Dylan – The 30th Anniversary Concert", year: "1992", url: "#" },
-      { title: "RAYE - Live at Montreux Jazz Festival", year: "2024", url: "#" },
-      { title: "tracy chapman live?", year: "2020", url: "#" },
-      { title: "Radiohead live", year: "2020", url: "#" },
-      { title: "Bad bunny tiny desk", year: "2020", url: "#" }
+      { title: "Bob Dylan Live at the ABC Theatre", year: "1966", url: "https://youtu.be/63ucJmVonAc?si=2NNQEKBDAOrt6SuS" },
+      { title: "RAYE Live at Montreux Jazz Festival", year: "2024", url: "https://youtu.be/4GRfxJiQeyM?si=cLsLMApjiEJeKvPx" },
+      { title: "Bad Bunny: Tiny Desk Concert", year: "2025", url: "https://www.youtube.com/watch?v=ouuPSxE1hK4&t=285s" },
+      { title: "Tracy Chapman Live at Oakland Coliseum Arena", year: "1988", url: "https://www.youtube.com/watch?v=kUXahDmsVdU" },
+      { title: "Jeff Buckley Live in Chicago", year: "1995", url: "https://www.youtube.com/watch?v=H1d50u7wT5s" },
+      { title: "Sam Cooke Live At The Harlem Square Club", year: "1963", url: "https://open.spotify.com/album/3nTXqOEHr6AfTb1WSaB4Pm?si=ntoQxv7rRxWJYXSfRnusjQ" }
     ],
     movies: [
-      { title: "Gattaca", year: "2020", url: "#" },
-      { title: "City of Gods", year: "2010", url: "#" },
-      { title: "Fight Club", year: "2015", url: "#" }
-    ],
-    albums: [
-      // find a way to dadd artist
-      { title: "The Freewheelin' Bob Dylan", year: "2018", url: "#" },
-      { title: "REWORK", year: "2012", url: "#" },
-      { title: "Daisy", year: "2019", url: "#" },
-      { title: "One Night Stand", year: "1963", url: "#" },
-      { title: "Dummy", year: "1994", url: "#" },
-      { title: "Drukqs", year: "2001", url: "#" },
-      { title: "The Deep End", year: "2018", url: "#" },
-      { title: "Le Tigre", year: "1999", url: "#" },
-      { title: "Mezzanine", year: "1998", url: "#" },
-      { title: "Sings Again", year: "1986", url: "#" },
-      { title: "Breath From Another", year: "1998", url: "#" }
+      { title: "Gattaca", year: "1997", url: "https://letterboxd.com/film/gattaca/" },
+      { title: "City of God", year: "2002", url: "https://letterboxd.com/film/city-of-god/" },
+      { title: "Manic", year: "2001", url: "https://letterboxd.com/film/manic/" },
+      { title: "Isle of Dogs", year: "2018", url: "https://letterboxd.com/film/isle-of-dogs-2018/" },
+      { title: "Cinema Paradiso", year: "2002", url: "https://letterboxd.com/film/cinema-paradiso/" },
+      { title: "Fight Club", year: "1999", url: "https://letterboxd.com/film/fight-club/" },
+      { title: "Slumdog Millionaire", year: "1999", url: "https://letterboxd.com/film/slumdog-millionaire/" },
+      { title: "Choke", year: "1999", url: "https://archive.org/details/bjjdocs/Choke+-+(A+Rickson+Gracie+Documentary).mp4" },
+      { title: "Bowling For Columbine", year: "2002", url: "https://letterboxd.com/film/bowling-for-columbine/" }
+      
 
     ],
+    albums: [
+      { title: "The Freewheelin' Bob Dylan", year: "1963", url: "https://open.spotify.com/album/0o1uFxZ1VTviqvNaYkTJek?si=SrExPixoQxCpeR7zmAWXbg"},
+      { title: "REWORK", year: "2012", url: "https://open.spotify.com/album/4YSbn4LNDIKqRhAwKsvaAG?si=pk-ssnDQR9uLS2o_RU6CDQ" },
+      { title: "Daisy", year: "2025", url: "https://open.spotify.com/album/0o1RGF3A02UN1aVAX1SLuQ?si=3CQvLYLwTh-cvETZkR8qgA" },
+      { title: "Dummy", year: "1994", url: "https://open.spotify.com/album/3539EbNgIdEDGBKkUf4wno?si=CcUKgfulQwSVHo_e4jA47w" },
+      { title: "Selected Ambient Works 85-92", year: "1992", url: "https://open.spotify.com/album/7aNclGRxTysfh6z0d8671k?si=0P062UOURs6fp8pjCKQ18g" },
+      { title: "The Deep End", year: "2018", url: "https://open.spotify.com/album/3Fwmzb3B5GXy6aUWfFEFXm?si=3rQ1eEXHR-af_J-5ybWBmw" },
+      { title: "Le Tigre", year: "1999", url: "https://open.spotify.com/album/0dSSZGzoukzrFBnG07J45i?si=lCbC7yLvRU6Iy9zxolFcfA" },
+      { title: "Mezzanine", year: "1998", url: "https://open.spotify.com/album/49MNmJhZQewjt06rpwp6QR?si=Ge6dNyJERxKhu2OeLSu7Aw" },
+      { title: "Sings Again", year: "1986", url: "https://open.spotify.com/album/1WUlOWwCmLevOi6QSkDkOV?si=LGgK2dQkQwecBAczMuSYHw" },
+      { title: "Either/Or", year: "1997", url: "https://open.spotify.com/album/5bmpvyP7UGqB4VuXmrJUMy?si=LE3i75l1SdGaOVGCwgXrkw" },
+      { title: "Breath From Another", year: "1998", url: "https://open.spotify.com/album/5IjiTlH5NjwgFjfCxXlY0S?si=NH7F52ejRcSODVDVIiTAYw" }
+    ],
     books: [
-      // add author
-      { title: "Man's Search For Meaning", year: "2010", url: "#" },
-      { title: "", year: "2012", url: "#" },
-      { title: "Placeholder Book 3", year: "2016", url: "#" }
+      { title: "Man's Search For Meaning", year: "1946", url: "https://www.goodreads.com/book/show/4069.Man_s_Search_for_Meaning" },
+      { title: "Kitchen Confidential", year: "2000", url: "https://www.goodreads.com/book/show/33313.Kitchen_Confidential" },
+      { title: "Badawi", year: "1994", url: "https://www.goodreads.com/book/show/7789365-badawi" },
+      { title: "The Almanack of Naval Ravikant", year: "2020", url: "https://www.goodreads.com/book/show/54898389-the-almanack-of-naval-ravikant" },
+      { title: "You Get So Alone at Times That it Just Makes Sense", year: "1986", url: "https://www.goodreads.com/book/show/38504.You_Get_So_Alone_at_Times_That_it_Just_Makes_Sense" },
+      { title: "Bound for Glory", year: "1943", url: "https://www.goodreads.com/book/show/761256.Bound_for_Glory" },
+      { title: "Meditations", year: "180", url: "https://www.goodreads.com/book/show/30659.Meditations" },
+      { title: "History Will Absolve Me", year: "1958", url: "https://www.goodreads.com/book/show/723914.History_Will_Absolve_Me" }
     ],
     videos: [
-      { title: "Miracle on Six Train", year: "2020", url: "#" },
-      { title: "Placeholder Video 2", year: "2021", url: "#" },
-      { title: "Placeholder Video 3", year: "2022", url: "#" }
+      { title: "Miracle on Six Train", year: "", url: "https://youtu.be/yVzAC7mLxJw?si=_pqiclsiOgdhSnL9" },
+      { title: "Virgil Abloh, \“Insert Complicated Title Here\”", year: "", url: "https://youtu.be/qie5VITX6eQ?si=w1G1EF2UeVHCxwCT" },
+      { title: "Noam Chomsky: The five filters of the mass media machine", year: "", url: "https://youtu.be/34LGPIXvU5M?si=4aGhMx49hwoOJXGS" },
+      { title: "Norman McLaren - Dots", year: "", url: "https://youtu.be/E3-vsKwQ0Cg?si=j1mHBZrXGHVR4uHM" },
+      { title: "Here's To The Crazy Ones", year: "", url: "https://youtu.be/-z4NS2zdrZc?si=9Ox49sAE7o28ufDp" },
+      { title: "Fighting in the Age of Loneliness", year: "", url: "https://youtu.be/-DoaUyMGPWI?si=H-BkHi1FQaYt5YX2" }
+      
     ],
     history: [
-      { title: "Lee Kuan Yew", year: "", url: "#" },
-      { title: "Alexander The Great", year: "", url: "#" },
-      { title: "", year: "", url: "#" }
+      { title: "Lee Kuan Yew", year: "", url: "https://en.wikipedia.org/wiki/Lee_Kuan_Yew" },
+      { title: "Alexander The Great", year: "", url: "https://en.wikipedia.org/wiki/Alexander_the_Great" },
+      { title: "Carlos Manuel de Céspedes", year: "", url: "https://en.wikipedia.org/wiki/Carlos_Manuel_de_C%C3%A9spedes" }
     ],
     wikipedia: [
-      { title: "Chet Baker", year: "", url: "#" },
-      { title: "Nia (Cuban Lady)", year: "", url: "#" },
-      { title: "Tracy Mcgrady", year: "", url: "#" }
+      { title: "Anaïs Nin", year: "", url: "https://en.wikipedia.org/wiki/Ana%C3%AFs_Nin" },
+      { title: "Prophetic Perfect Tense", year: "", url: "https://en.wikipedia.org/wiki/Prophetic_perfect_tense" },
+      { title: "Chet Baker", year: "", url: "https://en.wikipedia.org/wiki/Chet_Baker" }
     ],
     musicians: [
-      { title: "Bob Dylan", year: "", url: "#" },
-      { title: "Arca", year: "", url: "#" },
-      { title: "Jai Paul", year: "", url: "#" }
+      { title: "Bob Dylan", year: "", url: "https://en.wikipedia.org/wiki/Bob_Dylan" },
+      { title: "Sam Cooke", year: "", url: "https://en.wikipedia.org/wiki/Sam_Cooke" },
+      { title: "Jai Paul", year: "", url: "https://en.wikipedia.org/wiki/Jai_Paul" },
+      { title: "Arca", year: "", url: "https://en.wikipedia.org/wiki/Arca_(musician)" },
+      { title: "Elliott Smith", year: "", url: "https://en.wikipedia.org/wiki/Elliott_Smith" },
+      { title: "Amy Winehouse", year: "", url: "https://en.wikipedia.org/wiki/Amy_Winehouse" }
     ],
     researchers: [
-      { title: "Sam Gershman", year: "", url: "#" },
-      { title: "Max Tegmark", year: "", url: "#" },
-      { title: "Sebastian Seung", year: "", url: "#" }
+      { title: "Sam Gershman", year: "", url: "https://psychology.fas.harvard.edu/people/samuel-j-gershman" },
+      { title: "Max Tegmark", year: "", url: "https://physics.mit.edu/faculty/max-tegmark/" },
+      { title: "Kenneth Stanley", year: "", url: "https://www.kenstanley.net/" },
+      { title: "Mark Weiser", year: "", url: "https://en.wikipedia.org/wiki/Mark_Weiser" },
+      { title: "Jeff Clune", year: "", url: "http://jeffclune.com/" },
+      { title: "Sebastian Seung", year: "", url: "https://pni.princeton.edu/people/h-sebastian-seung" }
     ],
     artists: [
-      { title: "Leonardo DaVinci", year: "", url: "#" },
-      { title: "Basquiat", year: "", url: "#" },
-      { title: "Caravaggio", year: "", url: "#" },
-      { title: "Banksy", year: "", url: "#" },
+      { title: "Leonardo DaVinci", year: "", url: "https://en.wikipedia.org/wiki/Leonardo_da_Vinci" },
+      { title: "Basquiat", year: "", url: "https://en.wikipedia.org/wiki/Jean-Michel_Basquiat" },
+      { title: "Caravaggio", year: "", url: "https://en.wikipedia.org/wiki/Caravaggio" },
+      { title: "Banksy", year: "", url: "https://en.wikipedia.org/wiki/Banksy" },
     ],
     papers: [
-      { title: "Platonic Representation Hypothesis", year: "2020", url: "#" },
-      { title: "Placeholder Paper 2", year: "2021", url: "#" },
-      { title: "Placeholder Paper 3", year: "2022", url: "#" }
+      { title: "Platonic Representation Hypothesis", year: "2024", url: "https://arxiv.org/abs/2405.07987" },
+      { title: "Questioning Representational Optimism in Deep Learning", year: "2025", url: "https://arxiv.org/abs/2505.11581" },
+      { title: "A contextualized reinforcer pathology approach to addiction", year: "2023", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC10028332/pdf/44159_2023_Article_167.pdf"},
+      { title: "Cognitive computational neuroscience", year: "2018", url: "https://www.nature.com/articles/s41593-018-0210-5" }
     ],
     designers: [
-      { title: "Steve Jobs", year: "", url: "#" },
-      { title: "Leonardo Davinci", year: "", url: "#" },
-      { title: "Virgil Abloh", year: "", url: "#" }
+      { title: "Steve Jobs", year: "", url: "https://en.wikipedia.org/wiki/Steve_Jobs" },
+      { title: "Leonardo da Vinci", year: "", url: "https://en.wikipedia.org/wiki/Leonardo_da_Vinci" },
+      { title: "Virgil Abloh", year: "", url: "https://en.wikipedia.org/wiki/Virgil_Abloh" }
     ],
     philosophers: [
-      { title: "Marcus Aurelius", year: "", url: "#" },
-      { title: "Placeholder Philosopher 2", year: "", url: "#" },
-      { title: "Placeholder Philosopher 3", year: "", url: "#" }
+      { title: "Marcus Aurelius", year: "", url: "https://en.wikipedia.org/wiki/Marcus_Aurelius" },
+      { title: "James Baldwin", year: "", url: "https://en.wikipedia.org/wiki/James_Baldwin" },
+      { title: "Socrates", year: "", url: "https://en.wikipedia.org/wiki/Socrates" },
+      { title: "Carl Jung", year: "", url: "https://en.wikipedia.org/wiki/Carl_Jung" },
+      { title: "Viktor Frankl", year: "", url: "https://en.wikipedia.org/wiki/Viktor_Frankl" }
     ],
     fighters: [
-      { title: "Rickson Gracie", year: "", url: "#" },
-      { title: "Mike Tyson", year: "", url: "#" },
-      { title: "Achilles", year: "", url: "#" },
-      { title: "Muhammad Ali", year: "", url: "#" }
+      { title: "Rickson Gracie", year: "", url: "https://en.wikipedia.org/wiki/Rickson_Gracie" },
+      { title: "Mike Tyson", year: "", url: "https://en.wikipedia.org/wiki/Mike_Tyson" },
+      { title: "Achilles", year: "", url: "https://en.wikipedia.org/wiki/Achilles" },
+      { title: "Muhammad Ali", year: "", url: "https://en.wikipedia.org/wiki/Muhammad_Ali" }
     ],
     dj: [
-      { title: "the one sent to julian", year: "", url: "#" },
-      { title: "arca boiler room", year: "", url: "#" },
-      { title: "japanese guy in bathroom", year: "", url: "#" },
-      { title: "fabrica del arte?", year: "", url: "#" }
+      { title: "Arca Boiler Room", year: "", url: "https://youtu.be/UWkANbUYWLI?si=WKRZKsYtujQ9ulBS" },
+      { title: "¥ØU$UK€ ¥UK1MAT$U Midnight Shift - ", year: "", url: "https://www.youtube.com/watch?v=WvyvwlowHWM&t=2067s" },
+      { title: "Kaytranada Boiler Room", year: "", url: "https://youtu.be/-5EQIiabJvk?si=QJykJBFF8exw2nqS" },
+      { title: "The Dare Boiler Room", year: "", url: "https://www.youtube.com/watch?v=6EBK3qbGhE0" }
     ]
   };
 

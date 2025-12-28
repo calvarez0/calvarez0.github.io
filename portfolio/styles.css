@@ -211,8 +211,9 @@ p, li, figcaption {
   transition: width 0.2s ease;
 }
 
-.progress.active {
-  width: 40px;
+.progress.active,
+.progress.hover {
+  width: 200px;
   pointer-events: auto;
 }
 
@@ -235,11 +236,8 @@ p, li, figcaption {
   transition: width 0.2s ease;
 }
 
-.progress.active .progress-track {
-  width: 8px;
-}
-
-.progress-track:hover {
+.progress.active .progress-track,
+.progress.hover .progress-track {
   width: 20px;
 }
 
@@ -257,15 +255,36 @@ p, li, figcaption {
   position: absolute;
   pointer-events: none;
   transition: width 0.2s ease;
+  display: flex;
+  align-items: center;
+  overflow: visible;
   /* width, height, positioning set via JS based on section size */
 }
 
-.progress.active .tick {
-  width: 8px !important;
+.progress.active .tick,
+.progress.hover .tick {
+  width: 20px !important;
 }
 
-.progress-track:hover .tick {
-  width: 20px !important;
+/* Section title labels */
+.tick-label {
+  position: absolute;
+  right: 25px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  text-align: right;
+  z-index: 10;
+}
+
+.progress.hover .tick-label,
+.progress.active .tick-label {
+  opacity: 1;
 }
 
 /* Nav (optional) */
