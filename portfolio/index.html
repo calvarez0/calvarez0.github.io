@@ -86,6 +86,312 @@
       <strong>→ <a href="assets/paper.pdf" style="color: #2d8ef4; text-decoration: underline;">Read the full paper</a></strong> ·
       <a href="assets/poster.pdf" style="color: #2d8ef4; text-decoration: underline;">View Poster</a>
     </p>
+
+    <!-- Interactive Visualization -->
+    <div class="saliency-viz" style="margin-top: 3rem;">
+      <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Interactive Demo</h3>
+      <p style="font-size: 0.95rem; opacity: 0.8; margin-bottom: 1.5rem;">
+        Drag the slider to reveal pixels by energy level. High-energy pixels (edges, contours) appear first. The green L2 line marks the saliency threshold.
+      </p>
+
+      <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;">
+        <label style="font-size: 0.85rem; font-weight: 600;">Image:</label>
+        <select id="saliencyImageSelect" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #ccc; background: white; font-size: 0.9rem; cursor: pointer;"></select>
+      </div>
+
+      <div class="saliency-grid" style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; align-items: start;">
+        <!-- Chart -->
+        <div>
+          <div style="font-size: 0.8rem; font-weight: 600; margin-bottom: 8px; opacity: 0.7;">Log-Log Energy Distribution</div>
+          <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <canvas id="saliencyChart"></canvas>
+            <div style="padding: 12px 16px; background: #f8f8f8;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #666; margin-bottom: 6px;">
+                <span>High Energy</span>
+                <span>Low Energy</span>
+              </div>
+              <input type="range" id="saliencySlider" min="0" max="1000" value="0" style="width: 100%; cursor: pointer;">
+            </div>
+          </div>
+        </div>
+        <!-- Energy Map -->
+        <div>
+          <div style="font-size: 0.8rem; font-weight: 600; margin-bottom: 8px; opacity: 0.7;">Energy Map</div>
+          <div style="background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 1;">
+            <canvas id="saliencyCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1rem; text-align: center; font-size: 0.85rem;">
+        <div><span style="opacity: 0.6; display: block; font-size: 0.7rem; text-transform: uppercase;">Pixels</span><strong id="saliencyPixels">0</strong></div>
+        <div><span style="opacity: 0.6; display: block; font-size: 0.7rem; text-transform: uppercase;">Percent</span><strong id="saliencyPercent">0%</strong></div>
+        <div><span style="opacity: 0.6; display: block; font-size: 0.7rem; text-transform: uppercase;">Threshold</span><strong id="saliencyThreshold">-</strong></div>
+        <div><span style="opacity: 0.6; display: block; font-size: 0.7rem; text-transform: uppercase;">L2 Point</span><strong id="saliencyL2" style="color: #34c759;">-</strong></div>
+      </div>
+    </div>
+
+    <script>
+    (function() {
+      let SALIENCY_DATA = null;
+      let currentImage = null;
+      let sortedPixels = [];
+      let energyImageData = null;
+      let imageWidth = 0, imageHeight = 0, maxEnergy = 0;
+
+      async function initSaliencyViz() {
+        const resp = await fetch('assets/saliency/viz_data.json');
+        SALIENCY_DATA = await resp.json();
+
+        const select = document.getElementById('saliencyImageSelect');
+        const names = Object.keys(SALIENCY_DATA);
+        names.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = SALIENCY_DATA[name].displayName;
+          select.appendChild(opt);
+        });
+
+        select.addEventListener('change', e => loadSaliencyImage(e.target.value));
+        document.getElementById('saliencySlider').addEventListener('input', e => updateSaliency(parseInt(e.target.value)));
+
+        const chart = document.getElementById('saliencyChart');
+        let dragging = false;
+        chart.addEventListener('mousedown', e => { dragging = true; chartClick(e); });
+        chart.addEventListener('mousemove', e => { if (dragging) chartClick(e); });
+        chart.addEventListener('mouseup', () => dragging = false);
+        chart.addEventListener('mouseleave', () => dragging = false);
+
+        await loadSaliencyImage(names[0]);
+      }
+
+      function chartClick(e) {
+        const canvas = document.getElementById('saliencyChart');
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const padding = { left: 60, right: 25 };
+        const plotWidth = rect.width - padding.left - padding.right;
+        let val = Math.round(((x - padding.left) / plotWidth) * 1000);
+        val = Math.max(0, Math.min(1000, val));
+        document.getElementById('saliencySlider').value = val;
+        updateSaliency(val);
+      }
+
+      async function loadSaliencyImage(name) {
+        currentImage = name;
+        const data = SALIENCY_DATA[name];
+        document.getElementById('saliencyL2').textContent = data.histogram.L2.toFixed(0);
+
+        const img = await loadImg(data.energy);
+        imageWidth = img.width;
+        imageHeight = img.height;
+
+        const tmp = document.createElement('canvas');
+        tmp.width = imageWidth; tmp.height = imageHeight;
+        const ctx = tmp.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        energyImageData = ctx.getImageData(0, 0, imageWidth, imageHeight);
+
+        buildPixels();
+        setupCanvas();
+        document.getElementById('saliencySlider').value = 0;
+        updateSaliency(0);
+        drawSaliencyChart();
+      }
+
+      function loadImg(src) {
+        return new Promise((res, rej) => {
+          const img = new Image();
+          img.onload = () => res(img);
+          img.onerror = rej;
+          img.src = src;
+        });
+      }
+
+      function buildPixels() {
+        sortedPixels = [];
+        const d = energyImageData.data;
+        maxEnergy = 0;
+        for (let row = 0; row < imageHeight; row++) {
+          for (let col = 0; col < imageWidth; col++) {
+            const idx = (row * imageWidth + col) * 4;
+            const r = d[idx], g = d[idx+1], b = d[idx+2];
+            const energy = r;
+            sortedPixels.push({ row, col, energy, r, g, b });
+            if (energy > maxEnergy) maxEnergy = energy;
+          }
+        }
+        sortedPixels.sort((a, b) => b.energy - a.energy);
+      }
+
+      function setupCanvas() {
+        const c = document.getElementById('saliencyCanvas');
+        c.width = imageWidth; c.height = imageHeight;
+      }
+
+      function drawSaliencyChart() {
+        const canvas = document.getElementById('saliencyChart');
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = 220 * dpr;
+        canvas.style.height = '220px';
+        ctx.scale(dpr, dpr);
+
+        const width = rect.width, height = 220;
+        const padding = { left: 60, right: 25, top: 25, bottom: 40 };
+        const plotW = width - padding.left - padding.right;
+        const plotH = height - padding.top - padding.bottom;
+
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, width, height);
+
+        const hist = SALIENCY_DATA[currentImage].histogram;
+        const valid = [];
+        for (let i = 0; i < hist.binCenters.length; i++) {
+          if (hist.binCenters[i] > 0 && hist.hPmf[i] > 0) {
+            valid.push({ e: hist.binCenters[i], h: hist.hPmf[i], g: hist.gPmf[i] > 1e-10 ? hist.gPmf[i] : null });
+          }
+        }
+        if (!valid.length) return;
+
+        const eMin = Math.log10(Math.min(...valid.map(d => d.e)));
+        const eMax = Math.log10(Math.max(...valid.map(d => d.e)));
+        const allP = [...valid.map(d => d.h), ...valid.filter(d => d.g).map(d => d.g)];
+        const pMin = Math.log10(Math.min(...allP));
+        const pMax = Math.log10(Math.max(...allP));
+
+        const xScale = e => padding.left + plotW * (1 - (Math.log10(e) - eMin) / (eMax - eMin));
+        const yScale = p => padding.top + plotH * (1 - (Math.log10(p) - pMin) / (pMax - pMin));
+
+        ctx.strokeStyle = '#e5e5e7'; ctx.lineWidth = 1;
+        for (let exp = Math.ceil(eMin); exp <= Math.floor(eMax); exp++) {
+          const x = xScale(Math.pow(10, exp));
+          ctx.beginPath(); ctx.moveTo(x, padding.top); ctx.lineTo(x, padding.top + plotH); ctx.stroke();
+        }
+        for (let exp = Math.ceil(pMin); exp <= Math.floor(pMax); exp++) {
+          const y = yScale(Math.pow(10, exp));
+          ctx.beginPath(); ctx.moveTo(padding.left, y); ctx.lineTo(padding.left + plotW, y); ctx.stroke();
+        }
+
+        ctx.strokeStyle = '#1d1d1f'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, padding.top);
+        ctx.lineTo(padding.left, padding.top + plotH);
+        ctx.lineTo(padding.left + plotW, padding.top + plotH);
+        ctx.stroke();
+
+        const L2 = hist.L2;
+        if (L2 > 0) {
+          const l2X = xScale(L2);
+          ctx.strokeStyle = '#34c759'; ctx.lineWidth = 2; ctx.setLineDash([5, 3]);
+          ctx.beginPath(); ctx.moveTo(l2X, padding.top); ctx.lineTo(l2X, padding.top + plotH); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#34c759'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText('L2', l2X, padding.top - 6);
+        }
+
+        ctx.strokeStyle = '#1f77b4'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        valid.forEach((d, i) => { const x = xScale(d.e), y = yScale(d.h); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ff7f0e'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        let started = false;
+        valid.forEach(d => {
+          if (d.g) { const x = xScale(d.e), y = yScale(d.g); started ? ctx.lineTo(x, y) : (ctx.moveTo(x, y), started = true); }
+        });
+        ctx.stroke();
+
+        const sliderVal = parseInt(document.getElementById('saliencySlider').value);
+        const threshX = padding.left + (sliderVal / 1000) * plotW;
+        ctx.strokeStyle = '#ff3b30'; ctx.lineWidth = 2; ctx.setLineDash([5, 3]);
+        ctx.beginPath(); ctx.moveTo(threshX, padding.top); ctx.lineTo(threshX, padding.top + plotH); ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = 'rgba(31, 119, 180, 0.1)';
+        ctx.fillRect(padding.left, padding.top, threshX - padding.left, plotH);
+
+        ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
+        const lx = padding.left + 10, ly = padding.top + 12;
+        ctx.strokeStyle = '#1f77b4'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 20, ly); ctx.stroke();
+        ctx.fillStyle = '#1d1d1f'; ctx.fillText('h(E)', lx + 26, ly + 3);
+        ctx.strokeStyle = '#ff7f0e';
+        ctx.beginPath(); ctx.moveTo(lx, ly + 14); ctx.lineTo(lx + 20, ly + 14); ctx.stroke();
+        ctx.fillText('g(E)', lx + 26, ly + 17);
+      }
+
+      function updateSaliency(sliderVal) {
+        const frac = sliderVal / 1000;
+        const numPx = Math.floor(frac * sortedPixels.length);
+        let thresh = numPx > 0 && numPx < sortedPixels.length ? sortedPixels[numPx - 1].energy : (numPx >= sortedPixels.length ? 0 : maxEnergy);
+
+        document.getElementById('saliencyPixels').textContent = numPx.toLocaleString();
+        document.getElementById('saliencyPercent').textContent = (frac * 100).toFixed(1) + '%';
+        document.getElementById('saliencyThreshold').textContent = thresh;
+
+        drawEnergyMap(numPx);
+        drawSaliencyChart();
+      }
+
+      function drawEnergyMap(numPx) {
+        const canvas = document.getElementById('saliencyCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, imageWidth, imageHeight);
+        if (numPx === 0) return;
+
+        const imgData = ctx.createImageData(imageWidth, imageHeight);
+        const d = imgData.data;
+        for (let i = 0; i < numPx; i++) {
+          const px = sortedPixels[i];
+          const idx = (px.row * imageWidth + px.col) * 4;
+          d[idx] = px.r; d[idx + 1] = px.g; d[idx + 2] = px.b; d[idx + 3] = 255;
+        }
+        ctx.putImageData(imgData, 0, 0);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSaliencyViz);
+      } else {
+        initSaliencyViz();
+      }
+    })();
+    </script>
+
+    <style>
+      .saliency-viz input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 6px;
+        background: #d2d2d7;
+        border-radius: 3px;
+        outline: none;
+      }
+      .saliency-viz input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        background: #2d8ef4;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(45, 142, 244, 0.3);
+      }
+      .saliency-viz input[type="range"]::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        background: #2d8ef4;
+        border-radius: 50%;
+        cursor: pointer;
+        border: none;
+      }
+      @media (max-width: 700px) {
+        .saliency-grid { grid-template-columns: 1fr !important; }
+      }
+    </style>
   </article>
 </section>
 
@@ -149,6 +455,8 @@
       Unlike traditional synthesizers with fixed parameters, SynthBreeder explores an open-ended
       space of possible sounds through evolutionary computation.
     </p>
+    
+    <img src="assets/synth.png" alt="Screenshot of the SynthBreeder interface" style="width: 100%; height: auto;">
 
     <p>
       Users select sounds they find interesting from each generation, and the system breeds
@@ -170,7 +478,7 @@
       generation from its DNA.
     </p>
 
-    <img src="assets/abloeh.jpeg">
+    <img src="assets/abloeh.jpeg" alt="Screenshot of the AblOEh interface" style="width: 100%; height: auto;">
 
     <p>
       The system demonstrates how explicit designer controls can coexist with emergent complexity.
@@ -202,7 +510,7 @@
     <p>
       By placing humans in the selection loop, we create a co-creative process where the
       algorithm explores possibility space and humans provide the fitness function through
-      their choices. What emerges is often surprising—solutions neither purely human-designed
+      their choices. What emerges is often surprising. Solutions that are neither purely human-designed
       nor purely algorithmic, but a synthesis that neither could achieve alone. 
       Additionally, the system seems to act as a mirror; it reveals the humans taste in surprising ways.
     </p>
