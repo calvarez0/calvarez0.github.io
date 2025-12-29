@@ -131,18 +131,15 @@
       </div>
     </div>
 
+    <script src="assets/saliency/viz_data.js"></script>
     <script>
     (function() {
-      let SALIENCY_DATA = null;
       let currentImage = null;
       let sortedPixels = [];
       let energyImageData = null;
       let imageWidth = 0, imageHeight = 0, maxEnergy = 0;
 
       async function initSaliencyViz() {
-        const resp = await fetch('assets/saliency/viz_data.json');
-        SALIENCY_DATA = await resp.json();
-
         const select = document.getElementById('saliencyImageSelect');
         const names = Object.keys(SALIENCY_DATA);
         names.forEach(name => {
@@ -460,7 +457,7 @@
 
     <p>
       Users select sounds they find interesting from each generation, and the system breeds
-      increasingly complex variations. The underlying CPPNs start simple and grow more intricate
+      increasingly complex variations. The underlying NN start simple and complexifies
       over time, discovering sonic textures that would be impossible to design manually. Each
       network topology is unique, encoding audio waveforms through compositions of mathematical
       activation functions.
@@ -499,12 +496,12 @@
       <strong>→ <a href="../openendedness/ablOEh.html" style="color: #4CAF50; text-decoration: underline;">Try AblOEh</a></strong>
     </p>
 
-    <h3>On Open-Endedness</h3>
+    <h3>Open-Endedness</h3>
     <p>
       These platforms explore a fundamental question in artificial intelligence and creativity:
       how do we build systems that can discover genuinely novel solutions rather than optimizing
-      toward predefined goals? Traditional optimization has a target; open-ended evolution has
-      only interesting-ness as defined by the observer.
+      toward predefined goals? Traditional optimization converges upon a target solution; 
+      open-endedness, by design, creates infinites solution that are both novel and learnable/interesting.
     </p>
 
     <p>
@@ -571,11 +568,16 @@
   data-title="Demographic IQ"
   data-bg="#f5f5f5" data-fg="#1a1a1a" data-accent="#8b2635">
   <article>
-    <h2>Demographic IQ</h2>
-    <p></p>
-    <div class="video-container">
-      <iframe src="https://www.youtube.com/embed/pYoY8ZFtUx0?si=XKx1jr5HmnVX9C7o" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-    </div>
+    <h2>Dem<span class="ornate">O</span>graphic IQ</h2>
+    <p class="lede">
+      A policy impact calculator built to help voters understand how presidential candidates' economic proposals could affect their personal finances. Uses nonpartisan data from the Tax Foundation and MIT's Living Wage Calculator. Featured on <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" target="_blank">KBTX</a>.
+    </p>
+
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; width: 100%; margin-top: 1.5rem;"><iframe src="https://www.youtube.com/embed/pYoY8ZFtUx0?si=XKx1jr5HmnVX9C7o" style= "width: 960px; height: 540px" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
+
+    <p>
+      <strong>→ <a href="../demographic_iq.html" style="color: #8b2635; text-decoration: underline;">Try Demographic IQ</a></strong>
+    </p>
   </article>
 </section>
 
