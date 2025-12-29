@@ -5,24 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SynthBreeder - Evolve Percussion Sounds</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #1a1a1a;
-            color: #e0e0e0;
-            display: grid;
-            grid-template-columns: 350px 1fr 420px;
-            gap: 20px;
-            height: 100vh;
-            overflow: hidden;
+        * {
             box-sizing: border-box;
         }
 
-        .settings-panel {
-            background: #2a2a2a;
-            border-radius: 8px;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+            margin: 0;
             padding: 20px;
+            background: #0a0a0a;
+            color: #e5e5e5;
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 20px;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .settings-panel {
+            background: #141414;
+            border: 1px solid #1f1f1f;
+            border-radius: 12px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -35,81 +39,133 @@
         }
 
         .sidebar {
-            background: #2a2a2a;
-            border-radius: 8px;
-            padding: 20px;
+            background: #141414;
+            border: 1px solid #1f1f1f;
+            border-radius: 12px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
         .settings-panel h3 {
-            margin-top: 0;
-            color: #4CAF50;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 10px;
+            margin: 0 0 28px 0;
+            color: #f5f5f5;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: -0.015em;
         }
 
         .sidebar h2 {
-            margin-top: 0;
-            color: #4CAF50;
-            font-size: 18px;
+            margin: 0 0 20px 0;
+            color: #f5f5f5;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: -0.015em;
         }
 
         .setting-group {
-            margin-bottom: 25px;
+            margin-bottom: 24px;
         }
 
         .setting-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #aaa;
+            margin-bottom: 10px;
+            color: #8a8a8a;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 400;
+            letter-spacing: -0.01em;
         }
 
         .setting-group input[type="range"] {
             width: 100%;
-            margin-bottom: 5px;
+            height: 2px;
+            margin-bottom: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #2a2a2a;
+            border-radius: 1px;
+            outline: none;
+        }
+
+        .setting-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #f5f5f5;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .setting-group input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        .setting-group input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(0.95);
+        }
+
+        .setting-group input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .setting-group input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        .setting-group input[type="range"]::-moz-range-thumb:active {
+            transform: scale(0.95);
         }
 
         .range-value {
             display: inline-block;
             float: right;
-            color: #4CAF50;
-            font-weight: bold;
+            color: #f5f5f5;
+            font-weight: 400;
+            font-size: 13px;
+            font-variant-numeric: tabular-nums;
         }
 
         .activation-controls {
             display: flex;
-            gap: 5px;
+            gap: 8px;
             margin-bottom: 10px;
         }
 
         .select-btn {
             flex: 1;
-            padding: 6px;
-            background: #333;
-            border: 1px solid #555;
-            color: #e0e0e0;
-            border-radius: 4px;
+            padding: 6px 10px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #a0a0a0;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 11px;
-            transition: all 0.2s;
+            font-weight: 400;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .select-btn:hover {
-            background: #444;
-            border-color: #4CAF50;
+            background: #222;
+            border-color: #333;
+            color: #e5e5e5;
         }
 
         .activation-checkboxes {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            background: #1a1a1a;
+            gap: 8px;
+            background: #0f0f0f;
             padding: 10px;
-            border-radius: 4px;
+            border-radius: 8px;
             overflow-y: auto;
             max-height: 400px;
         }
@@ -119,204 +175,260 @@
             align-items: center;
             gap: 8px;
             margin: 0;
+            padding: 2px 0;
             font-size: 12px;
             font-weight: normal;
+            color: #a0a0a0;
+            cursor: pointer;
         }
 
         .activation-checkboxes input[type="checkbox"] {
             margin: 0;
+            cursor: pointer;
+            accent-color: #f5f5f5;
         }
 
         .preset-buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 8px;
+            margin-top: 16px;
         }
 
         .preset-btn {
             flex: 1;
-            padding: 8px;
-            background: #333;
-            border: 1px solid #555;
-            color: #e0e0e0;
-            border-radius: 4px;
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #a0a0a0;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 12px;
-            transition: all 0.2s;
+            font-weight: 400;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .preset-btn:hover {
-            background: #444;
-            border-color: #4CAF50;
+            background: #222;
+            border-color: #333;
+            color: #e5e5e5;
         }
 
         .controls {
-            background: #2a2a2a;
-            padding: 20px;
-            border-radius: 8px;
+            background: #141414;
+            border: 1px solid #1f1f1f;
+            padding: 32px 28px;
+            border-radius: 12px;
             margin-bottom: 20px;
         }
 
         .controls h1 {
             text-align: center;
-            color: #4CAF50;
-            margin: 0 0 5px 0;
+            color: #f5f5f5;
+            margin: 0 0 6px 0;
             font-size: 28px;
+            font-weight: 500;
+            letter-spacing: -0.02em;
         }
 
         .controls .subtitle {
             text-align: center;
-            color: #888;
-            margin-bottom: 20px;
-            font-size: 14px;
+            color: #6a6a6a;
+            margin-bottom: 28px;
+            font-size: 13px;
+            font-weight: 400;
         }
 
         .button-group {
             display: flex;
             gap: 10px;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         button {
-            padding: 12px 24px;
-            font-size: 16px;
+            padding: 10px 20px;
+            font-size: 13px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 400;
+            letter-spacing: -0.01em;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        button:active {
+            transform: scale(0.98);
         }
 
         .evolve-btn {
-            background: #4CAF50;
-            color: white;
+            background: #f5f5f5;
+            color: #0a0a0a;
         }
 
         .evolve-btn:hover {
-            background: #45a049;
+            background: #fff;
         }
 
         .reset-btn {
-            background: #f44336;
-            color: white;
+            background: #1a1a1a;
+            color: #a0a0a0;
+            border: 1px solid #2a2a2a;
         }
 
         .reset-btn:hover {
-            background: #da190b;
+            background: #222;
+            color: #e5e5e5;
+            border-color: #333;
         }
 
         .save-btn {
-            background: #2196F3;
-            color: white;
+            background: #1a1a1a;
+            color: #a0a0a0;
+            border: 1px solid #2a2a2a;
         }
 
         .save-btn:hover {
-            background: #0b7dda;
+            background: #222;
+            color: #e5e5e5;
+            border-color: #333;
         }
 
         .info {
             text-align: center;
-            color: #888;
-            margin-bottom: 20px;
-            font-size: 14px;
+            color: #6a6a6a;
+            margin-bottom: 14px;
+            font-size: 13px;
         }
-
 
         .sound-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: 14px;
             flex: 1;
             overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .sound-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sound-grid::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sound-grid::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 3px;
+        }
+
+        .sound-grid::-webkit-scrollbar-thumb:hover {
+            background: #333;
         }
 
         .sound-item {
-            background: #2a2a2a;
-            border: 3px solid #333;
-            border-radius: 8px;
-            padding: 15px;
+            background: #141414;
+            border: 1px solid #1f1f1f;
+            border-radius: 10px;
+            padding: 14px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
 
         .sound-item:hover {
-            border-color: #555;
-            transform: translateY(-2px);
+            border-color: #2a2a2a;
+            background: #161616;
         }
 
         .sound-item.selected {
-            border-color: #4CAF50;
-            background: #2a3a2a;
+            border-color: #3a3a3a;
+            background: #181818;
         }
 
         .sound-item.playing {
-            border-color: #2196F3;
-            background: #2a2a3a;
+            border-color: #f5f5f5;
+            background: #181818;
+        }
+
+        .viz-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+
+        .waveform-canvas {
+            width: 100%;
+            height: 50px;
+            background: #0f0f0f;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .envelope-canvas {
+            width: 100%;
+            height: 30px;
+            background: #0f0f0f;
+            border-radius: 0 0 6px 6px;
         }
 
         canvas {
             width: 100%;
-            height: 80px;
-            background: #1a1a1a;
-            border-radius: 4px;
-            margin-bottom: 10px;
+            background: #0f0f0f;
+            border-radius: 6px;
         }
 
         .sound-info {
             font-size: 12px;
-            color: #888;
+            color: #6a6a6a;
             text-align: center;
         }
 
         .generation-info {
-            background: #1a1a1a;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-            margin-bottom: 20px;
+            background: #0f0f0f;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 24px;
         }
 
         .stats {
             display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
         }
 
         .stat-item {
-            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .stat-label {
-            color: #888;
-            font-size: 12px;
+            color: #6a6a6a;
+            font-size: 11px;
+            font-weight: 400;
         }
 
         .stat-value {
-            color: #4CAF50;
-            font-size: 18px;
-            font-weight: bold;
+            color: #f5f5f5;
+            font-size: 13px;
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
         }
 
         #network-viz {
             width: 100%;
             flex: 1;
             min-height: 0;
-            background: #1a1a1a;
-            border-radius: 4px;
-            margin-bottom: 15px;
+            background: #0f0f0f;
+            border-radius: 8px;
+            margin-bottom: 14px;
         }
 
         .network-info {
             font-size: 12px;
-            color: #888;
+            color: #6a6a6a;
         }
 
         .network-info div {
@@ -325,24 +437,25 @@
 
         .node-legend {
             display: flex;
-            gap: 15px;
+            gap: 14px;
             flex-wrap: wrap;
             margin: 10px 0;
             padding: 10px;
-            background: #1a1a1a;
-            border-radius: 4px;
+            background: #0f0f0f;
+            border-radius: 8px;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             font-size: 11px;
+            color: #8a8a8a;
         }
 
         .legend-color {
-            width: 12px;
-            height: 12px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
         }
     </style>
@@ -441,14 +554,14 @@
     <div class="main-content">
         <div class="controls">
             <h1>SynthBreeder</h1>
-            <div class="subtitle">Evolve Percussion Sounds with CPPN-NEAT</div>
+            <div class="subtitle">Evolve Sounds with Dual Neural Networks</div>
             <div class="button-group">
                 <button class="evolve-btn" onclick="evolve()">Evolve Selected</button>
                 <button class="reset-btn" onclick="reset()">New Population</button>
                 <button class="save-btn" onclick="saveSelected()">Save Selected</button>
             </div>
             <div class="info">
-                Click on any sound to play it and select it for evolution.
+                Click to play. Top: waveform (timbre). Bottom: envelope (dynamics). Both evolve independently.
             </div>
         </div>
 
@@ -461,15 +574,15 @@
 
         <div class="node-legend">
             <div class="legend-item">
-                <div class="legend-color" style="background: #2196F3;"></div>
+                <div class="legend-color" style="background: #5b8ec5;"></div>
                 <span>Input</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #4CAF50;"></div>
+                <div class="legend-color" style="background: #6b9d6b;"></div>
                 <span>Output</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #FF9800;"></div>
+                <div class="legend-color" style="background: #9d7b5b;"></div>
                 <span>Hidden</span>
             </div>
         </div>
