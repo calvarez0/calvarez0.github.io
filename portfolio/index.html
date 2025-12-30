@@ -68,9 +68,15 @@
 
     <p>
       We explore a theoretical juncture where the power law, Gaussian, and Lambert W converge to compute saliency thresholds in neural code.
+      The Lambert W function emerges naturally in instances where exponential processes (like the Gaussian's
+      exponentially decaying tails) and polynomial processes (like the power law's polynomially decaying tails)
+      meet.  
+      Our results point to a biologically plausible invariant property in neural thresholding that could greatly simplify downstream
+      processing in visual systems and potentially generalizes across different sensory modalities and
+      processing levels.
     </p>
 
-    <p>
+    <!-- <p>
       The Lambert W function emerges naturally in instances where exponential processes (like the Gaussian's
       exponentially decaying tails) and polynomial processes (like the power law's polynomially decaying tails)
       meet.
@@ -80,7 +86,7 @@
       Our results point to a biologically plausible invariant property in neural thresholding that could greatly simplify downstream
       processing in visual systems and potentially generalizes across different sensory modalities and
       processing levels.
-    </p>
+    </p> -->
 
     <p style="margin-top: 2rem;">
       <strong>→ <a href="assets/paper.pdf" style="color: #2d8ef4; text-decoration: underline;">Read the full paper</a></strong> ·
@@ -137,7 +143,8 @@
       </div>
 
       <p style="opacity: 0.8; margin-bottom: 1.5rem;">
-        Drag the slider to reveal pixels by energy level. High-energy pixels (edges, contours) appear first. The green L2 line marks the saliency threshold.
+        Drag the slider to reveal pixels by energy level.
+        I perceive the saliency threshold conceptually as the point where marginal information gain per pixel begins to diminish sharply, answering the question of <b><i>"How many pixels are needed to make out what I'm looking at?"</i></b>
       </p>
 
     </div>
@@ -224,11 +231,14 @@
             const idx = (row * imageWidth + col) * 4;
             const r = d[idx], g = d[idx+1], b = d[idx+2];
             const energy = r;
-            sortedPixels.push({ row, col, energy, r, g, b });
+            // Add small random offset to break ties between pixels with same energy
+            // This prevents the "top-to-bottom slip" effect when many pixels share energy values
+            const tieBreaker = Math.random() * 0.99;
+            sortedPixels.push({ row, col, energy, sortKey: energy + tieBreaker, r, g, b });
             if (energy > maxEnergy) maxEnergy = energy;
           }
         }
-        sortedPixels.sort((a, b) => b.energy - a.energy);
+        sortedPixels.sort((a, b) => b.sortKey - a.sortKey);
       }
 
       function setupCanvas() {
@@ -629,15 +639,14 @@
   data-title="Interactive Evolution"
   data-bg="#000000" data-fg="#f5f5f5" data-accent="#4CAF50">
   <article>
-    <h2>Interactive Evolutionary Platforms</h2>
+    <h2>Open-Ended Creative Platforms</h2>
     <p class="lede">
       Exploring art through open-ended evolution and human-guided selection. What emerges when
-      we combine neural networks, genetic algorithms, and aesthetic judgment?
+      we combine neural networks, genetic algorithms, and human aesthetic judgment?
     </p>
 
     <h3>SynthBreeder</h3>
     <p>
-      An interactive evolution platform for generating sounds using NEAT.
       Unlike traditional synthesizers with fixed parameters, SynthBreeder explores an open-ended
       space of possible sounds through evolutionary computation.
     </p>
@@ -645,10 +654,10 @@
     <img src="assets/synth.png" alt="Screenshot of the SynthBreeder interface" style="width: 100%; height: auto;">
 
     <p>
-      Users select sounds they find interesting from each generation, and the system breeds
-      increasingly complex variations. The underlying NN start simple and complexifies
+      Users select sounds they find interesting from each generation and the system evolves
+      increasingly complex variations. The underlying neural networks start simple and complexify
       over time, discovering sonic textures that would be impossible to design manually. Each
-      network topology is unique, encoding audio waveforms through compositions of mathematical
+      network topology is unique, encoding audio waveforms and envelopes through compositions of mathematical
       activation functions.
     </p>
 
@@ -660,8 +669,7 @@
     <p>
       "AblOEh" is an open-ended, 3D, evolutionary fashion design platform that generates dresses through a combination
       of explicitly encoded trait-based genetics (hemline, silhouette, waist width) and neural networks
-      that control color, texture, and surface detail. Click on any design to breed the next
-      generation from its DNA.
+      that control color, texture, and morphology.
     </p>
 
     <img src="assets/abloeh.jpeg" alt="Screenshot of the AblOEh interface" style="width: 100%; height: auto;">
