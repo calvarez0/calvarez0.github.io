@@ -32,6 +32,42 @@
         
         h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; color: #fff; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
         h3 { margin: 10px 0 5px 0; font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Mannequin Preview Panel */
+        #mannequin-preview {
+            width: 100%;
+            height: 280px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+            border-radius: 8px;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+        #mannequin-preview canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        #mannequin-label {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+        #mannequin-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.7rem;
+            color: #444;
+            text-align: center;
+            pointer-events: none;
+        }
         
         .control-group { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 4px; }
         .slider-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 0.8rem; }
@@ -85,23 +121,250 @@
             pointer-events: none;
             z-index: 5;
         }
+
+        /* Settings Panel (Left Side) - Similar to Synthbreeder */
+        #settings-panel {
+            position: absolute;
+            top: 0; left: 0;
+            width: 300px;
+            height: 100vh;
+            background: var(--panel);
+            border-right: 1px solid #333;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+        #settings-panel.open { transform: translateX(0); }
+
+        #settings-toggle {
+            position: absolute;
+            top: 20px; left: 20px;
+            background: var(--panel);
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px 12px;
+            cursor: pointer;
+            z-index: 15;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            width: auto;
+        }
+        #settings-toggle:hover { background: #333; border-color: var(--primary); }
+        #settings-panel.open + #settings-toggle { left: 320px; }
+
+        .settings-section { margin-bottom: 20px; }
+        .settings-section h4 {
+            margin: 0 0 10px 0;
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.75rem;
+        }
+        .setting-row label { color: #aaa; }
+        .setting-row input[type=range] { width: 50%; accent-color: var(--primary); }
+        .setting-row .value { width: 35px; text-align: right; color: #fff; font-variant-numeric: tabular-nums; }
+
+        .activation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.3);
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .activation-grid label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            color: #888;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        .activation-grid label:hover { background: rgba(255,255,255,0.05); color: #ccc; }
+        .activation-grid input[type=checkbox] { accent-color: var(--primary); cursor: pointer; }
+
+        .preset-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .preset-btn {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.65rem;
+            background: #222;
+            border: 1px solid #444;
+            width: auto;
+            margin-top: 0;
+        }
+        .preset-btn:hover { background: #333; border-color: #555; }
+
+        /* Network Topology Visualization */
+        #network-viz-container {
+            width: 100%;
+            height: 160px;
+            background: #0f0f0f;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        #network-viz {
+            width: 100%;
+            height: 100%;
+        }
+        #network-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.7rem;
+            color: #444;
+            text-align: center;
+            pointer-events: none;
+        }
+        .node-legend {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 8px 0;
+            padding: 8px;
+            background: #0f0f0f;
+            border-radius: 6px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.65rem;
+            color: #8a8a8a;
+        }
+        .legend-color {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body>
 
     <div id="overlay-msg">EVOLVING NEXT GENERATION...</div>
-    
+
+    <!-- Settings Panel (Left Side) -->
+    <div id="settings-panel">
+        <h3 style="margin:0 0 15px 0; font-size:1rem; border-bottom:1px solid #333; padding-bottom:10px;">Evolution Settings</h3>
+
+        <div class="settings-section">
+            <h4>Mutation Parameters</h4>
+            <div class="setting-row">
+                <label>Weight Mutation</label>
+                <input type="range" id="weight-mut-rate" min="0" max="1" step="0.05" value="0.8">
+                <span class="value" id="weight-mut-val">0.80</span>
+            </div>
+            <div class="setting-row">
+                <label>Add Connection</label>
+                <input type="range" id="add-conn-rate" min="0" max="1" step="0.05" value="0.3">
+                <span class="value" id="add-conn-val">0.80</span>
+            </div>
+            <div class="setting-row">
+                <label>Add Node</label>
+                <input type="range" id="add-node-rate" min="0" max="0.5" step="0.02" value="0.12">
+                <span class="value" id="add-node-val">0.12</span>
+            </div>
+            <div class="setting-row">
+                <label>Change Activation</label>
+                <input type="range" id="change-act-rate" min="0" max="0.5" step="0.02" value="0.15">
+                <span class="value" id="change-act-val">0.15</span>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h4>Activation Functions</h4>
+            <div style="display:flex; gap:6px; margin-bottom:8px;">
+                <button class="preset-btn" onclick="selectAllActivations()">All</button>
+                <button class="preset-btn" onclick="deselectAllActivations()">None</button>
+            </div>
+            <div class="activation-grid" id="activation-checkboxes">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h4>Presets</h4>
+            <div class="preset-row">
+                <button class="preset-btn" onclick="loadPreset('default')">Default</button>
+                <button class="preset-btn" onclick="loadPreset('diverse')">Diverse</button>
+                <button class="preset-btn" onclick="loadPreset('stable')">Stable</button>
+            </div>
+            <div class="preset-row">
+                <button class="preset-btn" onclick="loadPreset('wild')">Wild</button>
+                <button class="preset-btn" onclick="loadPreset('organic')">Organic</button>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h4>Network Stats</h4>
+            <div style="font-size:0.7rem; color:#666;">
+                <div>Activations enabled: <span id="act-count">0</span></div>
+                <div>Avg network nodes: <span id="avg-nodes">0</span></div>
+            </div>
+        </div>
+    </div>
+    <button id="settings-toggle">Settings</button>
+
     <div id="nav-help">
         LEFT CLICK: Rotate &bull; RIGHT CLICK: Pan &bull; SCROLL: Zoom
     </div>
 
     <div id="controls">
         <h1>"AblOEh"</h1>
-        
+
+        <!-- Mannequin Preview -->
+        <div id="mannequin-preview">
+            <div id="mannequin-hint">Select a dress to preview<br/>on mannequin</div>
+            <span id="mannequin-label">Drag to rotate</span>
+        </div>
+
+        <!-- Network Topology Visualization -->
+        <h3>Network Topology</h3>
+        <div id="network-viz-container">
+            <canvas id="network-viz"></canvas>
+            <div id="network-hint">Select a dress to view its CPPN</div>
+        </div>
+        <div class="node-legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #5b8ec5;"></div>
+                <span>Input</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #6b9d6b;"></div>
+                <span>Output</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #9d7b5b;"></div>
+                <span>Hidden</span>
+            </div>
+        </div>
+
         <div id="stats">Gen: <span id="gen-display">1</span> | Pop: 8</div>
 
         <div class="control-group">
-            <h3>Evolutionary Controls</h3>
+            <h3>Evolution Controls</h3>
             <button id="evolve-btn">New Random Generation</button>
             <div class="slider-row">
                 <span>Mutation Rate</span>
@@ -111,24 +374,16 @@
                 <span>Complexity</span>
                 <input type="range" id="complexity" min="0" max="10" step="1" value="3">
             </div>
-        </div>
 
-        <div class="control-group">
-            <h3>Genetic Locks</h3>
-            <p style="font-size:0.7rem; color:#666; margin-bottom:10px;">Lock traits to preserve them while breeding.</p>
-            
+            <h3 style="margin-top:12px;">Genetic Locks</h3>
             <label class="toggle-row">
                 <input type="checkbox" id="lock-shape"> Lock Shape/Silhouette
             </label>
             <label class="toggle-row">
                 <input type="checkbox" id="lock-pattern"> Lock Fabric/Color
             </label>
-        </div>
 
-        <div class="control-group">
-            <h3>Designer Overrides</h3>
-            <p style="font-size:0.7rem; color:#666; margin-bottom:10px;">Force specific traits into the next generation.</p>
-            
+            <h3 style="margin-top:12px;">Designer Overrides</h3>
             <div class="slider-row">
                 <span>Hemline</span>
                 <select id="override-hem" style="width:60%; background:#222; color:#fff; border:none;">
@@ -163,24 +418,88 @@
         const GRID_COLS = 4;
         const SPACING = 5;
 
+        // Evolution config object (must be defined before Genotype.mutate() uses it)
+        const evolutionConfig = {
+            weightMutationRate: 0.8,
+            addConnectionRate: 0.3,
+            addNodeRate: 0.12,
+            changeActivationRate: 0.15
+        };
+
         // --- MATH & UTILS ---
         const rand = (min, max) => Math.random() * (max - min) + min;
         const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
         const lerp = (start, end, t) => start * (1 - t) + end * t;
 
         // Activation functions for the Neural Network (CPPN)
-        // These provide the "Texture" and "Organic" feel
+        // Expanded set based on Picbreeder/NEAT research for maximum phenotype diversity
+        // Different function types create different pattern regularities:
+        // - Periodic (sin, cos) -> repetition, segmentation
+        // - Symmetric (gauss, abs) -> bilateral symmetry
+        // - Linear -> gradients, fractal-like patterns
+        // - Sharp (step, spike) -> boundaries, edges
+        // - Harmonic (sin2x, sin3x) -> complex wave interference
         const Activations = {
+            // Basic periodic - segmentation and repetition
             sin: Math.sin,
             cos: Math.cos,
-            tanh: Math.tanh,
-            abs: Math.abs,
+            sin2x: x => Math.sin(2 * x * Math.PI),
+            sin3x: x => Math.sin(3 * x * Math.PI),
+            sin5x: x => Math.sin(5 * x * Math.PI),
+            cos2x: x => Math.cos(2 * x * Math.PI),
+
+            // Symmetric - bilateral symmetry, gradients
             gauss: x => Math.exp(-x * x),
+            gaussNarrow: x => Math.exp(-x * x * 4),
+            gaussWide: x => Math.exp(-x * x * 0.5),
+            abs: Math.abs,
+            hat: x => Math.max(0, 1 - Math.abs(x)),
+
+            // Smooth transitions
+            tanh: Math.tanh,
+            sigmoid: x => 1 / (1 + Math.exp(-x)),
+            softplus: x => Math.log(1 + Math.exp(x)) / 5,
+
+            // Sharp/percussive - boundaries, dramatic edges
             step: x => x > 0 ? 1 : 0,
+            spike: x => Math.exp(-Math.abs(x) * 5),
+            ramp: x => Math.max(0, Math.min(1, x)),
+
+            // Wave shapes - different timbres/textures
             sawtooth: x => x - Math.floor(x),
-            sigmoid: x => 1 / (1 + Math.exp(-x))
+            triangle: x => 2 * Math.abs(x % 2 - 1) - 1,
+            square: x => x > 0 ? 1 : -1,
+
+            // Polynomial - organic curves
+            square_x: x => x * x * Math.sign(x),
+            cube: x => x * x * x,
+            inv: x => x === 0 ? 0 : Math.max(-1, Math.min(1, 1 / (x * 5))),
+
+            // Complex/modulation - rich textures
+            sinc: x => x === 0 ? 1 : Math.sin(Math.PI * x * 3) / (Math.PI * x * 3),
+            ripple: x => Math.sin(x * x * 10) * Math.exp(-Math.abs(x)),
+            chirp: x => Math.sin(x * x * x * 20),
+            wobble: x => Math.sin(x * Math.PI) * Math.sin(x * x * 15),
+            flutter: x => Math.sin(x * Math.PI) + 0.3 * Math.sin(x * 17 * Math.PI),
+
+            // Organic/noise - natural variation
+            warble: x => Math.sin(x * Math.PI) * (1 + 0.3 * Math.sin(x * 20)),
+
+            // Folding - creates complex repeating structures
+            fold: x => {
+                let v = x % 2;
+                return v > 1 ? 2 - v : v < -1 ? -2 - v : v;
+            },
+
+            // Linear - gradients, fractal-like
+            linear: x => Math.max(-1, Math.min(1, x)),
+            identity: x => x,
+            clamp: x => Math.max(-0.5, Math.min(0.5, x * 2))
         };
         const ActivationKeys = Object.keys(Activations);
+
+        // Track which activations are enabled (for settings panel)
+        let enabledActivations = new Set(ActivationKeys);
 
         /**
          * --- GENOTYPE ---
@@ -191,14 +510,23 @@
         class Genotype {
             constructor() {
                 // --- 1. EXPLICIT FASHION TRAITS (The "Designer" Genes) ---
+                // EXPANDED RANGES for dramatic silhouette diversity
                 this.traits = {
-                    skirtLength: rand(0.3, 1.0),    // 0=Mini, 1=Floor
-                    waistWidth: rand(0.3, 0.7),     // Corset vs Sack
-                    skirtFlare: rand(0.0, 1.0),     // Pencil vs Ballgown
-                    shoulderWidth: rand(0.3, 0.6), 
-                    necklineDepth: rand(0.0, 0.5),
-                    hemAsymmetry: rand(0.0, 0.2),   // High-low deviation
-                    ruffleAmp: rand(0.0, 0.2)       // Noise amplitude
+                    skirtLength: rand(0.2, 1.0),      // 0=Mini, 1=Floor (expanded min)
+                    waistWidth: rand(0.2, 0.9),       // Corset vs Sack (expanded range)
+                    skirtFlare: rand(0.0, 2.5),       // Pencil vs DRAMATIC Ballgown (was 0-1, now 0-2.5)
+                    shoulderWidth: rand(0.2, 0.8),    // Expanded range
+                    necklineDepth: rand(0.0, 0.6),    // Slightly expanded
+                    hemAsymmetry: rand(0.0, 0.5),     // High-low deviation (was 0-0.2)
+                    ruffleAmp: rand(0.0, 0.8),        // Surface detail amplitude (was 0-0.2, now 0-0.8!)
+
+                    // NEW TRAITS for more variation
+                    flareHeight: rand(0.3, 0.7),      // Where flare starts (waist to hip)
+                    flareExponent: rand(1.0, 3.0),    // Flare curve shape (linear to dramatic)
+                    bustEnhance: rand(0.0, 0.4),      // Bodice volume
+                    layerCount: rand(0.0, 1.0),       // For tiered/layered effects
+                    sculptAmount: rand(0.0, 1.0),     // How much CPPN affects silhouette (not just texture)
+                    volumeScale: rand(0.5, 2.0)       // Overall volume multiplier
                 };
 
                 // --- 2. NEURAL NETWORK (The "Artist" Genes) ---
@@ -207,19 +535,19 @@
                 this.nodes = [];
                 this.connections = [];
                 this.nodeCounter = 0;
-                
-                this.inputCount = 4; 
-                this.outputCount = 5; 
+
+                this.inputCount = 4;
+                this.outputCount = 5;
 
                 this.initNetwork();
             }
 
             initNetwork() {
-                // Inputs
+                // Inputs (nodes 0-3)
                 for(let i=0; i<this.inputCount; i++) this.nodes.push({id: this.nodeCounter++, type: 'input', act: 'identity'});
-                // Outputs
+                // Outputs (nodes 4-8)
                 for(let i=0; i<this.outputCount; i++) this.nodes.push({id: this.nodeCounter++, type: 'output', act: 'sigmoid'});
-                
+
                 // Initial random dense wiring
                 for(let i=0; i<this.inputCount; i++) {
                     for(let j=0; j<this.outputCount; j++) {
@@ -231,16 +559,19 @@
                         });
                     }
                 }
+                console.log('Network initialized:', this.nodes.length, 'nodes,', this.connections.length, 'connections');
             }
 
             clone() {
-                const copy = new Genotype();
+                const copy = Object.create(Genotype.prototype);
                 // Deep copy traits
                 copy.traits = { ...this.traits };
-                // Deep copy network
+                // Deep copy network structure
                 copy.nodes = this.nodes.map(n => ({...n}));
                 copy.connections = this.connections.map(c => ({...c}));
                 copy.nodeCounter = this.nodeCounter;
+                copy.inputCount = this.inputCount;
+                copy.outputCount = this.outputCount;
                 return copy;
             }
 
@@ -248,16 +579,43 @@
                 const lockShape = document.getElementById('lock-shape').checked;
                 const lockPattern = document.getElementById('lock-pattern').checked;
 
+                // Trait ranges for proper clamping (some traits have expanded ranges)
+                const traitRanges = {
+                    skirtLength: [0.2, 1.0],
+                    waistWidth: [0.2, 0.9],
+                    skirtFlare: [0.0, 2.5],      // Expanded!
+                    shoulderWidth: [0.2, 0.8],
+                    necklineDepth: [0.0, 0.6],
+                    hemAsymmetry: [0.0, 0.5],
+                    ruffleAmp: [0.0, 0.8],       // Expanded!
+                    flareHeight: [0.3, 0.7],
+                    flareExponent: [1.0, 3.0],
+                    bustEnhance: [0.0, 0.4],
+                    layerCount: [0.0, 1.0],
+                    sculptAmount: [0.0, 1.0],
+                    volumeScale: [0.5, 2.0]
+                };
+
                 // --- MUTATE TRAITS (Structure) ---
                 if(!lockShape) {
-                    // Trait drift
+                    // Trait drift with proper ranges
                     for(let key in this.traits) {
                         if(Math.random() < rate) {
-                            this.traits[key] += rand(-0.1, 0.1);
-                            this.traits[key] = clamp(this.traits[key], 0, 1); // Keep normalized
+                            const range = traitRanges[key] || [0, 1];
+                            const mutationSize = (range[1] - range[0]) * 0.15; // 15% of range
+                            this.traits[key] += rand(-mutationSize, mutationSize);
+                            this.traits[key] = clamp(this.traits[key], range[0], range[1]);
                         }
                     }
-                    
+
+                    // Occasional dramatic mutations (stepping stones!)
+                    if(Math.random() < 0.1) {
+                        const keys = Object.keys(this.traits);
+                        const key = keys[Math.floor(Math.random() * keys.length)];
+                        const range = traitRanges[key] || [0, 1];
+                        this.traits[key] = rand(range[0], range[1]); // Full random reset
+                    }
+
                     // Apply User Overrides
                     const hemOverride = document.getElementById('override-hem').value;
                     if(hemOverride === 'short') this.traits.skirtLength = rand(0.2, 0.4);
@@ -267,34 +625,57 @@
 
                 // --- MUTATE NETWORK (Pattern/Texture) ---
                 if(!lockPattern) {
-                    // 1. Weight Mutation
+                    // Get enabled activations for this mutation
+                    const availableActivations = Array.from(enabledActivations);
+                    if(availableActivations.length === 0) availableActivations.push('sigmoid'); // Fallback
+
+                    // Use evolutionConfig if available, otherwise use defaults
+                    const config = typeof evolutionConfig !== 'undefined' ? evolutionConfig : {
+                        weightMutationRate: 0.8,
+                        addConnectionRate: 0.3,
+                        addNodeRate: 0.12,
+                        changeActivationRate: 0.15
+                    };
+
+                    // 1. Weight Mutation (with occasional large jumps)
                     this.connections.forEach(c => {
-                        if(Math.random() < rate) {
-                            c.weight += rand(-0.5, 0.5);
+                        if(Math.random() < config.weightMutationRate) {
+                            if(Math.random() < 0.9) {
+                                c.weight += rand(-0.5, 0.5);
+                                c.weight = clamp(c.weight, -3, 3);
+                            } else {
+                                // Occasional large mutation for exploration
+                                c.weight = rand(-2, 2);
+                            }
                         }
                     });
 
                     // 2. Add Connection
-                    if(Math.random() < rate * 0.5) {
+                    if(Math.random() < config.addConnectionRate) {
                         const src = this.nodes[Math.floor(Math.random() * this.nodes.length)];
-                        const tgt = this.nodes.filter(n => n.type !== 'input' && n.id !== src.id)[Math.floor(Math.random() * (this.nodes.length - this.inputCount))];
-                        if(src && tgt) {
-                            this.connections.push({ source: src.id, target: tgt.id, weight: rand(-1, 1), enabled: true });
+                        const validTargets = this.nodes.filter(n => n.type !== 'input' && n.id !== src.id);
+                        if(validTargets.length > 0) {
+                            const tgt = validTargets[Math.floor(Math.random() * validTargets.length)];
+                            // Check if connection already exists
+                            const exists = this.connections.some(c => c.source === src.id && c.target === tgt.id);
+                            if(!exists) {
+                                this.connections.push({ source: src.id, target: tgt.id, weight: rand(-1.5, 1.5), enabled: true });
+                            }
                         }
                     }
 
                     // 3. Add Node (Increases complexity)
-                    // We limit this based on complexity slider to prevent 'noise'
-                    if(this.nodes.length < (10 + complexityBias * 5) && Math.random() < 0.05) {
+                    // Higher complexity ceiling for more expressive networks
+                    if(this.nodes.length < (15 + complexityBias * 8) && Math.random() < config.addNodeRate) {
                         const activeConns = this.connections.filter(c => c.enabled);
                         if(activeConns.length > 0) {
                             const conn = activeConns[Math.floor(Math.random() * activeConns.length)];
                             conn.enabled = false;
 
-                            const newNode = { 
-                                id: this.nodeCounter++, 
-                                type: 'hidden', 
-                                act: ActivationKeys[Math.floor(Math.random() * ActivationKeys.length)] 
+                            const newNode = {
+                                id: this.nodeCounter++,
+                                type: 'hidden',
+                                act: availableActivations[Math.floor(Math.random() * availableActivations.length)]
                             };
                             this.nodes.push(newNode);
 
@@ -302,22 +683,116 @@
                             this.connections.push({ source: newNode.id, target: conn.target, weight: conn.weight, enabled: true });
                         }
                     }
-                    
+
                     // 4. Mutate Activation Function (Style shift)
-                    if(Math.random() < 0.05) {
+                    if(Math.random() < config.changeActivationRate) {
                         const hidden = this.nodes.filter(n => n.type === 'hidden');
                         if(hidden.length > 0) {
                             const n = hidden[Math.floor(Math.random() * hidden.length)];
-                            n.act = ActivationKeys[Math.floor(Math.random() * ActivationKeys.length)];
+                            n.act = availableActivations[Math.floor(Math.random() * availableActivations.length)];
                         }
+                    }
+
+                    // 5. Toggle connection enabled state (for exploring dormant connections)
+                    if(Math.random() < 0.05) {
+                        const conn = this.connections[Math.floor(Math.random() * this.connections.length)];
+                        if(conn) conn.enabled = !conn.enabled;
                     }
                 }
             }
         }
 
         /**
+         * --- BODY PROFILE ---
+         * Defines the humanoid body shape that dresses must wrap around.
+         * Returns the body radius at a given normalized height (0=feet, 1=head)
+         * and angle (for non-circular cross-sections like shoulders)
+         */
+        const BodyProfile = {
+            // Height markers (normalized 0-1 from feet to top of head)
+            FEET: 0.0,
+            ANKLE: 0.05,
+            CALF: 0.15,
+            KNEE: 0.25,
+            THIGH: 0.35,
+            HIP: 0.45,
+            WAIST: 0.55,
+            RIBCAGE: 0.62,
+            BUST: 0.68,
+            CHEST: 0.75,
+            SHOULDER: 0.82,
+            NECK: 0.88,
+            HEAD: 1.0,
+
+            // Get body radius at height v (0-1) and angle (radians)
+            // This creates a realistic female body silhouette
+            getRadius(v, angle = 0) {
+                // Define radius at key body landmarks
+                const profile = [
+                    { h: 0.00, r: 0.08 },  // Feet
+                    { h: 0.05, r: 0.06 },  // Ankle
+                    { h: 0.15, r: 0.09 },  // Calf
+                    { h: 0.22, r: 0.08 },  // Below knee
+                    { h: 0.25, r: 0.09 },  // Knee
+                    { h: 0.35, r: 0.12 },  // Mid-thigh
+                    { h: 0.42, r: 0.15 },  // Upper thigh
+                    { h: 0.45, r: 0.18 },  // Hip
+                    { h: 0.50, r: 0.17 },  // Lower waist
+                    { h: 0.55, r: 0.14 },  // Waist (narrowest)
+                    { h: 0.60, r: 0.15 },  // Above waist
+                    { h: 0.65, r: 0.17 },  // Ribcage
+                    { h: 0.70, r: 0.18 },  // Bust
+                    { h: 0.75, r: 0.17 },  // Upper chest
+                    { h: 0.80, r: 0.16 },  // Below shoulder
+                    { h: 0.85, r: 0.08 },  // Neck base
+                    { h: 0.90, r: 0.06 },  // Neck
+                    { h: 1.00, r: 0.10 },  // Head
+                ];
+
+                // Find the two points to interpolate between
+                let lower = profile[0];
+                let upper = profile[profile.length - 1];
+
+                for (let i = 0; i < profile.length - 1; i++) {
+                    if (v >= profile[i].h && v <= profile[i + 1].h) {
+                        lower = profile[i];
+                        upper = profile[i + 1];
+                        break;
+                    }
+                }
+
+                // Smooth interpolation between points
+                const t = (v - lower.h) / (upper.h - lower.h + 0.001);
+                const smoothT = t * t * (3 - 2 * t); // Smoothstep
+                const baseRadius = lerp(lower.r, upper.r, smoothT);
+
+                // Add slight front-back asymmetry for bust area
+                let asymmetry = 1.0;
+                if (v > 0.65 && v < 0.75) {
+                    // Bust protrudes slightly forward
+                    asymmetry = 1.0 + Math.cos(angle) * 0.15 * (1 - Math.abs(v - 0.70) / 0.05);
+                }
+
+                // Hips are slightly wider side-to-side
+                if (v > 0.42 && v < 0.50) {
+                    asymmetry = 1.0 + Math.abs(Math.sin(angle)) * 0.1;
+                }
+
+                return baseRadius * asymmetry;
+            },
+
+            // Get the Y position in world space for a given v
+            // Maps v (0-1) to actual mannequin height
+            getY(v, totalHeight = 4.0) {
+                // Mannequin stands with feet at y = -2, head at y = 2
+                return (v - 0.5) * totalHeight;
+            }
+        };
+
+        /**
          * --- PHENOTYPE (The Dress Builder) ---
          * Converts Genotype into Three.js Mesh
+         * NOW BODY-AWARE: Dress is generated as an offset from the body surface
          */
         class Phenotype {
             constructor(genotype) {
@@ -330,12 +805,19 @@
                 // Simple feed-forward implementation for arbitrary graphs
                 let values = {};
                 this.genotype.nodes.forEach(n => values[n.id] = 0);
-                
+
+                // Get input nodes explicitly
+                const inputNodes = this.genotype.nodes.filter(n => n.type === 'input');
+                if (inputNodes.length < 4) {
+                    console.error('Not enough input nodes:', inputNodes.length);
+                    return [0.5, 0.5, 0.5, 0, 1]; // Default output
+                }
+
                 // Inputs
-                values[this.genotype.nodes[0].id] = Math.sin(x * Math.PI); // Periodicity
-                values[this.genotype.nodes[1].id] = y;
-                values[this.genotype.nodes[2].id] = r;
-                values[this.genotype.nodes[3].id] = bias;
+                values[inputNodes[0].id] = Math.sin(x * Math.PI); // Periodicity
+                values[inputNodes[1].id] = y;
+                values[inputNodes[2].id] = r;
+                values[inputNodes[3].id] = bias;
 
                 // Propagate (Multiple passes for recurrence/depth)
                 const passes = 4;
@@ -345,12 +827,12 @@
                             values[c.target] += values[c.source] * c.weight;
                         }
                     });
-                    
+
                     // Apply activations
                     this.genotype.nodes.forEach(n => {
                         if(n.type !== 'input') {
                             const fn = Activations[n.act] || Activations.sigmoid;
-                            values[n.id] = fn(values[n.id]); 
+                            values[n.id] = fn(values[n.id]);
                         }
                     });
                 }
@@ -362,111 +844,216 @@
                 return outs; // [R, G, B, Disp, Alpha]
             }
 
-            generateMesh() {
-                // Resolution
-                const radSegs = 60;
-                const hSegs = 60;
-                
-                const traits = this.genotype.traits;
-                
-                // Create Geometry
-                const geometry = new THREE.PlaneGeometry(2 * Math.PI, 2, radSegs, hSegs);
-                
-                const pos = geometry.attributes.position;
-                const colors = [];
-                const vertex = new THREE.Vector3();
-                const c = new THREE.Color();
+            generateMesh(forPreview = false) {
+                console.log('generateMesh called, forPreview:', forPreview);
+                try {
+                    // Resolution
+                    const radSegs = 48;
+                    const hSegs = 48;
 
-                // We map plane UVs to Cylinder coordinates manually to control the shape completely
-                for(let i=0; i<pos.count; i++) {
-                    const u = pos.getX(i) / (2 * Math.PI); // 0 to 1 around
-                    const v = (pos.getY(i) + 1) / 2;       // 0 to 1 height (0=bottom, 1=top)
-                    
-                    // --- 1. MACRO SHAPE (The Designer Genes) ---
-                    // Calculate base radius at this height based on traits
-                    
-                    // Waist is typically at v ~ 0.6
-                    const waistH = 0.6;
-                    let radius = 0;
-                    
-                    if (v > waistH) {
-                        // Bodice (Waist to Neck)
-                        const t = (v - waistH) / (1 - waistH);
-                        radius = lerp(traits.waistWidth * 0.5, traits.shoulderWidth * 0.6, t);
-                    } else {
-                        // Skirt (Waist to Hem)
-                        // Use power function for Flare curve
-                        const t = (waistH - v) / waistH;
-                        const flareCurve = Math.pow(t, 1 + (traits.skirtFlare * 2)); 
-                        radius = (traits.waistWidth * 0.5) + (flareCurve * traits.skirtFlare * 1.5);
+                    const traits = this.genotype.traits;
+
+                    // Scale factor for main scene vs preview
+                    const scale = forPreview ? 0.4 : 1.0;
+
+                    // Create Geometry using cylinder-like approach (more stable)
+                    const geometry = new THREE.CylinderGeometry(1, 1, 1, radSegs, hSegs, true);
+
+                    const pos = geometry.attributes.position;
+                    const colors = [];
+                    const vertex = new THREE.Vector3();
+                    const c = new THREE.Color();
+
+                    // Dress dimensions based on traits
+                    const dressHeight = 1.6 + traits.skirtLength * 1.0; // Variable height
+                    const baseY = -1.0 - traits.skirtLength * 0.5; // Lower base for longer dresses
+
+                    // Volume and flare parameters
+                    const volumeScale = traits.volumeScale;
+                    const skirtFlare = traits.skirtFlare;
+                    const flareHeight = traits.flareHeight;
+                    const flareExponent = traits.flareExponent;
+
+                    // --- FIRST PASS: Collect all radius/displacement values for smoothing ---
+                    const radiusData = [];
+                    const colorData = [];
+
+                    for(let i = 0; i < pos.count; i++) {
+                        // Get original cylinder position
+                        const origX = pos.getX(i);
+                        const origY = pos.getY(i);
+                        const origZ = pos.getZ(i);
+
+                        // Calculate angle and height (v)
+                        const angle = Math.atan2(origZ, origX);
+                        const v = (origY + 0.5); // 0 at bottom, 1 at top
+
+                        // --- Calculate base radius at this height ---
+                        // Body-inspired profile: narrow at waist, wider at hips and bust
+                        let baseRadius = 0.15;
+
+                        // Waist region - use wider, smoother gaussian
+                        const waistPos = 0.65;
+                        const waistWidth = 0.18; // Wider for smoother transition
+                        const waistFactor = 1 - Math.exp(-Math.pow((v - waistPos) / waistWidth, 2)) * 0.4 * (1 - traits.waistWidth);
+                        baseRadius *= waistFactor;
+
+                        // Bust region - smoother transition using smoothstep
+                        if (v > 0.70) {
+                            const bustT = clamp((v - 0.70) / 0.20, 0, 1);
+                            const smoothT = bustT * bustT * (3 - 2 * bustT); // smoothstep
+                            const bustPeak = 1 - Math.abs(v - 0.85) / 0.15;
+                            const bustFactor = 1 + traits.bustEnhance * 0.4 * Math.max(0, bustPeak) * smoothT;
+                            baseRadius *= bustFactor;
+                        }
+
+                        // --- DRAMATIC SKIRT FLARE - smoother curve ---
+                        if (v < flareHeight) {
+                            const flareProgress = (flareHeight - v) / flareHeight;
+                            // Use smoothstep for gradual onset of flare
+                            const smoothFlare = flareProgress * flareProgress * (3 - 2 * flareProgress);
+                            const flareShape = Math.pow(smoothFlare, flareExponent);
+                            const flareAmount = skirtFlare * flareShape * 0.2;
+                            baseRadius += flareAmount;
+                        }
+
+                        // Layer/tier effect - reduced amplitude and smoother wave
+                        if (traits.layerCount > 0.3 && v < 0.55) {
+                            const tierFreq = 2 + Math.floor(traits.layerCount * 3); // Fewer, broader tiers
+                            const tierPhase = v * tierFreq * Math.PI * 2;
+                            // Use softer wave shape (raised cosine instead of pure sine)
+                            const tierWave = (1 - Math.cos(tierPhase)) * 0.5;
+                            const tierAmp = tierWave * traits.layerCount * 0.08; // Reduced amplitude
+                            baseRadius += tierAmp;
+                        }
+
+                        // Hemline asymmetry - smoother fade
+                        if (v < 0.12) {
+                            const hemT = v / 0.12;
+                            const smoothHem = 1 - hemT * hemT; // Quadratic falloff
+                            const asymOffset = Math.cos(angle) * traits.hemAsymmetry * 0.15 * smoothHem;
+                            baseRadius += asymOffset;
+                        }
+
+                        // Apply overall volume scale
+                        baseRadius *= volumeScale;
+
+                        // --- CPPN-based detail and color ---
+                        const u = (angle + Math.PI) / (2 * Math.PI); // 0-1 around
+
+                        // Sample CPPN with slight spatial averaging for smoother results
+                        // Use lower frequency inputs to reduce high-frequency noise
+                        const nnOut = this.evaluateNetwork(u * 3, v * 1.5, baseRadius, 1.0);
+
+                        // [0]=R, [1]=G, [2]=B, [3]=Disp, [4]=Alpha
+
+                        // Color from neural network
+                        const cr = clamp(nnOut[0] + 0.2, 0, 1);
+                        const cg = clamp(nnOut[1] + 0.2, 0, 1);
+                        const cb = clamp(nnOut[2] + 0.2, 0, 1);
+                        colorData.push({ r: cr, g: cg, b: cb });
+
+                        // Displacement - apply smoothing function to raw CPPN output
+                        const dispRaw = nnOut[3];
+                        // Use smoothstep on displacement to reduce harsh peaks
+                        const dispNorm = clamp(dispRaw, 0, 1);
+                        const dispSmooth = dispNorm * dispNorm * (3 - 2 * dispNorm);
+                        const dispBase = 0.015 + traits.ruffleAmp * 0.25; // Reduced base displacement
+                        const dispAmount = dispSmooth * dispBase;
+
+                        const finalRadius = Math.max(0.05, baseRadius + dispAmount);
+
+                        radiusData.push({
+                            angle: angle,
+                            v: v,
+                            radius: finalRadius,
+                            origY: origY
+                        });
                     }
-                    
-                    // --- 2. HEMLINE LOGIC ---
-                    // Cut off geometry below trait length
-                    // We map logical V (0-1) to physical height. 
-                    // If the vertex v is below the "cut", we hide it or squash it.
-                    
-                    // Asymmetry calculation
-                    const angle = u * Math.PI * 2;
-                    const asymOffset = Math.cos(angle) * traits.hemAsymmetry * 0.3;
-                    const effectiveLength = traits.skirtLength + asymOffset;
-                    
-                    // We shift Y to match length
-                    let yPos = (v - 0.5) * 4; // Base scale
-                    
-                    // --- 3. MICRO DETAIL (The CPPN) ---
-                    const nnOut = this.evaluateNetwork(u * 4, v * 2, radius, 1.0);
-                    
-                    // [0]=R, [1]=G, [2]=B, [3]=Disp, [4]=Alpha
-                    
-                    // Color
-                    c.setRGB(
-                        clamp(nnOut[0] + 0.2, 0, 1), // Add base brightness
-                        clamp(nnOut[1] + 0.2, 0, 1),
-                        clamp(nnOut[2] + 0.2, 0, 1)
-                    );
-                    colors.push(c.r, c.g, c.b);
 
-                    // Displacement (Ruffles / Texture)
-                    // We modulate displacement by traits.ruffleAmp
-                    const disp = (nnOut[3] - 0.5) * (0.1 + traits.ruffleAmp);
-                    radius += disp;
+                    // --- SECOND PASS: Apply Laplacian-style smoothing to radii ---
+                    // This averages each vertex's radius with its neighbors to reduce bubbles
+                    const smoothedRadii = [];
+                    const smoothingStrength = 0.3; // How much to blend with neighbors
 
-                    // Alpha/Cutout (Lace effect)
-                    // If NN output 4 is very low, we discard (scale to 0)
-                    if(nnOut[4] < 0.15) {
-                        radius = 0.01; // effectively invisible line
+                    for(let i = 0; i < radiusData.length; i++) {
+                        const current = radiusData[i];
+                        let neighborSum = 0;
+                        let neighborCount = 0;
+
+                        // Find neighbors (vertices with similar v and adjacent angles)
+                        for(let j = 0; j < radiusData.length; j++) {
+                            if (i === j) continue;
+                            const other = radiusData[j];
+
+                            // Check if this is a neighbor (close in v and angle)
+                            const vDist = Math.abs(current.v - other.v);
+                            let angleDist = Math.abs(current.angle - other.angle);
+                            if (angleDist > Math.PI) angleDist = 2 * Math.PI - angleDist;
+
+                            // Consider it a neighbor if within ~1-2 segments
+                            const vThresh = 1.5 / hSegs;
+                            const angleThresh = 1.5 * (2 * Math.PI / radSegs);
+
+                            if (vDist < vThresh && angleDist < angleThresh) {
+                                neighborSum += other.radius;
+                                neighborCount++;
+                            }
+                        }
+
+                        if (neighborCount > 0) {
+                            const neighborAvg = neighborSum / neighborCount;
+                            // Blend current radius with neighbor average
+                            smoothedRadii[i] = lerp(current.radius, neighborAvg, smoothingStrength);
+                        } else {
+                            smoothedRadii[i] = current.radius;
+                        }
                     }
 
-                    // Apply Cylindrical Transform
-                    vertex.x = Math.cos(angle) * radius;
-                    vertex.z = Math.sin(angle) * radius;
-                    vertex.y = yPos;
-                    
-                    // Hemline Cut
-                    // We simply squash vertices below the hemline to the hemline Y
-                    // The top is v=1. The bottom is determined by skirtLength trait.
-                    // skirtLength 1 = full length (v=0). skirtLength 0 = micro (v=0.6).
-                    const hemV = 1.0 - (effectiveLength * 1.0); // Approximate
-                    if (v < hemV) {
-                       vertex.set(0,0,0); // Hide vertex
+                    // --- THIRD PASS: Apply smoothed values to geometry ---
+                    for(let i = 0; i < pos.count; i++) {
+                        const data = radiusData[i];
+                        const color = colorData[i];
+
+                        const finalRadius = smoothedRadii[i] * scale;
+                        const yPos = (baseY + data.v * dressHeight) * scale;
+
+                        vertex.x = Math.cos(data.angle) * finalRadius;
+                        vertex.z = Math.sin(data.angle) * finalRadius;
+                        vertex.y = yPos;
+
+                        // Guard against NaN/Infinity
+                        if (!isFinite(vertex.x)) vertex.x = 0;
+                        if (!isFinite(vertex.y)) vertex.y = 0;
+                        if (!isFinite(vertex.z)) vertex.z = 0;
+
+                        pos.setXYZ(i, vertex.x, vertex.y, vertex.z);
+                        colors.push(color.r, color.g, color.b);
                     }
 
-                    pos.setXYZ(i, vertex.x, vertex.y, vertex.z);
+                    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+                    geometry.computeVertexNormals();
+
+                    console.log('Geometry created, vertex count:', geometry.attributes.position.count);
+
+                    const mat = new THREE.MeshStandardMaterial({
+                        vertexColors: true,
+                        side: THREE.DoubleSide,
+                        roughness: 0.4,
+                        metalness: 0.1,
+                        flatShading: false
+                    });
+
+                    const mesh = new THREE.Mesh(geometry, mat);
+                    console.log('Mesh created successfully');
+                    return mesh;
+                } catch(e) {
+                    console.error('Error generating mesh:', e);
+                    // Return a simple fallback mesh
+                    const fallbackGeo = new THREE.SphereGeometry(0.5, 16, 16);
+                    const fallbackMat = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+                    return new THREE.Mesh(fallbackGeo, fallbackMat);
                 }
-                
-                geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-                geometry.computeVertexNormals();
-
-                const mat = new THREE.MeshStandardMaterial({
-                    vertexColors: true,
-                    side: THREE.DoubleSide,
-                    roughness: 0.4,
-                    metalness: 0.1,
-                    flatShading: false
-                });
-
-                return new THREE.Mesh(geometry, mat);
             }
         }
 
@@ -516,16 +1103,78 @@
         // Mannequins
         let population = [];
         let generation = 1;
-        
-        // Shared Mannequin Base Geometry (Reused)
-        const baseGeo = new THREE.Group();
-        const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 3, 12), new THREE.MeshLambertMaterial({color:0x333}));
-        stand.position.y = -0.5;
-        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.5, 12), new THREE.MeshLambertMaterial({color:0x111}));
-        neck.position.y = 1.8;
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshStandardMaterial({color:0x111, roughness:0.2, metalness:0.8}));
-        head.position.y = 2.2;
-        baseGeo.add(stand, neck, head);
+
+        // Create realistic humanoid mannequin for main scene
+        function createMainMannequin() {
+            const mannequin = new THREE.Group();
+            const skinMat = new THREE.MeshStandardMaterial({
+                color: 0x1a1a1a,
+                roughness: 0.4,
+                metalness: 0.1
+            });
+
+            // Simplified mannequin using basic geometries for stability
+            // Body (cylinder approximation)
+            const bodyGeo = new THREE.CylinderGeometry(0.15, 0.18, 1.6, 16);
+            const body = new THREE.Mesh(bodyGeo, skinMat);
+            body.position.y = 0.2;
+            mannequin.add(body);
+
+            // Head
+            const headGeo = new THREE.SphereGeometry(0.12, 16, 12);
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.y = 1.15;
+            head.scale.y = 1.2;
+            mannequin.add(head);
+
+            // Neck
+            const neckGeo = new THREE.CylinderGeometry(0.06, 0.08, 0.2, 12);
+            const neck = new THREE.Mesh(neckGeo, skinMat);
+            neck.position.y = 0.95;
+            mannequin.add(neck);
+
+            // Left Leg
+            const legGeo = new THREE.CylinderGeometry(0.08, 0.06, 1.4, 12);
+            const leftLeg = new THREE.Mesh(legGeo, skinMat);
+            leftLeg.position.set(-0.08, -1.25, 0);
+            mannequin.add(leftLeg);
+
+            // Right Leg
+            const rightLeg = new THREE.Mesh(legGeo, skinMat);
+            rightLeg.position.set(0.08, -1.25, 0);
+            mannequin.add(rightLeg);
+
+            // Left Arm
+            const armGeo = new THREE.CylinderGeometry(0.04, 0.03, 0.8, 8);
+            const leftArm = new THREE.Mesh(armGeo, skinMat);
+            leftArm.position.set(-0.25, 0.4, 0);
+            leftArm.rotation.z = 0.15;
+            mannequin.add(leftArm);
+
+            // Right Arm
+            const rightArm = new THREE.Mesh(armGeo, skinMat);
+            rightArm.position.set(0.25, 0.4, 0);
+            rightArm.rotation.z = -0.15;
+            mannequin.add(rightArm);
+
+            // Stand/pedestal
+            const standGeo = new THREE.CylinderGeometry(0.15, 0.2, 0.1, 16);
+            const standMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.5, roughness: 0.3 });
+            const stand = new THREE.Mesh(standGeo, standMat);
+            stand.position.y = -2.0;
+            mannequin.add(stand);
+
+            return mannequin;
+        }
+
+        // Cache the base mannequin geometry for cloning
+        let baseMannequinTemplate = null;
+        try {
+            baseMannequinTemplate = createMainMannequin();
+            console.log('Mannequin template created successfully');
+        } catch(e) {
+            console.error('Error creating mannequin template:', e);
+        }
 
         class Model {
             constructor(genotype, x, z) {
@@ -533,41 +1182,62 @@
                 this.group = new THREE.Group();
                 this.group.position.set(x, 0, z);
 
-                // Add Base
-                const base = baseGeo.clone();
-                this.group.add(base);
+                // Add humanoid mannequin base
+                if (baseMannequinTemplate) {
+                    this.mannequin = baseMannequinTemplate.clone();
+                    this.group.add(this.mannequin);
+                }
 
-                // Generate Dress
-                const pheno = new Phenotype(genotype);
-                this.mesh = pheno.generateMesh();
-                this.mesh.position.y = 0.5; // Align with neck
-                this.mesh.castShadow = true;
-                this.mesh.receiveShadow = true;
-                this.group.add(this.mesh);
-                
-                // Interaction Box - TIGHTER HITBOX
-                // Reduced width from 2.5 to 2.0 to prevent overlap
-                const hitGeo = new THREE.BoxGeometry(2.0, 4.5, 2.0);
+                // Generate Dress - now body-aware
+                try {
+                    const pheno = new Phenotype(genotype);
+                    this.mesh = pheno.generateMesh(false); // false = main scene scale
+                    // Dress is already positioned correctly relative to body profile
+                    this.mesh.castShadow = true;
+                    this.mesh.receiveShadow = true;
+                    this.group.add(this.mesh);
+                    console.log('Dress mesh created at', x, z);
+                } catch(e) {
+                    console.error('Error creating dress mesh in Model:', e);
+                    // Create a fallback visible mesh so we can see something
+                    const fallbackGeo = new THREE.CylinderGeometry(0.5, 1, 2, 16);
+                    const fallbackMat = new THREE.MeshStandardMaterial({ color: 0xff0055 });
+                    this.mesh = new THREE.Mesh(fallbackGeo, fallbackMat);
+                    this.mesh.position.y = 0;
+                    this.group.add(this.mesh);
+                }
+
+                // Interaction Box
+                const hitGeo = new THREE.BoxGeometry(1.8, 4.5, 1.8);
                 const hitMat = new THREE.MeshBasicMaterial({visible: false});
                 this.hitBox = new THREE.Mesh(hitGeo, hitMat);
-                this.hitBox.position.y = 1;
+                this.hitBox.position.y = 0;
                 this.hitBox.userData = { parent: this };
                 this.group.add(this.hitBox);
 
                 scene.add(this.group);
             }
-            
+
             dispose() {
                 scene.remove(this.group);
-                this.mesh.geometry.dispose();
-                this.mesh.material.dispose();
+                if (this.mesh) {
+                    this.mesh.geometry.dispose();
+                    this.mesh.material.dispose();
+                }
+                // Dispose mannequin geometries
+                if (this.mannequin) {
+                    this.mannequin.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) child.material.dispose();
+                    });
+                }
             }
 
             highlight(active) {
                 if(active) {
-                    this.group.scale.setScalar(1.1);
+                    this.group.scale.setScalar(1.08);
                     document.body.style.cursor = 'pointer';
-                    this.mesh.material.emissive.setHex(0x222222);
+                    this.mesh.material.emissive.setHex(0x1a1a1a);
                 } else {
                     this.group.scale.setScalar(1.0);
                     document.body.style.cursor = 'default';
@@ -577,38 +1247,186 @@
         }
 
         function createGeneration(parentGenotype = null) {
-            // Cleanup
-            population.forEach(p => p.dispose());
-            population = [];
+            try {
+                // Cleanup
+                population.forEach(p => p.dispose());
+                population = [];
 
-            const mRate = parseFloat(document.getElementById('mut-rate').value);
-            const complexity = parseInt(document.getElementById('complexity').value);
-            
-            const startX = -((GRID_COLS - 1) * SPACING) / 2;
-            const startZ = -((GRID_ROWS - 1) * SPACING) / 2;
+                const mRate = parseFloat(document.getElementById('mut-rate').value);
+                const complexity = parseInt(document.getElementById('complexity').value);
 
-            for(let r=0; r<GRID_ROWS; r++) {
-                for(let c=0; c<GRID_COLS; c++) {
-                    let dna;
-                    if(parentGenotype) {
-                        dna = parentGenotype.clone();
-                        dna.mutate(mRate, complexity);
-                        // Additional chance for severe mutation
-                        if(Math.random() < 0.2) dna.mutate(mRate, complexity);
-                    } else {
-                        dna = new Genotype(); // Random
-                        // Initial warmth
-                        dna.mutate(1.0, complexity); 
+                const startX = -((GRID_COLS - 1) * SPACING) / 2;
+                const startZ = -((GRID_ROWS - 1) * SPACING) / 2;
+
+                for(let r=0; r<GRID_ROWS; r++) {
+                    for(let c=0; c<GRID_COLS; c++) {
+                        let dna;
+                        if(parentGenotype) {
+                            dna = parentGenotype.clone();
+                            dna.mutate(mRate, complexity);
+                            // Additional chance for severe mutation
+                            if(Math.random() < 0.2) dna.mutate(mRate, complexity);
+                        } else {
+                            dna = new Genotype(); // Random
+                            // Initial warmth
+                            dna.mutate(1.0, complexity);
+                        }
+
+                        const x = startX + c * SPACING;
+                        const z = startZ + r * SPACING;
+                        population.push(new Model(dna, x, z));
                     }
-
-                    const x = startX + c * SPACING;
-                    const z = startZ + r * SPACING;
-                    population.push(new Model(dna, x, z));
                 }
+
+                document.getElementById('gen-display').innerText = generation;
+                console.log('Generation created with', population.length, 'models');
+            } catch(e) {
+                console.error('Error creating generation:', e);
             }
-            
-            document.getElementById('gen-display').innerText = generation;
         }
+
+        // --- MANNEQUIN PREVIEW SYSTEM ---
+        // Uses the same BodyProfile as the main scene for consistency
+        const previewContainer = document.getElementById('mannequin-preview');
+        const previewScene = new THREE.Scene();
+        const previewCamera = new THREE.PerspectiveCamera(35, previewContainer.clientWidth / previewContainer.clientHeight, 0.1, 50);
+        const previewRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        previewRenderer.setSize(previewContainer.clientWidth, previewContainer.clientHeight);
+        previewRenderer.setClearColor(0x000000, 0);
+        previewContainer.insertBefore(previewRenderer.domElement, previewContainer.firstChild);
+
+        // Preview lighting
+        const previewAmb = new THREE.AmbientLight(0xffffff, 0.5);
+        previewScene.add(previewAmb);
+        const previewDir = new THREE.DirectionalLight(0xffffff, 0.8);
+        previewDir.position.set(2, 4, 3);
+        previewScene.add(previewDir);
+        const previewRim = new THREE.DirectionalLight(0xff0055, 0.3);
+        previewRim.position.set(-2, 2, -2);
+        previewScene.add(previewRim);
+
+        // Preview controls (drag to rotate)
+        const previewControls = new THREE.OrbitControls(previewCamera, previewRenderer.domElement);
+        previewControls.enableDamping = true;
+        previewControls.dampingFactor = 0.08;
+        previewControls.enableZoom = true;
+        previewControls.minDistance = 2;
+        previewControls.maxDistance = 8;
+        previewControls.enablePan = false;
+        previewControls.autoRotate = true;
+        previewControls.autoRotateSpeed = 1.5;
+
+        previewCamera.position.set(0, 0.3, 3.5);
+        previewControls.target.set(0, 0, 0);
+
+        // Create preview mannequin (simplified for sidebar)
+        function createPreviewMannequin() {
+            const mannequin = new THREE.Group();
+            const scale = 0.4;
+            const skinMat = new THREE.MeshStandardMaterial({
+                color: 0x2a2a2a,
+                roughness: 0.3,
+                metalness: 0.1
+            });
+
+            // Simplified mannequin using basic geometries
+            // Body
+            const bodyGeo = new THREE.CylinderGeometry(0.06, 0.072, 0.64, 12);
+            const body = new THREE.Mesh(bodyGeo, skinMat);
+            body.position.y = 0.08;
+            mannequin.add(body);
+
+            // Head
+            const headGeo = new THREE.SphereGeometry(0.048, 12, 10);
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.y = 0.46;
+            head.scale.y = 1.2;
+            mannequin.add(head);
+
+            // Neck
+            const neckGeo = new THREE.CylinderGeometry(0.024, 0.032, 0.08, 8);
+            const neck = new THREE.Mesh(neckGeo, skinMat);
+            neck.position.y = 0.38;
+            mannequin.add(neck);
+
+            // Legs
+            const legGeo = new THREE.CylinderGeometry(0.032, 0.024, 0.56, 8);
+            const leftLeg = new THREE.Mesh(legGeo, skinMat);
+            leftLeg.position.set(-0.032, -0.5, 0);
+            mannequin.add(leftLeg);
+
+            const rightLeg = new THREE.Mesh(legGeo, skinMat);
+            rightLeg.position.set(0.032, -0.5, 0);
+            mannequin.add(rightLeg);
+
+            // Arms
+            const armGeo = new THREE.CylinderGeometry(0.016, 0.012, 0.32, 6);
+            const leftArm = new THREE.Mesh(armGeo, skinMat);
+            leftArm.position.set(-0.10, 0.16, 0);
+            leftArm.rotation.z = 0.15;
+            mannequin.add(leftArm);
+
+            const rightArm = new THREE.Mesh(armGeo, skinMat);
+            rightArm.position.set(0.10, 0.16, 0);
+            rightArm.rotation.z = -0.15;
+            mannequin.add(rightArm);
+
+            return mannequin;
+        }
+
+        // Create the preview mannequin
+        const previewMannequin = createPreviewMannequin();
+        previewScene.add(previewMannequin);
+
+        // Variable to hold the preview dress mesh
+        let previewDress = null;
+        let selectedGenotype = null;
+
+        // Function to update the preview dress
+        function updatePreviewDress(genotype) {
+            // Remove old dress
+            if (previewDress) {
+                previewScene.remove(previewDress);
+                previewDress.geometry.dispose();
+                previewDress.material.dispose();
+                previewDress = null;
+            }
+
+            if (!genotype) return;
+
+            selectedGenotype = genotype;
+
+            // Generate dress mesh using Phenotype with forPreview=true
+            const pheno = new Phenotype(genotype);
+            previewDress = pheno.generateMesh(true); // true = preview scale
+
+            // Dress is already at correct scale and position from generateMesh
+            previewScene.add(previewDress);
+
+            // Hide the hint text
+            document.getElementById('mannequin-hint').style.display = 'none';
+
+            // Update network topology visualization
+            drawNetworkTopology(genotype);
+        }
+
+        // Animate preview scene
+        function animatePreview() {
+            requestAnimationFrame(animatePreview);
+            previewControls.update();
+            previewRenderer.render(previewScene, previewCamera);
+        }
+        animatePreview();
+
+        // Handle preview container resize
+        function resizePreview() {
+            const w = previewContainer.clientWidth;
+            const h = previewContainer.clientHeight;
+            previewCamera.aspect = w / h;
+            previewCamera.updateProjectionMatrix();
+            previewRenderer.setSize(w, h);
+        }
+        window.addEventListener('resize', resizePreview);
 
         // --- EVENTS & INTERACTION ---
         let hovered = null;
@@ -638,6 +1456,9 @@
 
             // If no hovered model, ignore
             if (!hovered) return;
+
+            // Update the mannequin preview with the selected dress
+            updatePreviewDress(hovered.genotype);
 
             // BREED
             const msg = document.getElementById('overlay-msg');
@@ -695,7 +1516,9 @@
         }
 
         // Initialize
+        console.log('Initializing generation...');
         createGeneration();
+        console.log('Population created:', population.length);
         animate();
 
         // Window Resize
@@ -704,6 +1527,278 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        // ========================================
+        // SETTINGS PANEL FUNCTIONALITY
+        // ========================================
+
+        // Toggle settings panel
+        document.getElementById('settings-toggle').addEventListener('click', () => {
+            document.getElementById('settings-panel').classList.toggle('open');
+        });
+
+        // Initialize activation function checkboxes
+        function initActivationCheckboxes() {
+            const container = document.getElementById('activation-checkboxes');
+            container.innerHTML = '';
+
+            ActivationKeys.forEach(name => {
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = enabledActivations.has(name);
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        enabledActivations.add(name);
+                    } else {
+                        enabledActivations.delete(name);
+                    }
+                    updateActivationCount();
+                });
+
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(name));
+                container.appendChild(label);
+            });
+
+            updateActivationCount();
+        }
+
+        function selectAllActivations() {
+            enabledActivations = new Set(ActivationKeys);
+            initActivationCheckboxes();
+        }
+
+        function deselectAllActivations() {
+            enabledActivations.clear();
+            initActivationCheckboxes();
+        }
+
+        function updateActivationCount() {
+            document.getElementById('act-count').textContent = enabledActivations.size;
+        }
+
+        // Settings sliders
+        document.getElementById('weight-mut-rate').addEventListener('input', (e) => {
+            evolutionConfig.weightMutationRate = parseFloat(e.target.value);
+            document.getElementById('weight-mut-val').textContent = e.target.value;
+        });
+
+        document.getElementById('add-conn-rate').addEventListener('input', (e) => {
+            evolutionConfig.addConnectionRate = parseFloat(e.target.value);
+            document.getElementById('add-conn-val').textContent = e.target.value;
+        });
+
+        document.getElementById('add-node-rate').addEventListener('input', (e) => {
+            evolutionConfig.addNodeRate = parseFloat(e.target.value);
+            document.getElementById('add-node-val').textContent = e.target.value;
+        });
+
+        document.getElementById('change-act-rate').addEventListener('input', (e) => {
+            evolutionConfig.changeActivationRate = parseFloat(e.target.value);
+            document.getElementById('change-act-val').textContent = e.target.value;
+        });
+
+        // Presets
+        function loadPreset(name) {
+            switch(name) {
+                case 'default':
+                    evolutionConfig.weightMutationRate = 0.8;
+                    evolutionConfig.addConnectionRate = 0.3;
+                    evolutionConfig.addNodeRate = 0.12;
+                    evolutionConfig.changeActivationRate = 0.15;
+                    enabledActivations = new Set(ActivationKeys);
+                    break;
+                case 'diverse':
+                    // High mutation for maximum exploration
+                    evolutionConfig.weightMutationRate = 0.95;
+                    evolutionConfig.addConnectionRate = 0.5;
+                    evolutionConfig.addNodeRate = 0.25;
+                    evolutionConfig.changeActivationRate = 0.3;
+                    enabledActivations = new Set(ActivationKeys);
+                    break;
+                case 'stable':
+                    // Low mutation for gradual refinement
+                    evolutionConfig.weightMutationRate = 0.5;
+                    evolutionConfig.addConnectionRate = 0.1;
+                    evolutionConfig.addNodeRate = 0.05;
+                    evolutionConfig.changeActivationRate = 0.05;
+                    enabledActivations = new Set(['sin', 'cos', 'gauss', 'sigmoid', 'tanh', 'linear']);
+                    break;
+                case 'wild':
+                    // Maximum chaos
+                    evolutionConfig.weightMutationRate = 1.0;
+                    evolutionConfig.addConnectionRate = 0.7;
+                    evolutionConfig.addNodeRate = 0.4;
+                    evolutionConfig.changeActivationRate = 0.5;
+                    enabledActivations = new Set(ActivationKeys);
+                    break;
+                case 'organic':
+                    // Focus on smooth, natural-looking forms
+                    evolutionConfig.weightMutationRate = 0.7;
+                    evolutionConfig.addConnectionRate = 0.2;
+                    evolutionConfig.addNodeRate = 0.1;
+                    evolutionConfig.changeActivationRate = 0.15;
+                    enabledActivations = new Set(['sin', 'cos', 'gauss', 'gaussNarrow', 'gaussWide', 'tanh', 'sigmoid', 'softplus', 'ripple', 'wobble', 'warble']);
+                    break;
+            }
+            updateSettingsUI();
+            initActivationCheckboxes();
+        }
+
+        function updateSettingsUI() {
+            document.getElementById('weight-mut-rate').value = evolutionConfig.weightMutationRate;
+            document.getElementById('weight-mut-val').textContent = evolutionConfig.weightMutationRate.toFixed(2);
+
+            document.getElementById('add-conn-rate').value = evolutionConfig.addConnectionRate;
+            document.getElementById('add-conn-val').textContent = evolutionConfig.addConnectionRate.toFixed(2);
+
+            document.getElementById('add-node-rate').value = evolutionConfig.addNodeRate;
+            document.getElementById('add-node-val').textContent = evolutionConfig.addNodeRate.toFixed(2);
+
+            document.getElementById('change-act-rate').value = evolutionConfig.changeActivationRate;
+            document.getElementById('change-act-val').textContent = evolutionConfig.changeActivationRate.toFixed(2);
+        }
+
+        function updateNetworkStats() {
+            if (population.length === 0) return;
+            const avgNodes = population.reduce((sum, p) => sum + p.genotype.nodes.length, 0) / population.length;
+            document.getElementById('avg-nodes').textContent = avgNodes.toFixed(1);
+        }
+
+        // ========================================
+        // NETWORK TOPOLOGY VISUALIZATION
+        // ========================================
+
+        // Draw network topology for a genotype's CPPN
+        function drawNetworkTopology(genotype) {
+            const canvas = document.getElementById('network-viz');
+            const container = document.getElementById('network-viz-container');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size to match container
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Clear canvas
+            ctx.fillStyle = '#0f0f0f';
+            ctx.fillRect(0, 0, width, height);
+
+            // Hide hint
+            document.getElementById('network-hint').style.display = 'none';
+
+            // Organize nodes by type
+            const inputNodes = genotype.nodes.filter(n => n.type === 'input');
+            const outputNodes = genotype.nodes.filter(n => n.type === 'output');
+            const hiddenNodes = genotype.nodes.filter(n => n.type === 'hidden');
+
+            // Position nodes
+            const nodePositions = new Map();
+            const padding = 25;
+            const usableWidth = width - padding * 2;
+            const usableHeight = height - padding * 2;
+
+            // Input nodes on left
+            inputNodes.forEach((node, i) => {
+                const spacing = inputNodes.length > 1 ? usableHeight / (inputNodes.length - 1) : 0;
+                nodePositions.set(node.id, {
+                    x: padding,
+                    y: padding + (inputNodes.length === 1 ? usableHeight / 2 : i * spacing)
+                });
+            });
+
+            // Output nodes on right
+            outputNodes.forEach((node, i) => {
+                const spacing = outputNodes.length > 1 ? usableHeight / (outputNodes.length - 1) : 0;
+                nodePositions.set(node.id, {
+                    x: width - padding,
+                    y: padding + (outputNodes.length === 1 ? usableHeight / 2 : i * spacing)
+                });
+            });
+
+            // Hidden nodes in middle
+            if (hiddenNodes.length > 0) {
+                const layers = Math.min(3, Math.ceil(Math.sqrt(hiddenNodes.length)));
+                const nodesPerLayer = Math.ceil(hiddenNodes.length / layers);
+
+                hiddenNodes.forEach((node, i) => {
+                    const layer = Math.floor(i / nodesPerLayer);
+                    const posInLayer = i % nodesPerLayer;
+                    const totalInLayer = Math.min(nodesPerLayer, hiddenNodes.length - layer * nodesPerLayer);
+
+                    const x = padding + usableWidth * (layer + 1) / (layers + 1);
+                    const spacing = totalInLayer > 1 ? usableHeight / (totalInLayer + 1) : usableHeight / 2;
+                    const y = padding + spacing * (posInLayer + 1);
+
+                    nodePositions.set(node.id, { x, y });
+                });
+            }
+
+            // Draw connections
+            genotype.connections.forEach(conn => {
+                if (!conn.enabled) return;
+
+                const fromPos = nodePositions.get(conn.source);
+                const toPos = nodePositions.get(conn.target);
+
+                if (!fromPos || !toPos) return;
+
+                const weight = Math.max(-3, Math.min(3, conn.weight));
+                const alpha = Math.min(0.7, Math.abs(weight) / 3 * 0.5 + 0.15);
+                const brightness = weight > 0 ? 200 : 100;
+                ctx.strokeStyle = `rgba(${brightness}, ${brightness}, ${brightness}, ${alpha})`;
+                ctx.lineWidth = Math.abs(weight) * 0.8 + 0.5;
+
+                ctx.beginPath();
+                ctx.moveTo(fromPos.x, fromPos.y);
+                ctx.lineTo(toPos.x, toPos.y);
+                ctx.stroke();
+            });
+
+            // Draw nodes
+            genotype.nodes.forEach((node) => {
+                const pos = nodePositions.get(node.id);
+                if (!pos) return;
+
+                let fillColor, strokeColor;
+                if (node.type === 'input') {
+                    fillColor = '#1e3a5f';
+                    strokeColor = '#5b8ec5';
+                } else if (node.type === 'output') {
+                    fillColor = '#2d4a2d';
+                    strokeColor = '#6b9d6b';
+                } else {
+                    fillColor = '#4a3a2a';
+                    strokeColor = '#9d7b5b';
+                }
+
+                ctx.fillStyle = fillColor;
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Draw activation label for hidden nodes
+                if (node.type === 'hidden' && hiddenNodes.length < 10) {
+                    ctx.fillStyle = '#8a8a8a';
+                    ctx.font = '8px -apple-system, BlinkMacSystemFont, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(node.act.slice(0, 4), pos.x, pos.y - 10);
+                }
+            });
+
+        }
+
+        // Initialize settings panel
+        initActivationCheckboxes();
+        updateSettingsUI();
 
     </script>
 </body>

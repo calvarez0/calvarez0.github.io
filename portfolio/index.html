@@ -16,10 +16,8 @@
 <nav aria-label="Sections">
   <a href="#intro" title="Intro">Intro</a>
   <a href="#salience" title="Salience">Salience</a>
-  <a href="#you-axis" title="YOU–AXIS">You-Axis</a>
+  <a href="#harvard" title="Harvard Research">Harvard</a>
   <a href="#evolutionary-platforms" title="Interactive Evolution">Evolution</a>
-  <a href="#beatbreeder" title="BeatBreeder">BeatBreeder</a>
-  <a href="#molly" title="Molly & The Mop">Molly</a>
   <a href="#volk" title="Volk">Volk</a>
   <a href="#cuba" title="On Cuba">Cuba</a>
   <a href="#credits" title="Contact">Contact</a>
@@ -159,7 +157,7 @@
 
       async function initSaliencyViz() {
         const select = document.getElementById('saliencyImageSelect');
-        const names = Object.keys(SALIENCY_DATA);
+        const names = ['wolf_after_release_1000_odfw', 'car', 'houses'];
         names.forEach(name => {
           const opt = document.createElement('option');
           opt.value = name;
@@ -590,48 +588,84 @@
     </style>
   </article>
 </section>
-<!-- 
-<section id="you-axis" class="wrap panel"
-  data-title="YOU–AXIS"
-  data-bg="#2d8ef4" data-fg="#0a0a0a" data-accent="#0a0a0a">
-  <div>
-    <div class="eyebrow">2025 — Alex Alvarez, Samhita Bollepally, &amp; Takashi Yamuchi</div>
-    <h1>
-      <span class="ornate">You</span>&nbsp;–&nbsp;AXIS
-    </h1>
-    <p class="lede">
-      What does <em>you</em> look like in semantic embedding space?
-    </p>
-
-    <p>Screenshots of "deliciousdeliciousdeliciousdeliciousdelicious".</p>
-  </div>
-</section>
-
 <section id="harvard" class="wrap"
   data-title="Harvard Research"
-  data-bg="#8b2635" data-fg="#f5f5f5" data-accent="#ffd700">
+  data-bg="#8b2635" data-fg="#fff8e7" data-accent="#2d8ef4">
   <article>
-    <div class="eyebrow">Recovery Research Institute</div>
-    <h2><span class="ornate"><b>H</b></span>arvard Medical School</h2>
-    <h4>AI-SBIRT (Screening, Brief Intervention, and Referral to Treatment)</h4>
-    <p class="lede">
-      <a href="../sbirt/sbirt.html" style="color: #2d8ef4; text-decoration: underline;">Try </a>
-      <img src="assets/start_screen.png" alt="Home Screen">
-      <img src="assets/session_screen.png" alt="Session Screen">
-      <img src="assets/console_logs.png" alt="Back-end Logs">
-      <div style="position: relative; padding-bottom: 64.55089820359281%; height: 0;"><iframe src="https://www.loom.com/embed/573829cc853741dcbb5b8823865dbb83" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
-    </p> -->
-    <!-- <p>
-      Evolutionary synthethic data (show little graphic).
-    </p>
+    <div class="eyebrow"><span class="ornate"><b>H</b></span>arvard Medical School</div>
+    <h2>The Therapist <span class="ornate">T</span>uring Test: Expert Evaluation of AI vs. Human Clinician Responses</h2>
     <p>
-      MI-fidelity study.
+      <strong>Can motivational interviewing (MI)-trained clinicians tell the difference between AI responses and human therapist responses?</strong>
+      I'm leading a study in collaboration with Harvard Medical School, Massachusetts General Hospital, and Washington State University to investigate AI-assisted mental health interventions.
+      We want to know if AI is ready for clinical use in psychiatry, where it falls short, and how it could expand mental health access to underserved populations.
     </p>
-    <p>
-      Addiction as a fundamental problem in intelligent agents (show github link and gif of agents).
 
-      ** for both MI-fidelity study and addiction as a fundamental... add a drop-down that reveals the abstract.
-    </p> -->
+    <div style="height: 1px; background: linear-gradient(to right, transparent, rgba(255,248,231,0.3) 20%, rgba(255,248,231,0.3) 80%, transparent); margin: 3rem 0;"></div>
+
+    <h2>AI-SBIRT: Accessible Substance Use Support</h2>
+    <p>
+      Many adolescents with substance use concerns turn to the internet, social media, or AI for help rather than seeking traditional care due to fear of parental or institutional repercussions.
+      I developed this AI-powered SBIRT prototype as a proof-of-concept system to provide a safer, evidence-based alternative that could expand access to confidential support while reducing burden on clinical providers.
+    </p>
+
+    <p>
+      <strong><a href="../sbirt/sbirt.html" style="color: #ffffff; text-decoration: underline;">→ Try the SBIRT Tool</a></strong>
+      <!-- <strong><a href="#" style="color: #fff8e7; text-decoration: underline;"> | GitHub</a></strong> -->
+    </p>
+
+    <!-- <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+      <div>
+        <img src="assets/start_screen.png" alt="SBIRT Home Screen" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+        <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem; text-align: center;">Initial screening interface</p>
+      </div>
+      <div>
+        <img src="assets/session_screen.png" alt="SBIRT Session Screen" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+        <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem; text-align: center;">AI-guided brief intervention</p>
+      </div>
+      <div>
+        <img src="assets/console_logs.png" alt="Back-end System Logs" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+        <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem; text-align: center;">HIPAA-compliant backend</p>
+      </div>
+    </div> -->
+
+    <!-- <div style="position: relative; padding-bottom: 56.25%; height: 0; margin: 2rem 0;">
+      <iframe src="https://www.loom.com/embed/573829cc853741dcbb5b8823865dbb83" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;"></iframe>
+    </div> -->
+
+    <div style="height: 1px; background: linear-gradient(to right, transparent, rgba(255,248,231,0.3) 20%, rgba(255,248,231,0.3) 80%, transparent); margin: 3rem 0;"></div>
+
+    <h2>Evolutionary Synthetic Data Creation</h2>
+    <p>
+      A core challenge in clinical psychology AI is data scarcity. Patient-therapist transcripts are siloed and protected by privacy regulations.
+      To overcome this, I developed an evolutionary technique that uses LLMs to generate synthetic therapy transcripts, evaluates them against MI principles, and selectively retains only the highest-fidelity examples for fine-tuning.
+    </p>
+
+    <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 2rem; margin: 2rem 0; border-left: 4px solid #2d8ef4;">
+      <div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; justify-content: center;">
+        <div style="text-align: center; flex: 1; min-width: 120px;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">✓</div>
+          <div style="font-size: 0.9rem; font-weight: 600;">Generation</div>
+          <div style="font-size: 0.75rem; opacity: 0.8;">LLMs create synthetic transcripts</div>
+        </div>
+        <div style="font-size: 1.5rem; opacity: 0.6;">→</div>
+        <div style="text-align: center; flex: 1; min-width: 120px;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚖️</div>
+          <div style="font-size: 0.9rem; font-weight: 600;">Evaluation</div>
+          <div style="font-size: 0.75rem; opacity: 0.8;">Scored against MI principles</div>
+        </div>
+        <div style="font-size: 1.5rem; opacity: 0.6;">→</div>
+        <div style="text-align: center; flex: 1; min-width: 120px;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🧬</div>
+          <div style="font-size: 0.9rem; font-weight: 600;">Selection</div>
+          <div style="font-size: 0.75rem; opacity: 0.8;">Only highest fitness survives</div>
+        </div>
+      </div>
+    </div>
+
+    <p>
+      <strong>→ <a href="https://github.com/calvarez0/MI-Synthetic-Data" style="color: #ffffff; text-decoration: underline;">GitHub Repository</a></strong>
+    </p>
+
   </article>
 </section>
 
@@ -645,7 +679,7 @@
       we combine neural networks, genetic algorithms, and human aesthetic judgment?
     </p>
 
-    <h3>SynthBreeder</h3>
+    <h3>S<span class="ornate">Y</span>nthBreeder</h3>
     <p>
       Unlike traditional synthesizers with fixed parameters, SynthBreeder explores an open-ended
       space of possible sounds through evolutionary computation.
@@ -665,23 +699,22 @@
       <strong>→ <a href="../openendedness/synthbreeder.html" style="color: #4CAF50; text-decoration: underline;">Try SynthBreeder</a></strong>
     </p>
 
-    <h3>AblOEh</h3>
+    <h3>"AblOEh"</h3>
     <p>
-      "AblOEh" is an open-ended, 3D, evolutionary fashion design platform that generates dresses through a combination
+      An open-ended, 3D, evolutionary fashion design platform that generates dresses through a combination
       of explicitly encoded trait-based genetics (hemline, silhouette, waist width) and neural networks
       that control color, texture, and morphology.
     </p>
 
-    <img src="assets/abloeh.jpeg" alt="Screenshot of the AblOEh interface" style="width: 100%; height: auto;">
+    <img src="assets/abloeh2.png" alt="Screenshot of the AblOEh interface" style="width: 100%; height: auto;">
 
+    <!-- should re-write this into a single, easier to understand paragraph -->
     <p>
       The system demonstrates how explicit designer controls can coexist with emergent complexity.
       Users can lock certain traits (shape, pattern) while allowing others to evolve, or apply
-      designer overrides (force asymmetric hemlines, strict symmetry) to guide evolution toward
-      specific aesthetic directions. The result is a hybrid approach where human creativity
+      designer overrides (force asymmetric hemlines, strict symmetry). The result is a hybrid approach where human creativity
       and algorithmic exploration work in tandem.
     </p>
-
     <p>
       Each dress is a phenotype expressed from a genotype containing both parametric traits
       and a CPPN that evaluates color and displacement at every vertex. The evolutionary
@@ -690,7 +723,7 @@
     </p>
 
     <p>
-      <strong>→ <a href="../openendedness/ablOEh.html" style="color: #4CAF50; text-decoration: underline;">Try AblOEh</a></strong>
+      <strong>→ <a href="../openendedness/ablOEh.html" style="color: #4CAF50; text-decoration: underline;">Try "Abl<span class="ornate">O</span>Eh"</a></strong>
     </p>
 
     <h3>Open-Endedness</h3>
@@ -906,7 +939,7 @@
 
 <section id="cuba" class="wrap"
   data-title="On Cuba"
-  data-bg="#8b2635" data-fg="#f5f5f5" data-accent="#ffd700">
+  data-bg="#8b2635" data-fg="#f5f5f5" data-accent="#2d8ef4">
   
   <article class="serif">
     <h2>On Cuba</h2>
@@ -926,7 +959,7 @@
       <div class="cuba-text">
         <p>
           As I work on AI agents and their environments, it's hard not to notice the parallels between simulation-building and society-building.
-          I’ve seen how bright researchers frustratingly achieve the exact behavior that they designed but not the one that they intended and I think politicians and lawmakers can act similarly.
+          I’ve seen how bright AI researchers frustratingly achieve the exact behavior that they designed but not the one that they intended and I think politicians and lawmakers can act similarly.
           I believe that the closer we get to understanding how systems work at scale (e.g., how historical context influences culture, how human psychology manifests in macroeconomics),
           the better we can create systems that help the world towards a common goal.
         </p>

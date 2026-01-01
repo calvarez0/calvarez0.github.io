@@ -75,6 +75,13 @@ const Icons = {
         <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
         </svg>
+    ),
+    info: (props) => (
+        <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" strokeLinecap="round" />
+            <circle cx="12" cy="8" r="1" fill="currentColor" stroke="none" />
+        </svg>
     )
 };
 
@@ -83,7 +90,276 @@ const Icon = ({ name, className }) => {
     return IconComponent ? <IconComponent className={className} /> : null;
 };
 
-const ChatInterface = ({ chatMessages, inputMessage, setInputMessage, sendMessage, isTyping, chatEndRef, inputRef, miStage, supervisorGuidance }) => (
+// Info Tooltip Component
+const InfoTooltip = () => {
+    const [isVisible, setIsVisible] = useState(false);
+
+    return (
+        <div className="relative inline-block ml-2">
+            <button
+                onMouseEnter={() => setIsVisible(true)}
+                onMouseLeave={() => setIsVisible(false)}
+                onFocus={() => setIsVisible(true)}
+                onBlur={() => setIsVisible(false)}
+                className="w-5 h-5 rounded-full bg-[#e8d7c3] hover:bg-[#c8a882] transition-colors flex items-center justify-center cursor-help"
+                aria-label="About this tool"
+            >
+                <Icon name="info" className="w-3.5 h-3.5 text-[#5c4033]" />
+            </button>
+
+            <div className={`absolute left-0 top-full mt-2 z-50 transition-all duration-300 ${
+                isVisible ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'
+            }`}>
+                <div className="w-80 p-5 rounded-2xl shadow-xl border-2 border-[#deb887]/40"
+                     style={{background: 'linear-gradient(145deg, #fffbf5 0%, #fff9f0 100%)'}}>
+                    {/* Experimental Banner */}
+                    <div className="bg-amber-100 border-2 border-amber-300 rounded-xl px-3 py-2 mb-4">
+                        <div className="flex items-center gap-2">
+                            <Icon name="alertCircle" className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                            <span className="text-xs font-bold text-amber-700">EXPERIMENTAL - NOT FOR CLINICAL USE</span>
+                        </div>
+                    </div>
+
+                    {/* What is SBIRT */}
+                    <h4 className="font-bold text-[#5c4033] mb-2">What is SBIRT?</h4>
+                    <p className="text-sm text-[#6b5744] mb-4 leading-relaxed">
+                        <strong>S</strong>creening, <strong>B</strong>rief <strong>I</strong>ntervention, and <strong>R</strong>eferral to <strong>T</strong>reatment
+                        is an evidence-based approach to identifying and addressing substance use concerns through
+                        motivational interviewing techniques.
+                    </p>
+
+                    {/* Why the progress bar */}
+                    <h4 className="font-bold text-[#5c4033] mb-2">About the Progress Bar</h4>
+                    <p className="text-sm text-[#6b5744] mb-4 leading-relaxed">
+                        The stage indicator shows how the LLM system navigates through Motivational Interviewing's
+                        four processes: Engaging, Focusing, Evoking, and Planning. This visualization helps
+                        researchers understand AI-driven stage transitions.
+                    </p>
+
+                    {/* Disclaimer */}
+                    <div className="text-xs text-[#8b6f47] pt-3 border-t-2 border-[#e8d7c3]">
+                        This is a research prototype for studying LLM behavior in therapeutic contexts.
+                        It is not intended for actual clinical or therapeutic use.
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Treatment Referral Screen Component
+const TreatmentReferralScreen = ({ onContinue, onBack }) => {
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        setTimeout(() => setIsVisible(true), 50);
+    }, []);
+
+    const bostonResources = [
+        {
+            name: "Mass General Hospital - Addiction Recovery Management Service (ARMS)",
+            description: "Specializes in supporting teenagers and young adults ages 14-26 with substance use and related problems.",
+            phone: "617-643-4699",
+            url: "https://www.massgeneral.org/psychiatry/treatments-and-services/addiction-recovery-management-service",
+            type: "Hospital Program"
+        },
+        {
+            name: "Boston Medical Center - Grayken Center for Addiction",
+            description: "Comprehensive addiction treatment with integrated mental health services.",
+            phone: "617-638-8000",
+            url: "https://www.bmc.org/grayken-center-addiction",
+            type: "Hospital Program"
+        },
+        {
+            name: "Bay Cove Human Services - Addiction Services",
+            description: "Detoxification, residential programming, counseling, and outpatient treatment.",
+            phone: "617-371-3000",
+            url: "https://baycovehumanservices.org/addiction",
+            type: "Community Services"
+        },
+        {
+            name: "North Suffolk - Meridian House",
+            description: "30-bed co-ed therapeutic community for adults 18+ with varying program lengths.",
+            address: "408 Meridian Street, East Boston",
+            url: "https://northsuffolk.org/addiction-services/",
+            type: "Residential"
+        },
+        {
+            name: "Addiction Treatment Center of New England",
+            description: "Evidence-based outpatient programs in Brighton with flexible scheduling.",
+            phone: "617-917-6111",
+            url: "https://www.atcne.net/",
+            type: "Outpatient"
+        },
+        {
+            name: "Massachusetts Center for Addiction",
+            description: "Personalized, evidence-based care serving Greater Boston and South Shore.",
+            location: "Quincy",
+            url: "https://masscenterforaddiction.com/",
+            type: "Outpatient"
+        }
+    ];
+
+    const helplines = [
+        {
+            name: "Massachusetts Substance Use Helpline",
+            number: "1-800-327-5050",
+            text: "Text HOPE to 800-327",
+            description: "Help checking eligibility and treatment openings"
+        },
+        {
+            name: "PAATHS (Providing Access to Addictions Treatment)",
+            number: "855-494-4057",
+            description: "Walk-in assessment and placement support"
+        },
+        {
+            name: "Mass 2-1-1",
+            number: "2-1-1",
+            description: "Referrals to low/no-cost treatment, transportation, and shelters"
+        },
+        {
+            name: "SAMHSA National Helpline",
+            number: "1-800-662-4357",
+            description: "24/7 free, confidential treatment referrals"
+        }
+    ];
+
+    return (
+        <div className={`space-y-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            {/* Header */}
+            <div className="text-center mb-8">
+                <div className="w-20 h-20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 cozy-button">
+                    <Icon name="heart" className="w-12 h-12 text-white" />
+                </div>
+                <h2 className="text-4xl font-bold text-[#5c4033] mb-4">
+                    Taking the Next Step
+                </h2>
+                <p className="text-xl text-[#8b6f47] max-w-2xl mx-auto leading-relaxed">
+                    You've shown courage by exploring these topics. Here are trusted resources
+                    in the Boston area that can provide additional support.
+                </p>
+            </div>
+
+            {/* Immediate Helplines */}
+            <div className="warm-card p-8 rounded-[2rem]" style={{background: 'linear-gradient(135deg, #f0f7f4 0%, #e8f3ed 100%)'}}>
+                <h3 className="text-2xl font-bold text-[#5c4033] mb-6 flex items-center">
+                    <Icon name="messageCircle" className="w-7 h-7 mr-3 text-[#689f7f]" />
+                    Call or Text Now
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {helplines.map((line, index) => (
+                        <div
+                            key={index}
+                            className="bg-white/70 p-5 rounded-2xl border-2 border-[#a8d5ba]/40 hover:border-[#689f7f] transition-all duration-300 hover:shadow-lg"
+                            style={{animationDelay: `${index * 100}ms`}}
+                        >
+                            <div className="font-bold text-[#5c4033] text-lg">{line.name}</div>
+                            <div className="text-2xl font-bold text-[#689f7f] my-2">{line.number}</div>
+                            {line.text && <div className="text-sm text-[#8b6f47] mb-1">{line.text}</div>}
+                            <div className="text-sm text-[#6b5744]">{line.description}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Boston Area Treatment Centers */}
+            <div className="warm-card p-8 rounded-[2rem]">
+                <h3 className="text-2xl font-bold text-[#5c4033] mb-6 flex items-center">
+                    <Icon name="shield" className="w-7 h-7 mr-3 text-[#c8a882]" />
+                    Boston Area Treatment Programs
+                </h3>
+                <div className="space-y-4">
+                    {bostonResources.map((resource, index) => (
+                        <a
+                            key={index}
+                            href={resource.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block bg-white/60 p-5 rounded-2xl border-2 border-[#e8d7c3] hover:border-[#c8a882] transition-all duration-300 hover:shadow-lg hover:translate-x-1 group"
+                        >
+                            <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <span className="font-bold text-[#5c4033] text-lg group-hover:text-[#8b6f47] transition-colors">
+                                            {resource.name}
+                                        </span>
+                                        <span className="text-xs bg-[#f5e6d3] text-[#8b6f47] px-3 py-1 rounded-full font-semibold">
+                                            {resource.type}
+                                        </span>
+                                    </div>
+                                    <p className="text-[#6b5744] mb-2">{resource.description}</p>
+                                    {resource.phone && (
+                                        <div className="text-sm text-[#689f7f] font-semibold">{resource.phone}</div>
+                                    )}
+                                    {resource.address && (
+                                        <div className="text-sm text-[#8b6f47]">{resource.address}</div>
+                                    )}
+                                </div>
+                                <Icon name="chevronRight" className="w-6 h-6 text-[#c8a882] group-hover:translate-x-1 transition-transform" />
+                            </div>
+                        </a>
+                    ))}
+                </div>
+            </div>
+
+            {/* State Resources */}
+            <div className="warm-card p-8 rounded-[2rem]" style={{background: 'linear-gradient(135deg, #f9ebe0 0%, #f5e6d3 100%)'}}>
+                <h3 className="text-2xl font-bold text-[#5c4033] mb-4 flex items-center">
+                    <Icon name="users" className="w-7 h-7 mr-3 text-[#c8a882]" />
+                    Massachusetts State Resources
+                </h3>
+                <p className="text-[#6b5744] mb-4">
+                    The Bureau of Substance Addiction Services (BSAS) oversees prevention, treatment,
+                    and recovery support across Massachusetts. Free and low-cost options are available
+                    even without insurance.
+                </p>
+                <a
+                    href="https://www.mass.gov/orgs/bureau-of-substance-addiction-services"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-[#689f7f] hover:text-[#5c4033] font-semibold transition-colors"
+                >
+                    Visit Mass.gov BSAS
+                    <Icon name="chevronRight" className="w-5 h-5 ml-1" />
+                </a>
+            </div>
+
+            {/* Encouragement */}
+            <div className="warm-card p-8 rounded-[2rem] text-center">
+                <h3 className="text-2xl font-bold text-[#5c4033] mb-4">You're Not Alone</h3>
+                <p className="text-[#6b5744] text-lg leading-relaxed max-w-2xl mx-auto mb-6">
+                    Reaching out for help is a sign of strength. These programs are staffed by
+                    compassionate professionals who understand what you're going through and are
+                    ready to support you on your journey.
+                </p>
+                <div className="flex items-center justify-center gap-2 text-[#8b6f47]">
+                    <Icon name="checkCircle" className="w-5 h-5 text-[#689f7f]" />
+                    <span>Confidential services available</span>
+                </div>
+            </div>
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-center gap-4 pt-4">
+                <button
+                    onClick={onBack}
+                    className="flex items-center space-x-2 text-[#8b6f47] hover:text-[#5c4033] px-6 py-3 rounded-2xl border-2 border-[#e8d7c3] hover:border-[#c8a882] bg-white/60 hover:bg-white transition-all duration-200"
+                >
+                    <Icon name="chevronLeft" className="w-5 h-5" />
+                    <span className="font-semibold">Back to Session</span>
+                </button>
+                <button
+                    onClick={onContinue}
+                    className="cozy-button text-white px-8 py-3 rounded-2xl font-bold flex items-center space-x-2"
+                >
+                    <span>View Session Summary</span>
+                    <Icon name="chevronRight" className="w-5 h-5" />
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const ChatInterface = ({ chatMessages, inputMessage, setInputMessage, sendMessage, isTyping, chatEndRef, inputRef, miStage, supervisorGuidance, onEndSession }) => (
     <div className="warm-card rounded-[2rem] overflow-hidden relative">
         <div style={{background: 'linear-gradient(135deg, #f9ebe0 0%, #f5e6d3 100%)'}} className="p-6 border-b-2 border-[#deb887]/30">
             <div className="flex items-center justify-between">
@@ -155,7 +431,7 @@ const ChatInterface = ({ chatMessages, inputMessage, setInputMessage, sendMessag
             </div>
             <div className="mt-5 text-center">
                 <button
-                    onClick={() => setStage('completion')}
+                    onClick={onEndSession}
                     className="text-[#8b6f47] hover:text-[#5c4033] px-5 py-2 rounded-2xl text-sm transition-all duration-200 border-2 border-[#e8d7c3] hover:border-[#c8a882] bg-white/60 hover:bg-white"
                 >
                     End Session
@@ -705,8 +981,11 @@ Follow the supervisor's guidance while maintaining your MI principles.`;
                             <Icon name="shield" className="w-9 h-9 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-[#5c4033]">SBIRT Youth Assessment</h1>
-                            <p className="text-sm text-[#8b6f47]">Recovery Research Institute</p>
+                            <div className="flex items-center">
+                                <h1 className="text-2xl font-bold text-[#5c4033]">SBIRT Youth Assessment</h1>
+                                <InfoTooltip />
+                            </div>
+                            {/* <p className="text-sm text-[#8b6f47]">Recovery Research Institute</p> */}
                         </div>
                     </div>
                     {stage !== 'welcome' && (
@@ -787,6 +1066,33 @@ Follow the supervisor's guidance while maintaining your MI principles.`;
                             inputRef={inputRef}
                             miStage={miStage}
                             supervisorGuidance={supervisorGuidance}
+                            onEndSession={() => {
+                                setFadeIn(false);
+                                setTimeout(() => {
+                                    setStage('treatment_referral');
+                                    setFadeIn(true);
+                                }, 300);
+                            }}
+                        />
+                    )}
+
+                    {/* Treatment Referral Stage */}
+                    {stage === 'treatment_referral' && (
+                        <TreatmentReferralScreen
+                            onContinue={() => {
+                                setFadeIn(false);
+                                setTimeout(() => {
+                                    setStage('completion');
+                                    setFadeIn(true);
+                                }, 300);
+                            }}
+                            onBack={() => {
+                                setFadeIn(false);
+                                setTimeout(() => {
+                                    setStage('mi_session');
+                                    setFadeIn(true);
+                                }, 300);
+                            }}
                         />
                     )}
 
