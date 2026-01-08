@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Saliency Thresholds Demo – Alex Alvarez</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Mea+Culpa&family=Spline+Sans:wght@300;400;600;700&family=Literata:opsz,wght@7..72,400;7..72,700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #fff8e7;
+  --fg: #1a1a1a;
+  --accent: #2d8ef4;
+  --max-w: 1040px;
+  --pad: clamp(18px, 3vw, 40px);
+  --lead: 1.65;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-family: "Spline Sans", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  line-height: var(--lead);
+  padding: 80px 0 40px 0;
+}
+
+.container {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
+
+/* Typography */
+.eyebrow {
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-size: .8rem;
+  opacity: .7;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  margin: 0 0 .8rem;
+  line-height: 1.1;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  h2 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  h2 {
+    font-size: 3.5rem;
+  }
+}
+
+h3 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin: 1.5rem 0 .8rem;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  h3 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  h3 {
+    font-size: 2.25rem;
+  }
+}
+
+p {
+  font-size: 1.0625rem;
+  max-width: 80ch;
+}
+
+@media (min-width: 768px) {
+  p {
+    font-size: 1.125rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  p {
+    font-size: 1.25rem;
+  }
+}
+
+.lede {
+  font-size: 1.25rem;
+  opacity: .95;
+}
+
+@media (min-width: 768px) {
+  .lede {
+    font-size: 1.375rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .lede {
+    font-size: 1.5rem;
+  }
+}
+
+.ornate {
+  font-family: "Mea Culpa", "Brush Script MT", cursive;
+  font-size: 1.1em;
+  letter-spacing: 0;
+  font-weight: 400;
+  display: inline-block;
+  transform: translateY(.05em);
+}
+
+a {
+  color: inherit;
+  text-underline-offset: .2em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Saliency Visualization Styles */
+.saliency-viz select {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.2);
+  background: #fff8e7;
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: #1a1a1a;
+}
+
+.saliency-viz select:focus {
+  outline: none;
+  border-color: #2d8ef4;
+}
+
+.saliency-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.saliency-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.saliency-chart-header .saliency-label {
+  margin-bottom: 0;
+}
+
+.saliency-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.saliency-chart-container {
+  background: #fff8e7;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.1);
+  aspect-ratio: 1.33 / 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.saliency-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.saliency-note {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
+}
+
+.saliency-key-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.saliency-key-line {
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.saliency-key-dashed {
+  background: repeating-linear-gradient(
+    90deg,
+    currentColor 0,
+    currentColor 4px,
+    transparent 4px,
+    transparent 7px
+  ) !important;
+  background-color: transparent !important;
+}
+
+.saliency-key-item:nth-child(3) .saliency-key-dashed {
+  background: repeating-linear-gradient(90deg, #4CAF50 0, #4CAF50 4px, transparent 4px, transparent 7px) !important;
+}
+
+.saliency-key-item:nth-child(4) .saliency-key-dashed {
+  background: repeating-linear-gradient(90deg, #1a1a1a 0, #1a1a1a 4px, transparent 4px, transparent 7px) !important;
+}
+
+.saliency-chart-container canvas {
+  flex: 1;
+  width: 100%;
+  display: block;
+  cursor: ew-resize;
+}
+
+.saliency-slider-container {
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.03);
+}
+
+.saliency-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  margin-bottom: 6px;
+}
+
+.saliency-image-container {
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 1;
+}
+
+.saliency-image-container canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.saliency-viz input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.saliency-viz input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #2d8ef4;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(45, 142, 244, 0.3);
+}
+
+.saliency-viz input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: #2d8ef4;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+@media (max-width: 700px) {
+  .saliency-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <article>
+    <div class="eyebrow"><a href="https://www.neurreps.org/">NeurIPS 2025 Workshop on Symmetry and Geometry in Neural Representations</a></div>
+    <h2>Saliency <span class="ornate"><b>T</b></span>hresholds in Neural Code and its Relation to the Power-Law, Gaussian, and Lambert W Function</h2>
+    <p class="lede">
+      Alex Alvarez*, Jin Hyun Park*, and Yoonsuck Choe
+    </p>
+    <div class="saliency-viz" style="margin-top: 3rem;">
+      <!-- <h3>Interactive Demo</h3> -->
+
+      <div class="saliency-grid">
+        <div>
+          <div class="saliency-chart-header">
+            <div class="saliency-label">Log-Log Energy Distribution</div>
+            <select id="saliencyImageSelect"></select>
+          </div>
+          <div class="saliency-chart-container">
+            <canvas id="saliencyChart"></canvas>
+            <div class="saliency-slider-container">
+              <div class="saliency-slider-labels">
+                <span>High Energy</span>
+                <span>Low Energy</span>
+              </div>
+              <input type="range" id="saliencySlider" min="0" max="1000" value="0">
+            </div>
+          </div>
+          <div class="saliency-key">
+            <div class="saliency-key-item">
+              <span class="saliency-key-line" style="background: #2d8ef4;"></span>
+              <span><strong>h(E)</strong> Energy response histogram</span>
+            </div>
+            <div class="saliency-key-item">
+              <span class="saliency-key-line" style="background: #8b2635;"></span>
+              <span><strong>g(E)</strong> Gaussian baseline</span>
+            </div>
+            <div class="saliency-key-item">
+              <span class="saliency-key-line saliency-key-dashed" style="background: #4CAF50;"></span>
+              <span><strong>L2</strong> Saliency threshold</span>
+            </div>
+            <div class="saliency-key-item">
+              <span class="saliency-key-line saliency-key-dashed" style="background: #1a1a1a;"></span>
+              <span><strong>Threshold</strong> Current position</span>
+            </div>
+          </div>
+          <p class="saliency-note">Note: The x-axis is flipped so high-energy pixels (revealed first) appear on the left.</p>
+        </div>
+
+        <div>
+          <div class="saliency-label">Energy Map</div>
+          <div class="saliency-image-container">
+            <canvas id="saliencyCanvas"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <p><i>Drag the slider to reveal pixels by energy level.</i></p>
+
+      <p style="opacity: 0.8; margin-bottom: 1.5rem;">
+        I perceive the saliency threshold conceptually as the point where marginal information gain per pixel begins to diminish sharply, answering the question of <b><i>"How many pixels are needed to make out what I'm looking at?"</i></b> 
+      </p>
+
+    </div>
+
+    <p>
+      We explore a theoretical juncture where the power law, Gaussian, and Lambert W converge to compute saliency thresholds in neural code.
+      The Lambert W function emerges naturally in instances where exponential processes (like the Gaussian's
+      exponentially decaying tails) and polynomial processes (like the power law's polynomially decaying tails)
+      meet.
+      Our results point to a biologically plausible invariant property in neural thresholding that could greatly simplify downstream
+      processing in visual systems and potentially generalizes across different sensory modalities and
+      processing levels.
+    </p>
+
+    <p style="margin-top: 2rem;">
+      <strong>→ <a href="https://openreview.net/pdf?id=cjo2oadaRz" style="color: #2d8ef4; text-decoration: underline;">Read the full paper</a></strong>
+       <!-- ·
+      <a href="portfolio/assets/poster.pdf" style="color: #2d8ef4; text-decoration: underline;">View Poster</a> -->
+    </p>
+
+  </article>
+</div>
+
+<script src="portfolio/assets/saliency/viz_data.js"></script>
+<script>
+(function() {
+  let currentImage = null;
+  let sortedPixels = [];
+  let energyImageData = null;
+  let imageWidth = 0, imageHeight = 0, maxEnergy = 0;
+
+  async function initSaliencyViz() {
+    const select = document.getElementById('saliencyImageSelect');
+    const names = ['wolf_after_release_1000_odfw', 'car', 'houses'];
+    names.forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = SALIENCY_DATA[name].displayName;
+      select.appendChild(opt);
+    });
+
+    select.addEventListener('change', e => loadSaliencyImage(e.target.value));
+    document.getElementById('saliencySlider').addEventListener('input', e => updateSaliency(parseInt(e.target.value)));
+
+    const chart = document.getElementById('saliencyChart');
+    let dragging = false;
+    chart.addEventListener('mousedown', e => { dragging = true; chartClick(e); });
+    chart.addEventListener('mousemove', e => { if (dragging) chartClick(e); });
+    chart.addEventListener('mouseup', () => dragging = false);
+    chart.addEventListener('mouseleave', () => dragging = false);
+
+    await loadSaliencyImage(names[0]);
+  }
+
+  function chartClick(e) {
+    const canvas = document.getElementById('saliencyChart');
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const padding = { left: 60, right: 25 };
+    const plotWidth = rect.width - padding.left - padding.right;
+    let val = Math.round(((x - padding.left) / plotWidth) * 1000);
+    val = Math.max(0, Math.min(1000, val));
+    document.getElementById('saliencySlider').value = val;
+    updateSaliency(val);
+  }
+
+  async function loadSaliencyImage(name) {
+    currentImage = name;
+    const data = SALIENCY_DATA[name];
+
+    const img = await loadImg(data.energy);
+    imageWidth = img.width;
+    imageHeight = img.height;
+
+    const tmp = document.createElement('canvas');
+    tmp.width = imageWidth; tmp.height = imageHeight;
+    const ctx = tmp.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    energyImageData = ctx.getImageData(0, 0, imageWidth, imageHeight);
+
+    buildPixels();
+    setupCanvas();
+    document.getElementById('saliencySlider').value = 0;
+    updateSaliency(0);
+    drawSaliencyChart();
+  }
+
+  function loadImg(src) {
+    return new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = rej;
+      img.src = src;
+    });
+  }
+
+  function buildPixels() {
+    sortedPixels = [];
+    const d = energyImageData.data;
+    maxEnergy = 0;
+    for (let row = 0; row < imageHeight; row++) {
+      for (let col = 0; col < imageWidth; col++) {
+        const idx = (row * imageWidth + col) * 4;
+        const r = d[idx], g = d[idx+1], b = d[idx+2];
+        const energy = r;
+        // Add small random offset to break ties between pixels with same energy
+        // This prevents the "top-to-bottom slip" effect when many pixels share energy values
+        const tieBreaker = Math.random() * 0.99;
+        sortedPixels.push({ row, col, energy, sortKey: energy + tieBreaker, r, g, b });
+        if (energy > maxEnergy) maxEnergy = energy;
+      }
+    }
+    sortedPixels.sort((a, b) => b.sortKey - a.sortKey);
+  }
+
+  function setupCanvas() {
+    const c = document.getElementById('saliencyCanvas');
+    c.width = imageWidth; c.height = imageHeight;
+  }
+
+  function drawSaliencyChart() {
+    const canvas = document.getElementById('saliencyChart');
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+
+    // Make the chart 1.33x wider than tall
+    const width = rect.width;
+    const height = width / 1.33;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.height = height + 'px';
+    ctx.scale(dpr, dpr);
+    const padding = { left: 55, right: 25, top: 30, bottom: 45 };
+    const plotW = width - padding.left - padding.right;
+    const plotH = height - padding.top - padding.bottom;
+
+    // Use warm background to match section
+    ctx.fillStyle = '#fff8e7';
+    ctx.fillRect(0, 0, width, height);
+
+    const hist = SALIENCY_DATA[currentImage].histogram;
+    const valid = [];
+    for (let i = 0; i < hist.binCenters.length; i++) {
+      if (hist.binCenters[i] > 0 && hist.hPmf[i] > 0) {
+        valid.push({ e: hist.binCenters[i], h: hist.hPmf[i], g: hist.gPmf[i] > 1e-10 ? hist.gPmf[i] : null });
+      }
+    }
+    if (!valid.length) return;
+
+    const eMin = Math.log10(Math.min(...valid.map(d => d.e)));
+    const eMax = Math.log10(Math.max(...valid.map(d => d.e)));
+    const allP = [...valid.map(d => d.h), ...valid.filter(d => d.g).map(d => d.g)];
+    const pMin = Math.log10(Math.min(...allP));
+    const pMax = Math.log10(Math.max(...allP));
+
+    const xScale = e => padding.left + plotW * (1 - (Math.log10(e) - eMin) / (eMax - eMin));
+    const yScale = p => padding.top + plotH * (1 - (Math.log10(p) - pMin) / (pMax - pMin));
+
+    // Grid lines and tick labels
+    ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.lineWidth = 1;
+    ctx.font = '9px "Spline Sans", sans-serif';
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+
+    // X-axis grid and labels (Energy)
+    for (let exp = Math.ceil(eMin); exp <= Math.floor(eMax); exp++) {
+      const x = xScale(Math.pow(10, exp));
+      ctx.beginPath(); ctx.moveTo(x, padding.top); ctx.lineTo(x, padding.top + plotH); ctx.stroke();
+      // Tick label
+      ctx.textAlign = 'center';
+      ctx.fillText('10' + (exp < 0 ? '⁻' : '') + String(Math.abs(exp)).replace(/\d/g, d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]), x, padding.top + plotH + 12);
+    }
+
+    // Y-axis grid and labels (Probability)
+    for (let exp = Math.ceil(pMin); exp <= Math.floor(pMax); exp++) {
+      const y = yScale(Math.pow(10, exp));
+      ctx.beginPath(); ctx.moveTo(padding.left, y); ctx.lineTo(padding.left + plotW, y); ctx.stroke();
+      // Tick label
+      ctx.textAlign = 'right';
+      ctx.fillText('10' + (exp < 0 ? '⁻' : '') + String(Math.abs(exp)).replace(/\d/g, d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]), padding.left - 5, y + 3);
+    }
+
+    // Axes
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, padding.top);
+    ctx.lineTo(padding.left, padding.top + plotH);
+    ctx.lineTo(padding.left + plotW, padding.top + plotH);
+    ctx.stroke();
+
+    // Axis labels
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.font = '10px "Spline Sans", sans-serif';
+    // X-axis label
+    ctx.textAlign = 'center';
+    ctx.fillText('Energy (E)', padding.left + plotW / 2, height - 5);
+    // Y-axis label (rotated)
+    ctx.save();
+    ctx.translate(12, padding.top + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.fillText('Probability', 0, 0);
+    ctx.restore();
+
+    // High/Low energy indicators on x-axis
+    ctx.font = '9px "Spline Sans", sans-serif';
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.textAlign = 'left';
+    ctx.fillText('← High E', padding.left + 2, padding.top + plotH + 26);
+    ctx.textAlign = 'right';
+    ctx.fillText('Low E →', padding.left + plotW - 2, padding.top + plotH + 26);
+
+    // L2 marker line (green from OE section: #4CAF50)
+    const L2 = hist.L2;
+    if (L2 > 0) {
+      const l2X = xScale(L2);
+      ctx.strokeStyle = '#4CAF50'; ctx.lineWidth = 2; ctx.setLineDash([5, 3]);
+      ctx.beginPath(); ctx.moveTo(l2X, padding.top); ctx.lineTo(l2X, padding.top + plotH); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#4CAF50'; ctx.font = 'bold 11px "Spline Sans", sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('L2', l2X, padding.top - 6);
+    }
+
+    // h(E) - observed distribution (portfolio blue: #2d8ef4)
+    ctx.strokeStyle = '#2d8ef4'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    valid.forEach((d, i) => { const x = xScale(d.e), y = yScale(d.h); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+    ctx.stroke();
+
+    // g(E) - Gaussian (portfolio red/burgundy: #8b2635)
+    ctx.strokeStyle = '#8b2635'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    let started = false;
+    valid.forEach(d => {
+      if (d.g) { const x = xScale(d.e), y = yScale(d.g); started ? ctx.lineTo(x, y) : (ctx.moveTo(x, y), started = true); }
+    });
+    ctx.stroke();
+
+    // Current threshold line (dark) with grabby handle
+    const sliderVal = parseInt(document.getElementById('saliencySlider').value);
+    const threshX = padding.left + (sliderVal / 1000) * plotW;
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2; ctx.setLineDash([5, 3]);
+    ctx.beginPath(); ctx.moveTo(threshX, padding.top); ctx.lineTo(threshX, padding.top + plotH); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Grabby handle - circle at top of threshold line
+    const handleY = padding.top + 20;
+    const handleRadius = 8;
+    ctx.beginPath();
+    ctx.arc(threshX, handleY, handleRadius, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fill();
+    // Inner lighter circle for depth effect
+    ctx.beginPath();
+    ctx.arc(threshX, handleY, handleRadius - 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff8e7';
+    ctx.fill();
+    // Grip lines on the handle
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(threshX - 2, handleY - 2);
+    ctx.lineTo(threshX - 2, handleY + 2);
+    ctx.moveTo(threshX + 2, handleY - 2);
+    ctx.lineTo(threshX + 2, handleY + 2);
+    ctx.stroke();
+
+    // Shaded revealed area
+    ctx.fillStyle = 'rgba(45, 142, 244, 0.08)';
+    ctx.fillRect(padding.left, padding.top, threshX - padding.left, plotH);
+
+    // Legend
+    ctx.font = '11px "Spline Sans", sans-serif'; ctx.textAlign = 'left';
+    const lx = padding.left + 8, ly = padding.top + 12;
+    ctx.strokeStyle = '#2d8ef4'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 18, ly); ctx.stroke();
+    ctx.fillStyle = '#1a1a1a'; ctx.fillText('h(E)', lx + 24, ly + 3);
+    ctx.strokeStyle = '#8b2635';
+    ctx.beginPath(); ctx.moveTo(lx, ly + 14); ctx.lineTo(lx + 18, ly + 14); ctx.stroke();
+    ctx.fillText('g(E)', lx + 24, ly + 17);
+  }
+
+  function updateSaliency(sliderVal) {
+    const frac = sliderVal / 1000;
+    const numPx = Math.floor(frac * sortedPixels.length);
+
+    drawEnergyMap(numPx);
+    drawSaliencyChart();
+  }
+
+  function drawEnergyMap(numPx) {
+    const canvas = document.getElementById('saliencyCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, imageWidth, imageHeight);
+    if (numPx === 0) return;
+
+    const imgData = ctx.createImageData(imageWidth, imageHeight);
+    const d = imgData.data;
+    for (let i = 0; i < numPx; i++) {
+      const px = sortedPixels[i];
+      const idx = (px.row * imageWidth + px.col) * 4;
+      d[idx] = px.r; d[idx + 1] = px.g; d[idx + 2] = px.b; d[idx + 3] = 255;
+    }
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSaliencyViz);
+  } else {
+    initSaliencyViz();
+  }
+})();
+</script>
+
+</body>
+</html>
