@@ -704,8 +704,9 @@
   <article>
     <h2>Open-Ended Creative Platforms</h2>
     <p class="lede">
-      Exploring art through open-ended evolution and human-guided selection. What emerges when
-      we combine neural networks, genetic algorithms, and human aesthetic judgment?
+      A series of projects designed to augment human creativity through open-ended algorithms,
+      allowing humans to traverse the creativity search space more expansively. 
+      What emerges when we combine neural networks, genetic algorithms, and human aesthetic judgment?
     </p>
 
     <h3>S<span class="ornate">Y</span>nthBreeder</h3>
@@ -717,7 +718,7 @@
     <img src="assets/synth.png" alt="Screenshot of the SynthBreeder interface" style="width: 100%; height: auto;">
 
     <p>
-      Users select sounds they find interesting from each generation and the system evolves
+      The user selects which sound they find interesting from each generation and the system evolves
       increasingly complex variations. The underlying neural networks start simple and complexify
       over time, discovering sonic textures that would be impossible to design manually. Each
       network topology is unique, encoding audio waveforms and envelopes through compositions of mathematical
@@ -739,37 +740,67 @@
 
     <!-- should re-write this into a single, easier to understand paragraph -->
     <p>
-      The system demonstrates how explicit designer controls can coexist with emergent complexity.
+      The system demonstrates how explicit designer controls can act as environmental constraints in open-ended neuroevolution.
       Users can lock certain traits (shape, pattern) while allowing others to evolve, or apply
-      designer overrides (force asymmetric hemlines, strict symmetry). The result is a hybrid approach where human creativity
-      and algorithmic exploration work in tandem.
+      designer overrides (force asymmetric hemlines, strict symmetry).
     </p>
     <p>
       Each dress is a phenotype expressed from a genotype containing both parametric traits
-      and a CPPN that evaluates color and displacement at every vertex. The evolutionary
-      process mirrors biological systems: mutations introduce variation, selection pressure
-      comes from human aesthetic judgment, and complexity grows organically over generations.
+      and a CPPN that evaluates color and displacement at every vertex. Mutations introduce variation, 
+      selection pressure comes from human aesthetic judgment, and complexity grows organically over generations.
     </p>
 
     <p>
       <strong>→ <a href="../openendedness/ablOEh.html" style="color: #4CAF50; text-decoration: underline;">Try "Abl<span class="ornate">O</span>Eh"</a></strong>
     </p>
 
-    <h3>Open-Endedness</h3>
+    <h3>IdeaBreeder</h3>
     <p>
-      These platforms explore a fundamental question in artificial intelligence and creativity:
-      how do we build systems that can discover genuinely novel solutions rather than optimizing
-      toward predefined goals? Traditional optimization converges upon a target solution; 
-      open-endedness, by design, creates infinites solution that are both novel and learnable/interesting.
+      An open-ended curiosity exploration platform that uses LLMs to guide users through a personalized learning journey.
+      As you explore, the system builds a "curiosity genome" that tracks your exploration patterns, like going down a more 
+      granular and personalized wikipedia rabbithole with an expert. 
+    </p>
+
+    <img src="assets/IdeaBreeder.png" alt="Screenshot of the IdeaBreeder interface" style="width: 100%; height: auto;">
+
+    <p>
+      Each question you choose shapes your curiosity profile and influences the follow-up questions generated.
+      The platform visualizes your exploration trajectory and allows you to "heart" insights worth remembering,
+      creating a record of your intellectual wanderings that reveals patterns in how you think and learn.
+    </p>
+
+    <p>This is part of a broader goal of mine which is to use AI for introspective work, to reveal parts of your cognition
+      how an Oura Ring might help with sleep and cardiovascular health.
+    </p>
+
+    <p>
+      <strong>→ <a href="../openendedness/ideabreeder.html" style="color: #4CAF50; text-decoration: underline;">Try IdeaBreeder</a></strong>
+    </p>
+
+    <h3>Open-Endedness</h3>
+
+    <p> The main idea behind all these platforms is that by using these tools, a human designer can discover
+    ideas that would otherwise never be illuminated in the labyrinth of creativity search space. In a very nerdy way, 
+    if we think of art as a search problem where the Mona Lisa lies in one corner of the painting search-space, 
+    and The Starry Night is hidden away in another, my platforms help humans traverse this space 
+    more intelligently towards these hidden masterpieces.
     </p>
 
     <p>
       By placing humans in the selection loop, we create a co-creative process where the
       algorithm explores possibility space and humans provide the fitness function through
-      their choices. What emerges is often surprising. Solutions that are neither purely human-designed
+      their choices. Solutions are neither purely human-designed
       nor purely algorithmic, but a synthesis that neither could achieve alone. 
       Additionally, the system seems to act as a mirror; it reveals the humans taste in surprising ways.
     </p>
+
+    <p>Open-endedness today is niche sub-community within artificial intelligence but I think it will be 
+      as important to the future of AI as deep learning was. Creativity is fundamentally open-ended and
+      using AI to push the boundaries of human creativity and innovation seems like an obvious next step for
+      AI.
+    </p>
+
+
   </article>
 </section>
 
@@ -1038,7 +1069,7 @@
       <!-- <span class="favorite-item" data-category="wikipedia">wikipedia pages</span>, -->
       <span class="favorite-item" data-category="musicians">musicians</span>,
       <span class="favorite-item" data-category="researchers">researchers</span>,
-      <span class="favorite-item" data-category="artists">artists</span>,
+      <!-- <span class="favorite-item" data-category="artists">artists</span>, -->
       <span class="favorite-item" data-category="papers">papers</span>,
       <span class="favorite-item" data-category="designers">designers</span>,
       <span class="favorite-item" data-category="philosophers">philosophers</span>,

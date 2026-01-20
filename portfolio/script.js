@@ -548,6 +548,7 @@
     ],
     researchers: [
       { title: "Sam Gershman", year: "", url: "https://psychology.fas.harvard.edu/people/samuel-j-gershman" },
+      { title: "Alan Kay", year: "", url: "https://en.wikipedia.org/wiki/Alan_Kay" },
       { title: "Max Tegmark", year: "", url: "https://physics.mit.edu/faculty/max-tegmark/" },
       { title: "Kenneth Stanley", year: "", url: "https://www.kenstanley.net/" },
       { title: "Mark Weiser", year: "", url: "https://en.wikipedia.org/wiki/Mark_Weiser" },
@@ -569,7 +570,8 @@
     designers: [
       { title: "Steve Jobs", year: "", url: "https://en.wikipedia.org/wiki/Steve_Jobs" },
       { title: "Leonardo da Vinci", year: "", url: "https://en.wikipedia.org/wiki/Leonardo_da_Vinci" },
-      { title: "Virgil Abloh", year: "", url: "https://en.wikipedia.org/wiki/Virgil_Abloh" }
+      { title: "Virgil Abloh", year: "", url: "https://en.wikipedia.org/wiki/Virgil_Abloh" },
+      { title: "Bret Victor", year: "", url: "https://en.wikipedia.org/wiki/Bret_Victor" }
     ],
     philosophers: [
       { title: "Marcus Aurelius", year: "", url: "https://en.wikipedia.org/wiki/Marcus_Aurelius" },
