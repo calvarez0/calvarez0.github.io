@@ -560,6 +560,8 @@
       { title: "Basquiat", year: "", url: "https://en.wikipedia.org/wiki/Jean-Michel_Basquiat" },
       { title: "Caravaggio", year: "", url: "https://en.wikipedia.org/wiki/Caravaggio" },
       { title: "Banksy", year: "", url: "https://en.wikipedia.org/wiki/Banksy" },
+      { title: "Rita Longa", year: "", url: "https://en.wikipedia.org/wiki/Rita_Longa" }
+
     ],
     papers: [
       { title: "Platonic Representation Hypothesis", year: "2024", url: "https://arxiv.org/abs/2405.07987" },
