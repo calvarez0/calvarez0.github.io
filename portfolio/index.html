@@ -19,6 +19,7 @@
   <a href="#you-axis" title="YOU–AXIS">You-Axis</a>
   <a href="#harvard" title="Harvard Research">Harvard</a>
   <a href="#evolutionary-platforms" title="Interactive Evolution">Evolution</a>
+  <a href="#student-research" title="Student Research Week">SRW</a>
   <a href="#volk" title="Volk">Volk</a>
   <a href="#cuba" title="On Cuba">Cuba</a>
   <a href="#credits" title="Contact">Contact</a>
@@ -88,7 +89,7 @@
     </p> -->
 
     <p style="margin-top: 2rem;">
-      <strong>→ <a href="assets/paper.pdf" style="color: #2d8ef4; text-decoration: underline;">Read the full paper</a></strong> ·
+      <strong>→ <a href="assets/paper.pdf" style="color: #2d8ef4; text-decoration: underline;">Read the full paper</a></strong> |
       <a href="assets/poster.pdf" style="color: #2d8ef4; text-decoration: underline;">View Poster</a>
     </p>
 
@@ -607,6 +608,11 @@
       What does the LLM's moral compass look like?
     </p>
 
+    <figure class="photo" style="margin-top: 1.5rem;">
+      <img src="assets/delicious.png" alt="YOU-AXIS" style="width: 100%; height: auto;">
+      <figcaption>When asking llama 3.1 "Is eating meat ethical?", and pushed to its limits, the model reveals its bias.</figcaption>
+    </figure>
+
     <p class="lede">
       In preparation for ICML 2026 :)
     </p>
@@ -621,7 +627,7 @@
   data-title="Harvard Research"
   data-bg="#8b2635" data-fg="#fff8e7" data-accent="#2d8ef4">
   <article>
-    <div class="eyebrow"><span class="ornate"><b>H</b></span>arvard Medical School</div>
+    <div class="eyebrow">Harvard Medical School</div>
     <h2>The Therapist <span class="ornate">T</span>uring Test: Expert Evaluation of AI vs. Human Clinician Responses</h2>
     <p>
       <strong>Can motivational interviewing (MI)-trained clinicians tell the difference between AI responses and human therapist responses?</strong>
@@ -636,6 +642,11 @@
       Many adolescents with substance use concerns turn to the internet, social media, or AI for help rather than seeking traditional care due to fear of parental or institutional repercussions.
       I developed this AI-powered SBIRT prototype as a proof-of-concept system to provide a safer, evidence-based alternative that could expand access to confidential support while reducing burden on clinical providers.
     </p>
+
+    <figure class="photo" style="margin-top: 1.5rem;">
+      <img src="assets/sbirt_referral.png" alt="SBIRT referral screen" style="width: 100%; height: auto;">
+      <figcaption>After brief intervention via LLM, patients can be referred to the appropriate treatment.</figcaption>
+    </figure>
 
     <p>
       <strong><a href="../sbirt/sbirt.html" style="color: #ffffff; text-decoration: underline;">→ Try the SBIRT Tool</a></strong>
@@ -702,14 +713,9 @@
   data-title="Interactive Evolution"
   data-bg="#000000" data-fg="#f5f5f5" data-accent="#4CAF50">
   <article>
-    <h2>Open-Ended Creative Platforms</h2>
-    <p class="lede">
-      A series of projects designed to augment human creativity through open-ended algorithms,
-      allowing humans to traverse the creativity search space more expansively. 
-      What emerges when we combine neural networks, genetic algorithms, and human aesthetic judgment?
-    </p>
-
-    <h3>S<span class="ornate">Y</span>nthBreeder</h3>
+    <!-- <h2>Open-Ended Creative Platforms</h2> -->
+    <div class="eyebrow">Open-ended Human-AI Creativity Platforms</div>
+    <h2>S<span class="ornate">Y</span>nthBreeder</h2>
     <p>
       Unlike traditional synthesizers with fixed parameters, SynthBreeder explores an open-ended
       space of possible sounds through evolutionary computation.
@@ -729,7 +735,7 @@
       <strong>→ <a href="../openendedness/synthbreeder.html" style="color: #4CAF50; text-decoration: underline;">Try SynthBreeder</a></strong>
     </p>
 
-    <h3>"AblOEh"</h3>
+    <h2>"AblOEh"</h2>
     <p>
       An open-ended, 3D, evolutionary fashion design platform that generates dresses through a combination
       of explicitly encoded trait-based genetics (hemline, silhouette, waist width) and neural networks
@@ -738,51 +744,40 @@
 
     <img src="assets/abloeh2.png" alt="Screenshot of the AblOEh interface" style="width: 100%; height: auto;">
 
-    <!-- should re-write this into a single, easier to understand paragraph -->
     <p>
-      The system demonstrates how explicit designer controls can act as environmental constraints in open-ended neuroevolution.
       Users can lock certain traits (shape, pattern) while allowing others to evolve, or apply
       designer overrides (force asymmetric hemlines, strict symmetry).
-    </p>
-    <p>
       Each dress is a phenotype expressed from a genotype containing both parametric traits
-      and a CPPN that evaluates color and displacement at every vertex. Mutations introduce variation, 
-      selection pressure comes from human aesthetic judgment, and complexity grows organically over generations.
+      and a CPPN that evaluates color and displacement at every vertex. 
+      Selection pressure comes from human aesthetic judgment and complexity grows organically over generations.
     </p>
 
     <p>
       <strong>→ <a href="../openendedness/ablOEh.html" style="color: #4CAF50; text-decoration: underline;">Try "Abl<span class="ornate">O</span>Eh"</a></strong>
     </p>
 
-    <h3>IdeaBreeder</h3>
+    <h2>Roxy</h2>
     <p>
-      An open-ended curiosity exploration platform that uses LLMs to guide users through a personalized learning journey.
-      As you explore, the system builds a "curiosity genome" that tracks your exploration patterns, like going down a more 
-      granular and personalized wikipedia rabbithole with an expert. 
+      A platform that guides your curiosity towards questions you wouldn't have otherwise asked.
     </p>
 
-    <img src="assets/IdeaBreeder.png" alt="Screenshot of the IdeaBreeder interface" style="width: 100%; height: auto;">
+    <img src="assets/roxy.png" alt="Screenshot of the IdeaBreeder interface" style="width: 100%; height: auto;">
 
     <p>
-      Each question you choose shapes your curiosity profile and influences the follow-up questions generated.
-      The platform visualizes your exploration trajectory and allows you to "heart" insights worth remembering,
-      creating a record of your intellectual wanderings that reveals patterns in how you think and learn.
-    </p>
-
-    <p>This is part of a broader goal of mine which is to use AI for introspective work, to reveal parts of your cognition
-      how an Oura Ring might help with sleep and cardiovascular health.
+      At the moment I'm very passionate about creating ambient intelligence that learns passively, not by instruction. Another goal of mine is to use AI for introspective work; as you use it you can track parts of your cognition
+      how an Oura Ring might help track your sleep cardiovascular health.
     </p>
 
     <p>
-      <strong>→ <a href="../openendedness/ideabreeder.html" style="color: #4CAF50; text-decoration: underline;">Try IdeaBreeder</a></strong>
+      <strong>→ <a href="https://roxy-tau.vercel.app/" style="color: #4CAF50; text-decoration: underline;">Try Roxy!!</a></strong>
     </p>
 
-    <h3>Open-Endedness</h3>
+    <h3>On Open-Endedness</h3>
 
     <p> The main idea behind all these platforms is that by using these tools, a human designer can discover
-    ideas that would otherwise never be illuminated in the labyrinth of creativity search space. In a very nerdy way, 
+    ideas that would otherwise never be illuminated in the labyrinth of the creativity search space. In a very nerdy way, 
     if we think of art as a search problem where the Mona Lisa lies in one corner of the painting search-space, 
-    and The Starry Night is hidden away in another, my platforms help humans traverse this space 
+    and The Starry Night is hidden away in another, my platforms help humans traverse the space 
     more intelligently towards these hidden masterpieces.
     </p>
 
@@ -792,64 +787,12 @@
       their choices. Solutions are neither purely human-designed
       nor purely algorithmic, but a synthesis that neither could achieve alone. 
       Additionally, the system seems to act as a mirror; it reveals the humans taste in surprising ways.
-    </p>
-
-    <p>Open-endedness today is niche sub-community within artificial intelligence but I think it will be 
+      Open-endedness today is niche sub-community within artificial intelligence but I think it will be 
       as important to the future of AI as deep learning was. Creativity is fundamentally open-ended and
       using AI to push the boundaries of human creativity and innovation seems like an obvious next step for
       AI.
     </p>
 
-
-  </article>
-</section>
-
-<section id="volk" class="wrap"
-  data-title="Volk"
-  data-bg="#fff8e7" data-fg="#1a1a1a" data-accent="#8b2635">
-  <article>
-    <!-- <div class="eyebrow">2019 – 2023 · E-commerce & Marketing</div> -->
-    <h2>V<span class="ornate">O</span>LK</h2>
-    <p class="lede">
-      From December 2019 to December 2023 I built multiple e-commerce brands that collectively garnered over 100 million impressions and millions of organic followers across social media platforms. 
-      My friends and I pioneered organic social media marketing during the wild wild west era of social media ads.
-      In particular, I was among the first to take advantage of the then-nascent short-form video content platforms.
-    </p>
-
-    <div class="project-images">
-      <figure class="photo">
-        <div class="polaroid">
-          <div>
-            <img src="assets/packets_sqr.jpg" alt="Packaging" style="width: 100%; height: auto;">
-          </div>
-        </div>
-        <figcaption>In the beginning I packaged everything from my apartment.</figcaption>
-      </figure>
-    
-    <div style="display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap;">
-      <div style="flex: 1; min-width: 300px;">
-        <p class="lede">
-          This is when I realized, as Steve Jobs put it, that
-        </p>
-
-        <blockquote style="margin: 1.5rem 0; font-size: 1.5rem; padding: 1rem 1.5rem; border-left: 3px solid #1a1a1a; background: rgba(0, 0, 0, 0.03); font-style: italic;">
-          "Everything around you that you call life was made up by people that were no smarter than you and you can change it, you can influence it, you can build your own things that other people can use."
-        </blockquote>
-
-        <p class="lede">
-          I helped influencers monetize their audiences and eventually realized I could acquire online businesses, apply our marketing strategies to increase their valuation, and sell them to larger holding companies.
-          I really didn't want to do private equity for the rest of my life. My father got sick and I got sick of working on something I didn't enjoy anymore so I went back to school.
-        </p>
-      </div>
-
-      <figure class="photo" style="flex: 0 0 auto; max-width: 300px; margin: 0;">
-        <div>
-          <img src="assets/monkee.png" alt="Monkee page" style="width: 100%; height: auto; max-height: 500px; object-fit: contain;">
-        </div>
-        <figcaption>One of our funnier brands.</figcaption>
-      </figure>
-    </div>
-    </div>
   </article>
 </section>
 
@@ -868,6 +811,35 @@
     <p>
       <strong>→ <a href="../demographic_iq.html" style="color: #8b2635; text-decoration: underline;">Try Demographic IQ</a></strong>
     </p>
+  </article>
+</section>
+
+
+<section id="student-research" class="wrap"
+  data-title="Student Research"
+  data-bg="#000000" data-fg="#f5f5f5" data-accent="#4CAF50">
+  <article>
+    <div class="eyebrow"><a href="https://calendar.tamu.edu/event/347103-student-research-week">Texas A&M Student Research Week</a></div>
+
+    <h2>Spectral Bias &amp; Saddle Points</h2>
+    <img src="assets/srw/poster_png.png" alt="Spectral Bias and Saddle Points poster" style="width: 100%; height: auto; margin-top: 1.5rem;">
+
+    <p style="margin-top: 2rem;">
+      <strong>→ <a href="../assets/Spectral Bias.pdf" style="color: #4CAF50; text-decoration: underline;">View Poster</a></strong> ·
+      <a href="assets/srw/Computational_Data_Sciences_Alex_Alvarez.pdf" style="color: #4CAF50; text-decoration: underline;">Read Abstract</a>
+    </p>
+
+    <div style="height: 1px; background: linear-gradient(to right, transparent, rgba(245,245,245,0.3) 20%, rgba(245,245,245,0.3) 80%, transparent); margin: 3rem 0;"></div>
+
+    <h2>A Continuum of Algorithms in Cognitive Reasoning</h2>
+
+    <img src="assets/srw/first_page.png" alt="A Continuum of Compression in Cognitive Reasoning presentation" style="width: 100%; height: auto; margin-top: 1.5rem;">
+
+    <p style="margin-top: 2rem;">
+      <strong>→ <a href="../assets/Continuum of Algorithms.pdf" style="color: #4CAF50; text-decoration: underline;">View Presentation</a></strong> ·
+      <a href="assets/srw/Social_Science_and_Human_Development_Alex_Alvarez.pdf" style="color: #4CAF50; text-decoration: underline;">Read Abstract</a>
+    </p>
+
   </article>
 </section>
 
@@ -933,69 +905,105 @@
   </article>
 </section> -->
 
-<!-- <section id="molly" class="wrap panel"
+<section id="volk" class="wrap"
+  data-title="Volk"
+  data-bg="#fff8e7" data-fg="#1a1a1a" data-accent="#8b2635">
+  <article>
+    <!-- <div class="eyebrow">2019 – 2023 · E-commerce & Marketing</div> -->
+    <h2>V<span class="ornate">O</span>LK</h2>
+    <p class="lede">
+      From December 2019 to December 2023 I built multiple e-commerce brands that collectively garnered over 100 million impressions and millions of organic followers across social media platforms.
+      My friends and I pioneered organic social media marketing during the wild wild west era of social media ads.
+      In particular, I was among the first to take advantage of the then-nascent short-form video content platforms.
+    </p>
+
+    <div class="project-images">
+      <figure class="photo">
+        <div class="polaroid">
+          <div>
+            <img src="assets/packets_sqr.jpg" alt="Packaging" style="width: 100%; height: auto;">
+          </div>
+        </div>
+        <figcaption>In the beginning I packaged everything from my apartment.</figcaption>
+      </figure>
+
+    <div style="display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 300px;">
+        <p class="lede">
+          This is when I realized, as Steve Jobs put it, that
+        </p>
+
+        <blockquote style="margin: 1.5rem 0; font-size: 1.5rem; padding: 1rem 1.5rem; border-left: 3px solid #1a1a1a; background: rgba(0, 0, 0, 0.03); font-style: italic;">
+          "Everything around you that you call life was made up by people that were no smarter than you and you can change it, you can influence it, you can build your own things that other people can use."
+        </blockquote>
+
+        <p class="lede">
+          I helped influencers monetize their audiences and eventually realized I could acquire online businesses, apply our marketing strategies to increase their valuation, and sell them to larger holding companies.
+          I really didn't want to do private equity for the rest of my life. My father got sick and I got sick of working on something I didn't enjoy anymore so I went back to school.
+        </p>
+      </div>
+
+      <figure class="photo" style="flex: 0 0 auto; max-width: 300px; margin: 0;">
+        <div>
+          <img src="assets/monkee.png" alt="Monkee page" style="width: 100%; height: auto; max-height: 500px; object-fit: contain;">
+        </div>
+        <figcaption>One of our funnier brands.</figcaption>
+      </figure>
+    </div>
+    </div>
+  </article>
+</section>
+
+<section id="molly" class="wrap panel"
   data-title="Molly & The Mop"
   data-bg="#2d8ef4" data-fg="#0a0a0a" data-accent="#000000">
   <article>
-    <div class="eyebrow">2022 – 2023 · Service Marketplace</div>
+    <div class="eyebrow">Service Marketplace</div>
     <h2>Molly &amp; The Mop</h2>
-    <p class="lede">
-      Connecting commercial and residential service providers with clients through
-      a social-first marketplace platform.
-    </p>
 
-    <figure class="photo">
-      <div class="polaroid">
-        <div>
-          <img src="../assets/molly-website.gif" alt="Molly & The Mop website" style="width: 100%; height: auto;">
-        </div>
+    <div style="display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 250px;">
+        <p class="lede">
+          Connecting local cleaning providers with clients through digital marketing.
+        </p>
+        <p>
+          Molly &amp; The Mop began with the simple observation that local cleaning services often lacked an effective way to reach customers beyond word-of-mouth while customers struggled to find reliable, vetted service providers in their area.
+        </p>
+        <p>
+          I used the same modern online marketing techniques from Volk and applied them to a local service company.
+          We were among the first small businesses utilizing short-form video content to promote their services, especially among cleaning companies in the Houston area. 
+          I eventually sold Molly &amp; The Mop to a local private holding company.
+        </p>
       </div>
-      <figcaption>The platform that connected service providers with local clients.</figcaption>
-    </figure>
 
-    <h3>The Vision</h3>
-    <p>
-      Molly &amp; The Mop began with a simple observation: local service providers&mdash;cleaners,
-      landscapers, handymen&mdash;often lacked an effective way to reach customers beyond word-of-mouth,
-      while customers struggled to find reliable, vetted service providers in their area.
-    </p>
+      <figure class="photo" style="flex: 0 0 auto; max-width: 300px; margin: 0;">
+        <div class="polaroid">
+          <div>
+            <img src="assets/molly/site gif.gif" alt="Molly & The Mop website" style="width: 100%; height: auto;">
+          </div>
+        </div>
+        <figcaption>Our website's design on mobile.</figcaption>
+      </figure>
+    </div>
 
-    <p>
-      We built an online platform that solved both sides of this problem. Service providers could
-      create profiles, showcase their work, and receive bookings directly through the platform.
-      Customers could browse verified providers, read reviews, and schedule services with confidence.
-    </p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; align-items: start;">
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div style="background: #fff; border-radius: 10px; padding: 1.5rem; display: flex; align-items: center; justify-content: center;">
+          <img src="assets/molly/Molly Logo.svg" alt="Molly & The Mop logo" style="width: 100%; max-width: 280px; height: auto;">
+        </div>
+        <figure class="photo" style="margin: 0;">
+          <img src="assets/molly/Molly Reviews.png" alt="Molly & The Mop Google Reviews – 5.0 stars" style="width: 100%; height: auto; border-radius: 10px;">
+          <figcaption>I was very proud of appearing first when you searched "local house cleaners" on Google :)</figcaption>
+        </figure>
+      </div>
+      <figure class="photo" style="margin: 0;">
+        <img src="assets/molly/Molly IG.png" alt="Molly & The Mop Instagram – 85K followers" style="width: 100%; height: auto; border-radius: 10px;">
+        <figcaption>85K followers on Instagram through organic marketing.</figcaption>
+      </figure>
+    </div>
 
-    <h3>Growth & Community</h3>
-    <p>
-      The company grew to 15+ employees and built a social media following of over 85,000 people.
-      We leveraged the same organic content strategy from Volk, but adapted it for the service
-      industry&mdash;sharing satisfying before/after transformations, highlighting local providers,
-      and building a community around home improvement and maintenance.
-    </p>
-
-    <p>
-      What started as a simple marketplace evolved into a trusted brand in the Houston area.
-      Our social presence drove consistent organic traffic to the platform, and our focus on
-      vetting quality providers built trust on both sides of the marketplace.
-    </p>
-
-    <h3>The Exit</h3>
-    <p>
-      In December 2023, we sold Molly &amp; The Mop to a private local cleaning company. They
-      saw value not just in the technology platform, but in the community and brand we'd built.
-      The customer base, provider network, and social media presence provided them with immediate
-      market presence and credibility.
-    </p>
-
-    <p>
-      This venture reinforced lessons about marketplace dynamics, two-sided network effects, and
-      the importance of brand in commodity service industries. It was rewarding to build something
-      that genuinely helped local businesses grow while making it easier for people to maintain
-      their homes and workspaces.
-    </p>
   </article>
-</section> -->
+</section>
 
 <section id="cuba" class="wrap"
   data-title="On Cuba"
