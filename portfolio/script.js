@@ -586,6 +586,8 @@
       { title: "Rickson Gracie", year: "", url: "https://en.wikipedia.org/wiki/Rickson_Gracie" },
       { title: "Mike Tyson", year: "", url: "https://en.wikipedia.org/wiki/Mike_Tyson" },
       { title: "Achilles", year: "", url: "https://en.wikipedia.org/wiki/Achilles" },
+      { title: "Jack Dempsey", year: "", url: "https://en.wikipedia.org/wiki/Jack_Dempsey" },
+      { title: "Sonny Liston", year: "", url: "https://en.wikipedia.org/wiki/Sonny_Liston" },
       { title: "Muhammad Ali", year: "", url: "https://en.wikipedia.org/wiki/Muhammad_Ali" }
     ],
     dj: [
