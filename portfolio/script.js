@@ -488,9 +488,9 @@
       { title: "City of God", year: "2002", url: "https://letterboxd.com/film/city-of-god/" },
       { title: "Manic", year: "2001", url: "https://letterboxd.com/film/manic/" },
       { title: "Isle of Dogs", year: "2018", url: "https://letterboxd.com/film/isle-of-dogs-2018/" },
-      { title: "Cinema Paradiso", year: "2002", url: "https://letterboxd.com/film/cinema-paradiso/" },
+      { title: "Cinema Paradiso", year: "1988", url: "https://letterboxd.com/film/cinema-paradiso/" },
       { title: "Fight Club", year: "1999", url: "https://letterboxd.com/film/fight-club/" },
-      { title: "Slumdog Millionaire", year: "1999", url: "https://letterboxd.com/film/slumdog-millionaire/" },
+      { title: "Slumdog Millionaire", year: "2008", url: "https://letterboxd.com/film/slumdog-millionaire/" },
       { title: "Choke", year: "1999", url: "https://archive.org/details/bjjdocs/Choke+-+(A+Rickson+Gracie+Documentary).mp4" },
       { title: "Bowling For Columbine", year: "2002", url: "https://letterboxd.com/film/bowling-for-columbine/" }
       
@@ -529,6 +529,8 @@
       
     ],
     history: [
+      { title: "Santiago Ramón y Cajal", year: "", url: "https://en.wikipedia.org/wiki/Santiago_Ram%C3%B3n_y_Cajal" },
+      { title: "Lucius Quinctius Cincinnatus", year: "", url: "https://en.wikipedia.org/wiki/Lucius_Quinctius_Cincinnatus" },
       { title: "Lee Kuan Yew", year: "", url: "https://en.wikipedia.org/wiki/Lee_Kuan_Yew" },
       { title: "Alexander The Great", year: "", url: "https://en.wikipedia.org/wiki/Alexander_the_Great" },
       { title: "Carlos Manuel de Céspedes", year: "", url: "https://en.wikipedia.org/wiki/Carlos_Manuel_de_C%C3%A9spedes" }
@@ -536,6 +538,7 @@
     wikipedia: [
       { title: "Anaïs Nin", year: "", url: "https://en.wikipedia.org/wiki/Ana%C3%AFs_Nin" },
       { title: "Prophetic Perfect Tense", year: "", url: "https://en.wikipedia.org/wiki/Prophetic_perfect_tense" },
+      { title: "Josep de la Trinxeria", year: "", url: "https://fr.wikipedia.org/wiki/Josep_de_la_Trinxeria" },
       { title: "Chet Baker", year: "", url: "https://en.wikipedia.org/wiki/Chet_Baker" }
     ],
     musicians: [
