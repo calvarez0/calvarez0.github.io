@@ -539,7 +539,8 @@
       { title: "Anaïs Nin", year: "", url: "https://en.wikipedia.org/wiki/Ana%C3%AFs_Nin" },
       { title: "Prophetic Perfect Tense", year: "", url: "https://en.wikipedia.org/wiki/Prophetic_perfect_tense" },
       { title: "Josep de la Trinxeria", year: "", url: "https://fr.wikipedia.org/wiki/Josep_de_la_Trinxeria" },
-      { title: "Chet Baker", year: "", url: "https://en.wikipedia.org/wiki/Chet_Baker" }
+      { title: "Chet Baker", year: "", url: "https://en.wikipedia.org/wiki/Chet_Baker" },
+      { title: "Pierre Wantzel", year: "", url: "https://en.wikipedia.org/wiki/Pierre_Wantzel" }
     ],
     musicians: [
       { title: "Bob Dylan", year: "", url: "https://en.wikipedia.org/wiki/Bob_Dylan" },
@@ -568,6 +569,7 @@
     ],
     papers: [
       { title: "Platonic Representation Hypothesis", year: "2024", url: "https://arxiv.org/abs/2405.07987" },
+      { title: "Auditing Algorithms", year: "2014", url: "https://www.kevinhamilton.org/share/papers/Auditing%20Algorithms%20--%20Sandvig%20--%20ICA%202014%20Data%20and%20Discrimination%20Preconference.pdf"},
       { title: "Questioning Representational Optimism in Deep Learning", year: "2025", url: "https://arxiv.org/abs/2505.11581" },
       { title: "A contextualized reinforcer pathology approach to addiction", year: "2023", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC10028332/pdf/44159_2023_Article_167.pdf"},
       { title: "Cognitive computational neuroscience", year: "2018", url: "https://www.nature.com/articles/s41593-018-0210-5" }
@@ -575,6 +577,7 @@
     designers: [
       { title: "Steve Jobs", year: "", url: "https://en.wikipedia.org/wiki/Steve_Jobs" },
       { title: "Leonardo da Vinci", year: "", url: "https://en.wikipedia.org/wiki/Leonardo_da_Vinci" },
+      { title: "Jef Raskin", year: "", url: "https://en.wikipedia.org/wiki/Jef_Raskin" },
       { title: "Virgil Abloh", year: "", url: "https://en.wikipedia.org/wiki/Virgil_Abloh" },
       { title: "Bret Victor", year: "", url: "https://en.wikipedia.org/wiki/Bret_Victor" }
     ],
