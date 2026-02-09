@@ -568,6 +568,7 @@
 
     ],
     papers: [
+      { title: "Computing Machinery and Intelligence", year: "1950", url: "https://courses.cs.umbc.edu/471/papers/turing.pdf" },
       { title: "Platonic Representation Hypothesis", year: "2024", url: "https://arxiv.org/abs/2405.07987" },
       { title: "Auditing Algorithms", year: "2014", url: "https://www.kevinhamilton.org/share/papers/Auditing%20Algorithms%20--%20Sandvig%20--%20ICA%202014%20Data%20and%20Discrimination%20Preconference.pdf"},
       { title: "Questioning Representational Optimism in Deep Learning", year: "2025", url: "https://arxiv.org/abs/2505.11581" },
