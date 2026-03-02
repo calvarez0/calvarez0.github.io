@@ -122,6 +122,73 @@
             z-index: 5;
         }
 
+        /* Phylogeny Toggle Button */
+        #phylogeny-toggle {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel);
+            border: 1px solid #444;
+            color: #fff;
+            padding: 10px 20px;
+            cursor: pointer;
+            z-index: 15;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: auto !important;
+            min-width: 140px;
+            max-width: 180px;
+            margin-top: 0;
+        }
+        #phylogeny-toggle:hover { background: var(--primary); border-color: var(--primary); }
+        #phylogeny-toggle.active { background: var(--primary); border-color: var(--primary); }
+
+        /* Phylogeny View Container */
+        #phylogeny-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1;
+            display: none;
+        }
+        #phylogeny-container.visible { display: block; }
+
+        /* Phylogeny Info Panel */
+        #phylogeny-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid #333;
+            padding: 12px 24px;
+            border-radius: 6px;
+            color: #888;
+            font-size: 0.8rem;
+            text-align: center;
+            z-index: 10;
+        }
+        #phylogeny-info strong { color: var(--primary); }
+
+        /* Phylogeny nav help */
+        #phylogeny-nav-help {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #555;
+            font-size: 0.7rem;
+            text-align: center;
+            z-index: 10;
+        }
+
         /* Settings Panel (Left Side) - Similar to Synthbreeder */
         #settings-panel {
             position: absolute;
@@ -264,6 +331,15 @@
 <body>
 
     <div id="overlay-msg">EVOLVING NEXT GENERATION...</div>
+
+    <!-- Phylogeny Toggle Button -->
+    <button id="phylogeny-toggle">View Phylogeny</button>
+
+    <!-- Phylogeny View Container -->
+    <div id="phylogeny-container">
+        <div id="phylogeny-nav-help">CLICK a dress to select it &bull; LEFT DRAG: Rotate &bull; RIGHT DRAG: Pan &bull; SCROLL: Zoom</div>
+        <div id="phylogeny-info">Phylogenetic tree of evolved dresses. <strong>Click</strong> any dress to branch from that point.</div>
+    </div>
 
     <!-- Settings Panel (Left Side) -->
     <div id="settings-panel">
@@ -1447,32 +1523,12 @@
             mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
         });
 
-        window.addEventListener('click', e => {
-            // Ignore clicks on UI
-            if (e.target.closest('#controls')) return;
-
-            // If camera is being dragged, ignore
-            if (isDragging) return;
-
-            // If no hovered model, ignore
-            if (!hovered) return;
-
-            // Update the mannequin preview with the selected dress
-            updatePreviewDress(hovered.genotype);
-
-            // BREED
-            const msg = document.getElementById('overlay-msg');
-            msg.style.opacity = 1;
-            setTimeout(() => {
-                generation++;
-                createGeneration(hovered.genotype);
-                msg.style.opacity = 0;
-            }, 100);
-        });
+        // Main click handler - now modified to track phylogeny (see end of script)
 
 
         document.getElementById('evolve-btn').addEventListener('click', () => {
             generation = 1;
+            currentParentPhyloId = null;  // Start a new root branch
             createGeneration(null);
         });
 
@@ -1799,6 +1855,631 @@
         // Initialize settings panel
         initActivationCheckboxes();
         updateSettingsUI();
+
+        // ========================================
+        // PHYLOGENETIC TREE SYSTEM
+        // ========================================
+
+        // Phylogeny stores ONLY chosen/surviving dresses (not entire populations)
+        const phylogenyTree = {
+            nodes: new Map(),  // id -> node data
+            rootIds: [],       // IDs of root nodes
+            nodeCounter: 0
+        };
+
+        // Compute genetic similarity between two genotypes (0-1, higher = more similar)
+        function computeGeneticSimilarity(g1, g2) {
+            let similarity = 0;
+            let count = 0;
+
+            // Compare traits
+            for (let key in g1.traits) {
+                if (g2.traits[key] !== undefined) {
+                    const diff = Math.abs(g1.traits[key] - g2.traits[key]);
+                    similarity += 1 - Math.min(diff, 1);
+                    count++;
+                }
+            }
+
+            // Compare network structure (node count, connection count)
+            const nodeDiff = Math.abs(g1.nodes.length - g2.nodes.length) / Math.max(g1.nodes.length, g2.nodes.length, 1);
+            const connDiff = Math.abs(g1.connections.length - g2.connections.length) / Math.max(g1.connections.length, g2.connections.length, 1);
+            similarity += (1 - nodeDiff) + (1 - connDiff);
+            count += 2;
+
+            // Compare activation functions used
+            const acts1 = new Set(g1.nodes.filter(n => n.type === 'hidden').map(n => n.act));
+            const acts2 = new Set(g2.nodes.filter(n => n.type === 'hidden').map(n => n.act));
+            const actIntersection = [...acts1].filter(a => acts2.has(a)).length;
+            const actUnion = new Set([...acts1, ...acts2]).size;
+            if (actUnion > 0) {
+                similarity += actIntersection / actUnion;
+                count++;
+            }
+
+            return count > 0 ? similarity / count : 0;
+        }
+
+        // Add a CHOSEN dress to the phylogeny (only called when user selects a dress)
+        function addToPhylogeny(genotype, parentId = null) {
+            const id = phylogenyTree.nodeCounter++;
+            const node = {
+                id: id,
+                genotype: genotype.clone(),
+                parentId: parentId,
+                children: [],
+                generation: generation,
+                timestamp: Date.now()
+            };
+
+            phylogenyTree.nodes.set(id, node);
+
+            if (parentId === null) {
+                phylogenyTree.rootIds.push(id);
+            } else {
+                const parent = phylogenyTree.nodes.get(parentId);
+                if (parent) {
+                    parent.children.push(id);
+                }
+            }
+
+            return node;
+        }
+
+        // Track current phylogeny parent
+        let currentParentPhyloId = null;
+
+        // ========================================
+        // PHYLOGENY 3D VISUALIZATION
+        // ========================================
+
+        const phylogenyContainer = document.getElementById('phylogeny-container');
+        const phyloScene = new THREE.Scene();
+        const phyloCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
+        const phyloRenderer = new THREE.WebGLRenderer({ antialias: true });
+        phyloRenderer.setSize(window.innerWidth, window.innerHeight);
+        phyloRenderer.setClearColor(0x000000, 1);
+        phylogenyContainer.insertBefore(phyloRenderer.domElement, phylogenyContainer.firstChild);
+
+        // Phylogeny controls
+        const phyloControls = new THREE.OrbitControls(phyloCamera, phyloRenderer.domElement);
+        phyloControls.enableDamping = true;
+        phyloControls.dampingFactor = 0.05;
+        phyloControls.minDistance = 5;
+        phyloControls.maxDistance = 200;
+
+        // Phylogeny lighting
+        const phyloAmb = new THREE.AmbientLight(0xffffff, 0.4);
+        phyloScene.add(phyloAmb);
+        const phyloDir = new THREE.DirectionalLight(0xffffff, 0.7);
+        phyloDir.position.set(10, 20, 15);
+        phyloScene.add(phyloDir);
+        const phyloDir2 = new THREE.DirectionalLight(0xff0055, 0.3);
+        phyloDir2.position.set(-10, 10, -10);
+        phyloScene.add(phyloDir2);
+
+        // Store phylogeny meshes
+        let phyloMeshes = [];  // {mesh, hitBox, phyloId, group}
+        let phyloConnections = [];  // Line objects for tree connections
+
+        // Phylogeny view state
+        let phylogenyVisible = false;
+        let phyloHovered = null;
+
+        // Toggle phylogeny view
+        document.getElementById('phylogeny-toggle').addEventListener('click', () => {
+            phylogenyVisible = !phylogenyVisible;
+
+            const toggleBtn = document.getElementById('phylogeny-toggle');
+            const mainCanvas = document.getElementById('canvas-container');
+            const mainControls = document.getElementById('controls');
+            const settingsPanel = document.getElementById('settings-panel');
+            const settingsToggle = document.getElementById('settings-toggle');
+            const navHelp = document.getElementById('nav-help');
+
+            if (phylogenyVisible) {
+                toggleBtn.textContent = 'Back to Evolution';
+                toggleBtn.classList.add('active');
+                phylogenyContainer.classList.add('visible');
+                mainCanvas.style.display = 'none';
+                mainControls.style.display = 'none';
+                settingsPanel.classList.remove('open');  // Close settings panel
+                settingsPanel.style.visibility = 'hidden';
+                settingsToggle.style.visibility = 'hidden';
+                navHelp.style.display = 'none';
+
+                updatePhylogenyView();
+            } else {
+                toggleBtn.textContent = 'View Phylogeny';
+                toggleBtn.classList.remove('active');
+                phylogenyContainer.classList.remove('visible');
+                mainCanvas.style.display = 'block';
+                mainControls.style.display = 'flex';
+                settingsPanel.style.visibility = 'visible';
+                settingsToggle.style.visibility = 'visible';
+                navHelp.style.display = 'block';
+            }
+        });
+
+        // Build/update the 3D phylogeny visualization
+        function updatePhylogenyView() {
+            // Clear existing meshes
+            phyloMeshes.forEach(item => {
+                phyloScene.remove(item.group);
+                if (item.mesh.geometry) item.mesh.geometry.dispose();
+                if (item.mesh.material) item.mesh.material.dispose();
+            });
+            phyloMeshes = [];
+
+            // Clear connections
+            phyloConnections.forEach(line => {
+                phyloScene.remove(line);
+                if (line.geometry) line.geometry.dispose();
+                if (line.material) line.material.dispose();
+            });
+            phyloConnections = [];
+
+            if (phylogenyTree.nodes.size === 0) return;
+
+            // Calculate tree layout
+            const layout = calculateTreeLayout();
+
+            // Create dress meshes for each node
+            layout.forEach((pos, nodeId) => {
+                const node = phylogenyTree.nodes.get(nodeId);
+                if (!node) return;
+
+                const group = new THREE.Group();
+                group.position.set(pos.x, pos.y, pos.z);
+
+                // Generate mini dress mesh
+                try {
+                    const pheno = new Phenotype(node.genotype);
+                    const dressMesh = pheno.generateMesh(true);  // Use preview scale
+                    dressMesh.scale.setScalar(1.0);
+                    group.add(dressMesh);
+
+                    // Add larger hit box for easier clicking
+                    // Use opacity 0 but visible:true so raycast works
+                    const hitGeo = new THREE.BoxGeometry(1.5, 2.0, 1.5);
+                    const hitMat = new THREE.MeshBasicMaterial({
+                        transparent: true,
+                        opacity: 0,
+                        depthWrite: false
+                    });
+                    const hitBox = new THREE.Mesh(hitGeo, hitMat);
+                    hitBox.userData = { phyloId: nodeId };
+                    hitBox.raycast = THREE.Mesh.prototype.raycast;  // Ensure raycast is enabled
+                    group.add(hitBox);
+
+                    phyloScene.add(group);
+                    phyloMeshes.push({ mesh: dressMesh, hitBox: hitBox, phyloId: nodeId, group: group });
+                } catch (e) {
+                    console.error('Error creating phylo mesh for node', nodeId, e);
+                }
+            });
+
+            // Create curved connection lines between parent-child nodes (tree branches)
+            phylogenyTree.nodes.forEach((node, nodeId) => {
+                if (node.parentId !== null) {
+                    const parentPos = layout.get(node.parentId);
+                    const childPos = layout.get(nodeId);
+
+                    if (parentPos && childPos) {
+                        // Create curved line using quadratic bezier
+                        const curve = new THREE.QuadraticBezierCurve3(
+                            new THREE.Vector3(parentPos.x, parentPos.y - 0.5, parentPos.z),
+                            new THREE.Vector3(
+                                (parentPos.x + childPos.x) / 2,
+                                (parentPos.y + childPos.y) / 2,
+                                (parentPos.z + childPos.z) / 2
+                            ),
+                            new THREE.Vector3(childPos.x, childPos.y + 0.5, childPos.z)
+                        );
+
+                        const points = curve.getPoints(20);
+                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+                        // Color based on genetic similarity
+                        const similarity = computeGeneticSimilarity(
+                            node.genotype,
+                            phylogenyTree.nodes.get(node.parentId).genotype
+                        );
+                        const color = new THREE.Color();
+                        color.setHSL(similarity * 0.3, 0.5, 0.3);  // Green=similar, red=divergent
+
+                        const lineMaterial = new THREE.LineBasicMaterial({
+                            color: color,
+                            linewidth: 2
+                        });
+                        const line = new THREE.Line(geometry, lineMaterial);
+                        phyloScene.add(line);
+                        phyloConnections.push(line);
+                    }
+                }
+            });
+
+            // Position camera to see the tree
+            const bounds = getTreeBounds(layout);
+            const centerX = (bounds.minX + bounds.maxX) / 2;
+            const centerY = (bounds.minY + bounds.maxY) / 2;
+            const centerZ = (bounds.minZ + bounds.maxZ) / 2;
+            const size = Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY, bounds.maxZ - bounds.minZ);
+
+            phyloCamera.position.set(centerX, centerY + size * 0.3, centerZ + size * 1.2);
+            phyloControls.target.set(centerX, centerY, centerZ);
+            phyloControls.update();
+        }
+
+        // Calculate 3D layout using force-directed + similarity embedding
+        // Inspired by UMAP/t-SNE style layouts and Picbreeder's phylogenetic tree
+        function calculateTreeLayout() {
+            const layout = new Map();  // nodeId -> {x, y, z}
+
+            if (phylogenyTree.nodes.size === 0) return layout;
+
+            const nodes = Array.from(phylogenyTree.nodes.values());
+
+            // Step 1: Compute pairwise genetic distances and create feature vectors
+            // Extract key traits as a feature vector for each dress
+            function getFeatureVector(genotype) {
+                const t = genotype.traits;
+                return [
+                    t.skirtLength,
+                    t.waistWidth,
+                    t.skirtFlare,
+                    t.shoulderWidth,
+                    t.necklineDepth,
+                    t.hemAsymmetry,
+                    t.ruffleAmp,
+                    t.flareHeight,
+                    t.bustEnhance,
+                    t.volumeScale,
+                    genotype.nodes.length / 20,  // Normalized network complexity
+                    genotype.connections.length / 50
+                ];
+            }
+
+            // Step 2: Initialize positions - use genetic features to seed X/Z positions
+            // Y is based on generation (tree grows downward)
+            const GENERATION_SPACING = 2;  // Reduced from 4
+
+            nodes.forEach(node => {
+                const features = getFeatureVector(node.genotype);
+
+                // Use first two principal components of features for initial X/Z
+                // Simple projection: combine traits meaningfully
+                const silhouetteAxis = features[0] * 2 + features[2] * 3 - features[1];  // Length + flare - waist
+                const decorationAxis = features[6] * 3 + features[4] + features[5];       // Ruffles + neckline + asymmetry
+
+                layout.set(node.id, {
+                    x: silhouetteAxis * 1.5,  // Reduced from 3
+                    y: -node.generation * GENERATION_SPACING,
+                    z: decorationAxis * 1.5   // Reduced from 3
+                });
+            });
+
+            // Step 3: Force-directed refinement
+            // - Attraction to parent (tree structure)
+            // - Repulsion from all other nodes (spacing)
+            // - Attraction to genetically similar nodes (clustering)
+            const ITERATIONS = 50;
+            const PARENT_ATTRACTION = 0.3;
+            const SIBLING_REPULSION = 0.5;
+            const SIMILARITY_ATTRACTION = 0.1;
+            const MIN_DISTANCE = 1.5;  // Reduced from 2.5
+
+            for (let iter = 0; iter < ITERATIONS; iter++) {
+                const forces = new Map();
+                nodes.forEach(n => forces.set(n.id, { x: 0, z: 0 }));
+
+                // Apply forces
+                for (let i = 0; i < nodes.length; i++) {
+                    const nodeA = nodes[i];
+                    const posA = layout.get(nodeA.id);
+                    const forceA = forces.get(nodeA.id);
+
+                    // Parent attraction - pull toward parent's X/Z
+                    if (nodeA.parentId !== null) {
+                        const parentPos = layout.get(nodeA.parentId);
+                        if (parentPos) {
+                            const dx = parentPos.x - posA.x;
+                            const dz = parentPos.z - posA.z;
+                            // Pull toward parent but allow some spread
+                            forceA.x += dx * PARENT_ATTRACTION * 0.3;
+                            forceA.z += dz * PARENT_ATTRACTION * 0.3;
+                        }
+                    }
+
+                    // Interaction with other nodes
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const nodeB = nodes[j];
+                        const posB = layout.get(nodeB.id);
+                        const forceB = forces.get(nodeB.id);
+
+                        const dx = posB.x - posA.x;
+                        const dz = posB.z - posA.z;
+                        const dist = Math.sqrt(dx * dx + dz * dz) + 0.01;
+
+                        // Repulsion (prevent overlap)
+                        if (dist < MIN_DISTANCE * 2) {
+                            const repulsion = (MIN_DISTANCE * 2 - dist) * SIBLING_REPULSION / dist;
+                            forceA.x -= dx * repulsion;
+                            forceA.z -= dz * repulsion;
+                            forceB.x += dx * repulsion;
+                            forceB.z += dz * repulsion;
+                        }
+
+                        // Similarity attraction (cluster similar dresses)
+                        const similarity = computeGeneticSimilarity(nodeA.genotype, nodeB.genotype);
+                        if (similarity > 0.7 && dist > MIN_DISTANCE) {
+                            const attraction = (similarity - 0.7) * SIMILARITY_ATTRACTION;
+                            forceA.x += dx * attraction;
+                            forceA.z += dz * attraction;
+                            forceB.x -= dx * attraction;
+                            forceB.z -= dz * attraction;
+                        }
+                    }
+                }
+
+                // Apply forces with damping
+                const damping = 0.8 * (1 - iter / ITERATIONS);  // Decrease over time
+                nodes.forEach(node => {
+                    const pos = layout.get(node.id);
+                    const force = forces.get(node.id);
+                    pos.x += force.x * damping;
+                    pos.z += force.z * damping;
+                });
+            }
+
+            // Step 4: Final pass - ensure minimum spacing
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const posA = layout.get(nodes[i].id);
+                    const posB = layout.get(nodes[j].id);
+
+                    const dx = posB.x - posA.x;
+                    const dz = posB.z - posA.z;
+                    const dist = Math.sqrt(dx * dx + dz * dz);
+
+                    if (dist < MIN_DISTANCE && dist > 0) {
+                        const push = (MIN_DISTANCE - dist) / 2;
+                        const nx = dx / dist;
+                        const nz = dz / dist;
+                        posA.x -= nx * push;
+                        posA.z -= nz * push;
+                        posB.x += nx * push;
+                        posB.z += nz * push;
+                    }
+                }
+            }
+
+            return layout;
+        }
+
+        // Get bounding box of tree
+        function getTreeBounds(layout) {
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
+            let minZ = Infinity, maxZ = -Infinity;
+
+            layout.forEach(pos => {
+                minX = Math.min(minX, pos.x);
+                maxX = Math.max(maxX, pos.x);
+                minY = Math.min(minY, pos.y);
+                maxY = Math.max(maxY, pos.y);
+                minZ = Math.min(minZ, pos.z);
+                maxZ = Math.max(maxZ, pos.z);
+            });
+
+            return { minX, maxX, minY, maxY, minZ, maxZ };
+        }
+
+        // Phylogeny interaction - using document-level capture to bypass OrbitControls
+        const phyloRaycaster = new THREE.Raycaster();
+        const phyloMouse = new THREE.Vector2();
+        let phyloPointerStart = { x: 0, y: 0, time: 0 };
+
+        // Capture phase event listeners run BEFORE OrbitControls can intercept
+        document.addEventListener('pointerdown', (e) => {
+            if (!phylogenyVisible) return;
+            phyloPointerStart.x = e.clientX;
+            phyloPointerStart.y = e.clientY;
+            phyloPointerStart.time = Date.now();
+        }, true);  // true = capture phase
+
+        document.addEventListener('pointerup', (e) => {
+            if (!phylogenyVisible) return;
+
+            // Check if click was on the phylogeny canvas
+            const rect = phyloRenderer.domElement.getBoundingClientRect();
+            if (e.clientX < rect.left || e.clientX > rect.right ||
+                e.clientY < rect.top || e.clientY > rect.bottom) {
+                return;
+            }
+
+            // Check if this was a click (not a drag)
+            const dx = e.clientX - phyloPointerStart.x;
+            const dy = e.clientY - phyloPointerStart.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const duration = Date.now() - phyloPointerStart.time;
+
+            console.log('Pointer up - dist:', dist, 'duration:', duration);
+
+            // Only count as click if moved less than 15px and held less than 500ms
+            if (dist > 15 || duration > 500) {
+                console.log('Rejected as drag');
+                return;
+            }
+
+            // Calculate mouse position in normalized device coordinates
+            phyloMouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            phyloMouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+            console.log('Mouse NDC:', phyloMouse.x, phyloMouse.y);
+
+            // Raycast against all objects in scene
+            phyloRaycaster.setFromCamera(phyloMouse, phyloCamera);
+            const allHits = phyloRaycaster.intersectObjects(phyloScene.children, true);
+
+            console.log('All raycast hits:', allHits.length);
+            allHits.forEach((h, i) => {
+                console.log('  Hit', i, ':', h.object.type, h.object.userData);
+            });
+
+            // Find hits on objects with phyloId
+            const phyloHits = allHits.filter(h => h.object.userData && h.object.userData.phyloId !== undefined);
+
+            console.log('Phylo hits:', phyloHits.length);
+
+            if (phyloHits.length > 0) {
+                const phyloId = phyloHits[0].object.userData.phyloId;
+                console.log('Selected phyloId:', phyloId);
+                branchFromNode(phyloId);
+            }
+        }, true);  // true = capture phase
+
+        // Branch from a specific phylogeny node (when clicking in phylogeny view)
+        function branchFromNode(phyloId) {
+            const node = phylogenyTree.nodes.get(phyloId);
+            if (!node) return;
+
+            // Set the current parent for new branches
+            currentParentPhyloId = phyloId;
+
+            // Use this node's genotype as the parent
+            const parentGenotype = node.genotype;
+
+            // Update generation counter to be one more than the selected node's generation
+            generation = node.generation + 1;
+
+            // Update the mannequin preview
+            updatePreviewDress(parentGenotype);
+
+            // Switch back to main view
+            document.getElementById('phylogeny-toggle').click();
+
+            // Show evolution message
+            const msg = document.getElementById('overlay-msg');
+            msg.textContent = 'BRANCHING FROM GENERATION ' + node.generation + '...';
+            msg.style.opacity = 1;
+
+            setTimeout(() => {
+                // Create new generation branching from selected node
+                // Note: the selected node is already in phylogeny, so just create offspring
+                createGeneration(parentGenotype);
+                msg.style.opacity = 0;
+                msg.textContent = 'EVOLVING NEXT GENERATION...';
+            }, 300);
+        }
+
+        // Track mouse for hover effect
+        document.addEventListener('pointermove', (e) => {
+            if (!phylogenyVisible) return;
+            const rect = phyloRenderer.domElement.getBoundingClientRect();
+            phyloMouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            phyloMouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        });
+
+        // Update phylogeny hover effect
+        function updatePhyloHover() {
+            if (!phylogenyVisible) return;
+
+            phyloRaycaster.setFromCamera(phyloMouse, phyloCamera);
+            const allHits = phyloRaycaster.intersectObjects(phyloScene.children, true);
+            const hits = allHits.filter(h => h.object.userData && h.object.userData.phyloId !== undefined);
+
+            // Reset previous hover
+            if (phyloHovered !== null) {
+                const item = phyloMeshes.find(m => m.phyloId === phyloHovered);
+                if (item) {
+                    item.group.scale.setScalar(1.0);
+                    if (item.mesh.material) item.mesh.material.emissive.setHex(0x000000);
+                }
+                phyloHovered = null;
+                document.getElementById('phylogeny-info').innerHTML =
+                    'Phylogenetic tree of evolved dresses. <strong>Click</strong> any dress to branch from that point.';
+            }
+
+            if (hits.length > 0) {
+                const phyloId = hits[0].object.userData.phyloId;
+                const item = phyloMeshes.find(m => m.phyloId === phyloId);
+                const node = phylogenyTree.nodes.get(phyloId);
+
+                if (item && node) {
+                    item.group.scale.setScalar(1.2);
+                    if (item.mesh.material) item.mesh.material.emissive.setHex(0x222222);
+                    phyloHovered = phyloId;
+                    phyloRenderer.domElement.style.cursor = 'pointer';
+
+                    // Update info panel
+                    const childCount = node.children.length;
+                    document.getElementById('phylogeny-info').innerHTML =
+                        `<strong>Generation ${node.generation}</strong> | ${childCount} branch${childCount !== 1 ? 'es' : ''} | Click to evolve from here`;
+                }
+            } else {
+                phyloRenderer.domElement.style.cursor = 'default';
+            }
+        }
+
+        // Animate phylogeny view
+        function animatePhylogeny() {
+            requestAnimationFrame(animatePhylogeny);
+
+            if (phylogenyVisible) {
+                phyloControls.update();
+                updatePhyloHover();
+
+                // Gentle rotation of dress meshes
+                phyloMeshes.forEach((item, i) => {
+                    item.mesh.rotation.y += 0.005;
+                });
+
+                phyloRenderer.render(phyloScene, phyloCamera);
+            }
+        }
+        animatePhylogeny();
+
+        // Handle window resize for phylogeny view
+        window.addEventListener('resize', () => {
+            phyloCamera.aspect = window.innerWidth / window.innerHeight;
+            phyloCamera.updateProjectionMatrix();
+            phyloRenderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Update the main click handler to track phylogeny
+        // Override the original click handler
+        window.removeEventListener('click', window.onclick);
+
+        // New click handler that tracks phylogeny - only stores CHOSEN dresses
+        function handleMainClick(e) {
+            if (e.target.closest('#controls')) return;
+            if (e.target.closest('#settings-panel')) return;
+            if (e.target.closest('#settings-toggle')) return;
+            if (e.target.closest('#phylogeny-toggle')) return;
+            if (phylogenyVisible) return;
+            if (isDragging) return;
+            if (!hovered) return;
+
+            // Update the mannequin preview with the selected dress
+            updatePreviewDress(hovered.genotype);
+
+            // Add the CHOSEN dress to the phylogeny tree
+            const phyloNode = addToPhylogeny(hovered.genotype, currentParentPhyloId);
+            currentParentPhyloId = phyloNode.id;
+
+            // BREED
+            const msg = document.getElementById('overlay-msg');
+            msg.style.opacity = 1;
+            setTimeout(() => {
+                generation++;
+                createGeneration(hovered.genotype);
+                msg.style.opacity = 0;
+            }, 100);
+        }
+
+        // Remove old click listener and add new one
+        renderer.domElement.addEventListener('click', handleMainClick);
 
     </script>
 </body>
