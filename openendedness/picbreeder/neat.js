@@ -10,12 +10,12 @@ const NEAT_CONFIG = {
 
     // Weight mutation
     weightMutationRate: 0.8,
-    weightPerturbRate: 0.9,
+    weightPerturbRate: 0.8,
     weightPerturbPower: 0.5,
 
     // Structural mutation - PicBreeder uses 50% rates!
-    addNodeRate: 0.5,
-    addConnectionRate: 0.5,
+    addNodeRate: 0.2,
+    addConnectionRate: 0.2,
 
     // Weight range
     weightMin: -8,

@@ -10,7 +10,8 @@ const AppState = {
     visualizer: null,
     phylogenyVisualizer: null,
     panelMode: 'network',
-    cells: []
+    cells: [],
+    sessionSaveMode: 'full'
 };
 const GRID_SIZE = 20;
 const EVOLUTION_STATE_STORAGE_KEY = 'cppn-evolution-state-v1';
@@ -33,24 +34,68 @@ function updateCellClasses() {
     });
 }
 
+function serializeGenomeForStorage(genome, includeLineage = true) {
+    if (!genome) return null;
+    if (includeLineage) return genome.serialize();
+
+    return {
+        id: genome.id,
+        historyId: genome.historyId,
+        generation: genome.generation,
+        parentHistoryIds: Array.isArray(genome.parentHistoryIds) ? [...genome.parentHistoryIds] : [],
+        nextNodeId: genome.nextNodeId,
+        nodes: genome.serializeNodes(),
+        connections: genome.serializeConnections()
+    };
+}
+
+function buildPopulationStateForSession(compact = false) {
+    if (!AppState.population) return null;
+    if (!compact) return AppState.population.exportState();
+
+    return {
+        format: 'cppn-population-v1',
+        exportedAt: new Date().toISOString(),
+        size: AppState.population.size,
+        generation: AppState.population.generation,
+        genomes: AppState.population.getGenomes().map((genome) => serializeGenomeForStorage(genome, false))
+    };
+}
+
+function buildEvolutionSessionPayload(compact = false) {
+    return {
+        format: compact ? 'cppn-evolution-state-v1-compact' : 'cppn-evolution-state-v1',
+        savedAt: new Date().toISOString(),
+        panelMode: AppState.panelMode,
+        viewingGenomeId: AppState.viewingGenome ? AppState.viewingGenome.id : null,
+        selectedGenomeIds: Array.from(AppState.selectedGenomes)
+            .map((genome) => genome.id)
+            .filter((id) => typeof id === 'string'),
+        compact,
+        population: buildPopulationStateForSession(compact)
+    };
+}
+
 function saveAppStateToSession() {
     if (!AppState.population) return;
 
     try {
         const genomes = AppState.population.getGenomes();
-        const payload = {
-            format: 'cppn-evolution-state-v1',
-            savedAt: new Date().toISOString(),
-            panelMode: AppState.panelMode,
-            viewingGenomeId: AppState.viewingGenome ? AppState.viewingGenome.id : null,
-            selectedGenomeIds: Array.from(AppState.selectedGenomes)
-                .map((genome) => genome.id)
-                .filter((id) => typeof id === 'string'),
-            population: AppState.population.exportState()
-        };
-
         if (!Array.isArray(genomes) || genomes.length === 0) return;
-        sessionStorage.setItem(EVOLUTION_STATE_STORAGE_KEY, JSON.stringify(payload));
+
+        if (AppState.sessionSaveMode !== 'compact') {
+            const fullPayload = buildEvolutionSessionPayload(false);
+            sessionStorage.setItem(EVOLUTION_STATE_STORAGE_KEY, JSON.stringify(fullPayload));
+            AppState.sessionSaveMode = 'full';
+            return;
+        }
+    } catch (error) {
+        AppState.sessionSaveMode = 'compact';
+    }
+
+    try {
+        const compactPayload = buildEvolutionSessionPayload(true);
+        sessionStorage.setItem(EVOLUTION_STATE_STORAGE_KEY, JSON.stringify(compactPayload));
     } catch (error) {
         // Ignore session persistence issues (private mode/quota, etc.).
     }
@@ -65,6 +110,7 @@ function restoreAppStateFromSession() {
         if (!parsed || !parsed.population) return false;
 
         AppState.population = NEAT.Population.fromState(parsed.population);
+        AppState.sessionSaveMode = parsed.compact ? 'compact' : 'full';
         AppState.panelMode = parsed.panelMode === 'phylogeny' ? 'phylogeny' : 'network';
 
         const viewingGenome = getGenomeById(parsed.viewingGenomeId);
@@ -97,7 +143,7 @@ function seedActivationLabFromCurrentGenome() {
             format: 'cppn-activation-seed-v1',
             savedAt: new Date().toISOString(),
             label: `Genome ${genome.id}`,
-            genome: genome.serialize()
+            genome: serializeGenomeForStorage(genome, false)
         };
         sessionStorage.setItem(LAB_SEED_STORAGE_KEY, JSON.stringify(payload));
     } catch (error) {
