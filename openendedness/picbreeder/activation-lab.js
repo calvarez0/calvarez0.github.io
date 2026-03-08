@@ -9,6 +9,7 @@ const LabState = {
     renderer: null,
     previewCanvas: null,
     previewCtx: null,
+    originalGenomeSnapshot: null,
     selectedConnectionIndex: null,
     renderPending: false,
     loadedGenomeName: 'No genome loaded'
@@ -16,12 +17,14 @@ const LabState = {
 const LAB_SEED_STORAGE_KEY = 'cppn-activation-seed-v1';
 const LAB_ARCHIVE_DIR = 'archive';
 const LAB_ARCHIVE_MANIFEST_PATH = `${LAB_ARCHIVE_DIR}/manifest.json`;
+const LAB_WEIGHT_BOUNDS = { min: -8, max: 8 };
 
 function initActivationLab() {
     const networkSvg = document.getElementById('editor-network-svg');
     const previewCanvas = document.getElementById('preview-canvas');
     if (!networkSvg || !previewCanvas) return;
 
+    enforceLabWeightBounds();
     LabState.previewCanvas = previewCanvas;
     LabState.previewCtx = previewCanvas.getContext('2d', { willReadFrequently: true });
 
@@ -33,6 +36,7 @@ function initActivationLab() {
     LabState.renderer = new CPPN.CPPNRenderer();
 
     setupActivationLabEvents();
+    setLabActionsEnabled(false);
     if (!loadSeedGenomeFromSession()) {
         randomizeNetwork();
     }
@@ -41,9 +45,11 @@ function initActivationLab() {
 function setupActivationLabEvents() {
     document.getElementById('genome-upload-input').addEventListener('change', handleGenomeUpload);
     document.getElementById('randomize-network-btn').addEventListener('click', randomizeNetwork);
+    document.getElementById('reset-connection-btn').addEventListener('click', resetSelectedConnectionToOriginal);
     document.getElementById('network-zoom-in-btn').addEventListener('click', () => LabState.visualizer.zoomIn());
     document.getElementById('network-zoom-out-btn').addEventListener('click', () => LabState.visualizer.zoomOut());
     document.getElementById('network-reset-view-btn').addEventListener('click', () => LabState.visualizer.resetView());
+    document.getElementById('save-lab-genome-btn').addEventListener('click', downloadLabGenomeJson);
     document.getElementById('download-preview-btn').addEventListener('click', downloadPreviewImage);
     document.getElementById('connection-picker').addEventListener('click', handleConnectionPickerClick);
 
@@ -118,11 +124,69 @@ async function randomizeNetwork() {
 function applyLoadedGenome(genome, label) {
     LabState.genome = genome;
     LabState.loadedGenomeName = label || `Genome ${genome.id}`;
+    LabState.originalGenomeSnapshot = serializeGenomeForLab(genome);
     renderNetwork();
     clearConnectionEditor();
-    document.getElementById('download-preview-btn').disabled = false;
+    setLabActionsEnabled(true);
     refreshPreviewStatus();
     queuePreviewRender();
+}
+
+function setLabActionsEnabled(hasGenome) {
+    const enabled = Boolean(hasGenome);
+    document.getElementById('save-lab-genome-btn').disabled = !enabled;
+    document.getElementById('download-preview-btn').disabled = !enabled;
+    if (!enabled) {
+        document.getElementById('reset-connection-btn').disabled = true;
+    }
+}
+
+function serializeGenomeForLab(genome) {
+    if (!genome) return null;
+    return {
+        id: genome.id,
+        historyId: genome.historyId,
+        generation: genome.generation,
+        parentHistoryIds: Array.isArray(genome.parentHistoryIds) ? [...genome.parentHistoryIds] : [],
+        nextNodeId: genome.nextNodeId,
+        nodes: genome.serializeNodes(),
+        connections: genome.serializeConnections()
+    };
+}
+
+function resetSelectedConnectionToOriginal() {
+    if (!LabState.genome || !LabState.originalGenomeSnapshot || !LabState.visualizer) return;
+
+    const selectedIndex = LabState.visualizer.selectedConnectionIndex;
+    if (!Number.isInteger(selectedIndex)) return;
+
+    const originalConnections = Array.isArray(LabState.originalGenomeSnapshot.connections)
+        ? LabState.originalGenomeSnapshot.connections
+        : [];
+    const originalConn = originalConnections[selectedIndex];
+    if (!originalConn || !Number.isFinite(originalConn.weight)) return;
+
+    const conn = LabState.visualizer.setConnectionWeight(selectedIndex, originalConn.weight);
+    if (!conn) return;
+
+    populateConnectionEditor(conn, selectedIndex);
+    queuePreviewRender();
+}
+
+function updateResetConnectionButtonState(selectedIndex) {
+    const resetButton = document.getElementById('reset-connection-btn');
+    if (!resetButton) return;
+
+    if (!Number.isInteger(selectedIndex)) {
+        resetButton.disabled = true;
+        return;
+    }
+
+    const originalConnections = LabState.originalGenomeSnapshot && Array.isArray(LabState.originalGenomeSnapshot.connections)
+        ? LabState.originalGenomeSnapshot.connections
+        : [];
+    const originalConn = originalConnections[selectedIndex];
+    resetButton.disabled = !(originalConn && Number.isFinite(originalConn.weight));
 }
 
 async function getArchiveGenomeFiles() {
@@ -287,6 +351,7 @@ function populateConnectionEditor(conn, connectionIndex) {
     valueSlider.min = String(bounds.min);
     valueSlider.max = String(bounds.max);
     valueSlider.value = String(conn.weight);
+    updateResetConnectionButtonState(connectionIndex);
     updateConnectionPickerSelection();
 }
 
@@ -294,6 +359,7 @@ function clearConnectionEditor() {
     LabState.selectedConnectionIndex = null;
     document.getElementById('connection-placeholder').classList.remove('hidden');
     document.getElementById('connection-controls').classList.add('hidden');
+    updateResetConnectionButtonState(null);
     updateConnectionPickerSelection();
 }
 
@@ -304,13 +370,13 @@ function formatNodeLabel(node) {
 }
 
 function getWeightBounds() {
-    if (window.NEAT && window.NEAT.CONFIG) {
-        const min = Number.isFinite(window.NEAT.CONFIG.weightMin) ? window.NEAT.CONFIG.weightMin : -3;
-        const max = Number.isFinite(window.NEAT.CONFIG.weightMax) ? window.NEAT.CONFIG.weightMax : 3;
-        return { min, max };
-    }
+    return { ...LAB_WEIGHT_BOUNDS };
+}
 
-    return { min: -3, max: 3 };
+function enforceLabWeightBounds() {
+    if (!window.NEAT || !window.NEAT.CONFIG) return;
+    window.NEAT.CONFIG.weightMin = LAB_WEIGHT_BOUNDS.min;
+    window.NEAT.CONFIG.weightMax = LAB_WEIGHT_BOUNDS.max;
 }
 
 function nudgeSelectedConnection(delta) {
@@ -432,6 +498,36 @@ function downloadPreviewImage() {
     document.body.appendChild(a);
     a.click();
     a.remove();
+}
+
+function downloadLabGenomeJson() {
+    if (!LabState.genome) return;
+
+    const serialized = serializeGenomeForLab(LabState.genome);
+    if (!serialized) return;
+
+    const payload = {
+        format: 'cppn-activation-lab-genome-v1',
+        savedAt: new Date().toISOString(),
+        label: LabState.loadedGenomeName || `Genome ${LabState.genome.id}`,
+        genome: serialized
+    };
+
+    const genomeId = typeof LabState.genome.id === 'string' && LabState.genome.id
+        ? LabState.genome.id
+        : 'edited';
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `activation-lab-genome-${genomeId}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 0);
 }
 
 function setPreviewStatus(text) {
