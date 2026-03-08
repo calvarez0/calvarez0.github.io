@@ -1,0 +1,463 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #f4f4f0;
+    --fg: #111111;
+    --border: #111111;
+    --accent: #0000ff;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.placeholder {
+    opacity: 0.5;
+    font-style: italic;
+}
+
+.main-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.evolution-panel {
+    border: 1px solid var(--border);
+    padding: 16px;
+}
+
+.controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+}
+
+.controls #evolve-btn {
+    margin-left: auto;
+}
+
+.primary-btn, .secondary-btn {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.primary-btn:hover, .secondary-btn:hover {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.primary-btn:disabled, .secondary-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.primary-btn:disabled:hover, .secondary-btn:disabled:hover {
+    background: transparent;
+    color: var(--fg);
+}
+
+.generation-info, .selection-info {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.image-cell {
+    position: relative;
+    aspect-ratio: 1;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.1s;
+}
+
+.image-cell:hover {
+    border-width: 2px;
+}
+
+.image-cell.selected {
+    border-width: 3px;
+}
+
+.image-cell.viewing {
+    border-style: dashed;
+}
+
+.image-cell canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.image-cell .select-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    background: var(--fg);
+    color: var(--bg);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.image-cell.selected .select-badge {
+    display: flex;
+}
+
+.network-panel {
+    border: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+}
+
+.network-panel h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.inspector-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 6px;
+}
+
+.view-toggle .secondary-btn {
+    padding: 6px 10px;
+}
+
+.view-toggle .secondary-btn.is-active {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.network-info {
+    font-size: 12px;
+    margin-bottom: 12px;
+    min-height: 20px;
+}
+
+.network-info .placeholder {
+    opacity: 0.5;
+    font-style: italic;
+}
+
+.network-visualization {
+    border: 1px solid var(--border);
+    height: 300px;
+    overflow: hidden;
+}
+
+#network-svg {
+    width: 100%;
+    height: 300px;
+    display: block;
+}
+
+#phylogeny-svg {
+    width: 100%;
+    height: 300px;
+    display: block;
+    cursor: grab;
+    user-select: none;
+}
+
+#phylogeny-svg.dragging {
+    cursor: grabbing;
+}
+
+.phylogeny-controls {
+    margin-top: 8px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.phylogeny-controls .secondary-btn {
+    padding: 6px 8px;
+}
+
+.network-stats {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.panel-footer-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.panel-footer-actions .secondary-btn {
+    flex: 1;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 8px 4px;
+    border: 1px solid var(--border);
+}
+
+.stat-item .stat-value {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.stat-item .stat-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+}
+
+.lab-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.lab-header h1 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.lab-network-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lab-controls {
+    margin-bottom: 0;
+    align-items: center;
+}
+
+.file-upload-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.file-upload-btn input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.lab-zoom-controls {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.lab-zoom-controls .secondary-btn {
+    padding: 6px 10px;
+}
+
+.lab-network-stage {
+    border: 1px solid var(--border);
+    width: 100%;
+    aspect-ratio: 5 / 4;
+    min-height: 420px;
+    overflow: hidden;
+}
+
+#editor-network-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: grab;
+    user-select: none;
+}
+
+#editor-network-svg.dragging {
+    cursor: grabbing;
+}
+
+.lab-connection-editor {
+    border: 1px solid var(--border);
+    padding: 10px;
+    min-height: 88px;
+}
+
+.lab-connection-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.connection-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.connection-label {
+    opacity: 0.65;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 10px;
+}
+
+#connection-value-input {
+    width: 112px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--fg);
+    padding: 4px 6px;
+    font-size: 12px;
+}
+
+.connection-slider-row {
+    align-items: center;
+}
+
+#connection-value-slider {
+    width: 180px;
+}
+
+.connection-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.connection-buttons .secondary-btn {
+    padding: 6px 8px;
+    min-width: 58px;
+}
+
+.lab-preview-panel {
+    gap: 12px;
+}
+
+.lab-preview-stage {
+    border: 1px solid var(--border);
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: #f9f9f5;
+}
+
+.lab-preview-stage canvas {
+    width: 100%;
+    height: auto;
+    max-height: 460px;
+    display: block;
+}
+
+.lab-connection-picker {
+    border: 1px solid var(--border);
+    padding: 8px;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    max-height: 170px;
+    overflow-y: auto;
+}
+
+.lab-connection-picker .placeholder {
+    grid-column: 1 / -1;
+    margin: 2px 0;
+}
+
+.connection-chip {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg);
+    font-size: 10px;
+    min-height: 28px;
+    padding: 0;
+    cursor: pointer;
+}
+
+.connection-chip:hover {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.connection-chip.is-active {
+    background: #0000ff;
+    color: #fff;
+    border-color: #0000ff;
+}
+
+@media (max-width: 900px) {
+    .lab-zoom-controls {
+        margin-left: 0;
+    }
+
+    .lab-network-stage {
+        min-height: 300px;
+    }
+}

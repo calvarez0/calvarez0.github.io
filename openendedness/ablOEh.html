@@ -2447,6 +2447,49 @@
             phyloRenderer.setSize(window.innerWidth, window.innerHeight);
         });
 
+        // ========================================
+        // EXPORT/DOWNLOAD DNA
+        // ========================================
+
+        document.getElementById('download-dna').addEventListener('click', () => {
+            if (!selectedGenotype) {
+                alert('Please select a dress first by clicking on one in the main view.');
+                return;
+            }
+
+            // Create exportable JSON of the genotype
+            const exportData = {
+                type: 'ablOEh-dress',
+                version: '1.0',
+                timestamp: new Date().toISOString(),
+                generation: generation,
+                genotype: {
+                    traits: selectedGenotype.traits,
+                    nodes: selectedGenotype.nodes,
+                    connections: selectedGenotype.connections,
+                    nodeCounter: selectedGenotype.nodeCounter,
+                    inputCount: selectedGenotype.inputCount,
+                    outputCount: selectedGenotype.outputCount
+                }
+            };
+
+            // Convert to JSON string
+            const jsonString = JSON.stringify(exportData, null, 2);
+
+            // Create blob and download
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ablOEh-dress-gen${generation}-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            console.log('Downloaded dress DNA');
+        });
+
         // Update the main click handler to track phylogeny
         // Override the original click handler
         window.removeEventListener('click', window.onclick);

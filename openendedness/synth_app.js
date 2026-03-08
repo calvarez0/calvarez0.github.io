@@ -945,6 +945,51 @@ function initializeSettingsPanel() {
     });
 }
 
+// Save/Export selected sound's DNA
+function saveSelected() {
+    if (selectedIndex === null) {
+        alert('Please select a sound first by clicking on one.');
+        return;
+    }
+
+    const individual = population[selectedIndex];
+
+    // Create exportable JSON of the genotype
+    const exportData = {
+        type: 'synthbreeder-sound',
+        version: '1.0',
+        timestamp: new Date().toISOString(),
+        generation: generation,
+        waveformGenotype: {
+            nodes: individual.waveformGenotype.nodes,
+            connections: individual.waveformGenotype.connections,
+            nodeCounter: individual.waveformGenotype.nodeCounter
+        },
+        envelopeGenotype: {
+            nodes: individual.envelopeGenotype.nodes,
+            connections: individual.envelopeGenotype.connections,
+            nodeCounter: individual.envelopeGenotype.nodeCounter
+        },
+        neatConfig: neatConfig
+    };
+
+    // Convert to JSON string
+    const jsonString = JSON.stringify(exportData, null, 2);
+
+    // Create blob and download
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `synthbreeder-sound-gen${generation}-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log('Downloaded sound DNA');
+}
+
 // Initialize on load
 window.addEventListener('load', () => {
     initializeSettingsPanel();

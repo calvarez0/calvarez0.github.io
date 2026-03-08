@@ -5,512 +5,458 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alex Alvarez</title>
     <link rel="icon" type="image/x-icon" href="assets/icon.png">
+    
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+        @font-face {
+            font-family: 'Fraunces';
+            src: url('assets/fraunces_static/Fraunces_72pt_SuperSoft-Bold.ttf') format('truetype');
+            font-weight: 600;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Akzidenz-Grotesk Pro';
+            src: url('assets/akzidenz_static/akzidenzgroteskpro_md.ttf') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+        }
+
         :root {
-            --text-primary: #1d1d1f;
-            --text-secondary: #86868b;
-            --background: #ffffff;
-            --accent: #0071e3;
+            --bg: #f4f4f0;
+            --fg: #111111;
+            --border: #111111;
+            --accent: #0000ff; /* Deep electric blue for subtle links */
         }
  
         .dark {
-            --text-primary: #f5f5f7;
-            --text-secondary: #86868b;
-            --background: #000000;
-            --accent: #0071e3;
+            --bg: #111111;
+            --fg: #e0e0e0;
+            --border: #444444;
+            --accent: #40A2E3;
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--background);
-            color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: var(--bg);
+            color: var(--fg);
+            transition: background-color 0.1s, color 0.1s;
         }
 
-        .section-title {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.015em;
-            line-height: 1.1;
-        }
-
-        @media (max-width: 768px) {
-            .section-title {
-                font-size: 24px;
-            }
-        }
-
-        .nav-link {
-            position: relative;
-            color: var(--text-secondary);
-            transition: color 0.2s ease;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 1px;
-            bottom: -2px;
-            left: 0;
-            background-color: var(--accent);
-            transition: width 0.2s ease;
-        }
-
-        .nav-link:hover {
-            color: var(--accent);
-        }
-
-        .nav-link:hover::after {
-            width: 100%;
-        }
-
-        .card {
-            background-color: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .dark .card {
-            background-color: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .theme-switch {
-            width: 50px;
-            height: 26px;
-            position: relative;
-            display: inline-block;
-        }
-
-        .theme-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--text-secondary);
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: var(--background);
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--accent);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
-
-        a.news-link {
-            color: #0071e3;
-        }
-
-        .light a.news-link {
-            color: #0071e3;
-        }
-
-        .link {
-            text-decoration: none;
-            color: inherit; /* Uses the same color as surrounding text */
-        }
-
-        .link:hover {
-            text-decoration: underline;
-        }
-
-        #current-questions, #previous-questions {
-            text-align: justify;
-            font-family: 'Inter', sans-serif;
-            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-        }
-
-        #current-questions a, #previous-questions a { 
-            text-decoration: none;
-            transition: opacity 0.2s ease;
-        }
-
-        #current-questions a:hover, #previous-questions a:hover { 
-            text-decoration: underline;
-            opacity: 0.8;
-        }
-
-        /* Colors for current questions - dark mode (brighter) */
-        .dark #current-questions a:nth-child(1) { color: #40A2E3; }  /* Bright Blue */
-        .dark #current-questions a:nth-child(2) { color: #FF69B4; }  /* Hot Pink */
-        .dark #current-questions a:nth-child(3) { color: #7276cb; }  /* Lilac */
-        .dark #current-questions a:nth-child(4) { color: #FF8C42; }  /* Dark Orange */
-        .dark #current-questions a:nth-child(5) { color: #6BCB77; }  /* Lime Green */
-        .dark #current-questions a:nth-child(6) { color: #C792EA; }  /* Light Purple */
-        .dark #current-questions a:nth-child(7) { color: #FF6B6B; }  /* Coral Red */
-        .dark #current-questions a:nth-child(8) { color: #4ECDC4; }  /* Turquoise */
-        .dark #current-questions a:nth-child(9) { color: #FF69B4; }  /* Hot Pink */
-        .dark #current-questions a:nth-child(10) { color: #FF7F50; } /* Coral */
-
-        /* Colors for current questions - light mode (muted) */
-        #current-questions a:nth-child(1) { color: #C1366B; }  /* Deep Pink */
-        #current-questions a:nth-child(2) { color: #1C6CA3; }  /* Navy Blue */
-        #current-questions a:nth-child(3) { color: #d8861b; }  /* Burnt Orange */
-        #current-questions a:nth-child(4) { color: #458B4B; }  /* Forest Green */
-        #current-questions a:nth-child(5) { color: #37258e; }  /* Deep Violet */
-        #current-questions a:nth-child(6) { color: #D14343; }  /* Muted Red */
-        #current-questions a:nth-child(7) { color: #8B4BA8; }  /* Deep Purple */
-        #current-questions a:nth-child(8) { color: #2A8A84; }  /* Deep Turquoise */
-        #current-questions a:nth-child(9) { color: #B13E67; }  /* Deep Rose */
-        #current-questions a:nth-child(10) { color: #CC6A4A; } /* Terracotta */
-
-        /* Colors for previous questions - dark mode (brighter) */
-        .dark #previous-questions a:nth-child(1) { color: #7ED6DF; }  /* Fresh Turquoise */
-        .dark #previous-questions a:nth-child(2) { color: #FF7675; }  /* Soft Red */
-        .dark #previous-questions a:nth-child(3) { color: #A8E6CF; }  /* Mint Green */
-        .dark #previous-questions a:nth-child(4) { color: #B0A8E6; }  /* Soft Purple */
-        .dark #previous-questions a:nth-child(5) { color: #FF9F43; }  /* Bright Orange */
-        .dark #previous-questions a:nth-child(6) { color: #74B9FF; }  /* Soft Blue */
-        .dark #previous-questions a:nth-child(7) { color: #E584FF; }  /* Light Purple */
-        .dark #previous-questions a:nth-child(8) { color: #55E6C1; }  /* Bright Mint */
-        .dark #previous-questions a:nth-child(9) { color: #FF8075; }  /* Soft Coral */
-        .dark #previous-questions a:nth-child(10) { color: #B0A8E6; } /* Aqua */
-        .dark #previous-questions a:nth-child(11) { color: #7ED6DF; } /* Fresh Turquoise */
-        .dark #previous-questions a:nth-child(12) { color: #FF7675; } /* Soft Red */
-        .dark #previous-questions a:nth-child(13) { color: #A8E6CF; } /* Mint Green */
-        .dark #previous-questions a:nth-child(14) { color: #B0A8E6; } /* Soft Purple */
-        .dark #previous-questions a:nth-child(15) { color: #FF9F43; } /* Bright Orange */
-        .dark #previous-questions a:nth-child(16) { color: #74B9FF; } /* Soft Blue */
-
-        /* Colors for previous questions - light mode (muted) */
-        #previous-questions a:nth-child(1) { color: #3B9A9C; }  /* Deep Turquoise */
-        #previous-questions a:nth-child(2) { color: #C84444; }  /* Deep Red */
-        #previous-questions a:nth-child(3) { color: #5BAB8B; }  /* Deep Mint */
-        #previous-questions a:nth-child(4) { color: #6C5BA8; }  /* Deep Purple */
-        #previous-questions a:nth-child(5) { color: #CF7122; }  /* Burnt Orange */
-        #previous-questions a:nth-child(6) { color: #4576B3; }  /* Deep Blue */
-        #previous-questions a:nth-child(7) { color: #A252B3; }  /* Deep Purple */
-        #previous-questions a:nth-child(8) { color: #2D9E82; }  /* Deep Green */
-        #previous-questions a:nth-child(9) { color: #B3524A; }  /* Deep Coral */
-        #previous-questions a:nth-child(10) { color: #6C5BA8; } /* Deep Aqua */
-        #previous-questions a:nth-child(11) { color: #3B9A9C; } /* Deep Turquoise */
-        #previous-questions a:nth-child(12) { color: #C84444; } /* Deep Red */
-        #previous-questions a:nth-child(13) { color: #5BAB8B; } /* Deep Mint */
-        #previous-questions a:nth-child(14) { color: #6C5BA8; } /* Deep Purple */
-        #previous-questions a:nth-child(15) { color: #CF7122; } /* Burnt Orange */
-        #previous-questions a:nth-child(16) { color: #4576B3; } /* Deep Blue */
-        /* alexrez.com */
-        /* Mobile menu styles */
-        .mobile-menu {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--background);
-            z-index: 40;
-            padding-top: 5rem;
-        }
-
-        .mobile-menu.active {
-            display: block;
-        }
-
-        .mobile-menu-button {
-            display: none;
+        /* Typography */
+        .font-serif-elegant {
+            font-family: 'EB Garamond', serif;
+            font-weight: 500;
         }
         
-
-        @media (max-width: 768px) {
-            .section-title {
-                text-align: center;
-            }
-            .mobile-menu-button {
-                display: block;
-            }
-
-            .desktop-menu {
-                display: none;
-            }
-
-            .mobile-menu .nav-link {
-                display: block;
-                padding: 1rem;
-                text-align: center;
-                font-size: 1.25rem;
-            }
-
-            .profile-img {
-                float: none !important;
-                margin: 0 auto 1rem auto;
-                display: block;
-            }
-        }
-        html, body {
-            height: 100%;
+        .font-mono-tech {
+            font-family: 'Space Mono', monospace;
         }
 
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+        .font-fraunces {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
         }
 
-        main {
-            flex: 1;
-            padding-bottom: 2rem; /* Add some space before footer */
+        .font-akzidenz {
+            font-family: 'Akzidenz-Grotesk Pro', sans-serif;
+            font-weight: 500;
         }
 
-        footer {
-            margin-top: auto;
-            flex-shrink: 0;
+        /* Brutalist Borders */
+        .brutal-border {
+            border-color: var(--border);
+        }
+
+        /* Index Row Hover Effects */
+        .index-row {
+            transition: background-color 0s, color 0s;
+            cursor: pointer;
+        }
+
+        .index-row:hover {
+            background-color: var(--fg);
+            color: var(--bg);
+        }
+
+        .index-row:hover .subtext {
+            color: var(--bg);
+            opacity: 0.7;
+        }
+
+        .index-row:hover .index-arrow {
+            transform: translateX(4px) rotate(-45deg);
+        }
+
+        .index-arrow {
+            transition: transform 0.2s ease;
+        }
+
+        /* Links */
+        .text-link {
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 4px;
+            transition: color 0.2s;
+        }
+        
+        .text-link:hover {
+            color: var(--accent);
+            text-decoration-color: var(--accent);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+            border-left: 1px solid var(--border);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--fg);
+        }
+
+        /* Theme Toggle */
+        .theme-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--fg);
+            padding: 2px 12px;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .theme-btn:hover {
+            background: var(--fg);
+            color: var(--bg);
         }
     </style>
 </head>
-<body>
-    <nav class="fixed w-full backdrop-blur-md bg-opacity-70 z-50 border-b border-gray-800">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <a href="/index.html" class="text-2xl font-semibold">AA</a>
-                <div class="desktop-menu hidden md:flex space-x-8">
-                    <a href="/index.html" class="nav-link">Home</a>
-                    <a href="https://alexrez.substack.com/" class="nav-link">Writing</a>
-                    <a href="demographic_iq.html" class="nav-link">Demographic IQ</a>
+<body class="antialiased min-h-screen font-akzidenz selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
+
+    <div class="md:flex min-h-screen">
+        
+        <aside class="md:w-5/12 lg:w-4/12 md:fixed md:h-screen border-b md:border-b-0 md:border-r brutal-border flex flex-col justify-between" style="background-color: var(--bg);">
+            
+            <div class="p-6 md:p-10 flex-grow overflow-y-auto">
+                <div class="flex justify-between items-start mb-6 md:hidden">
+                    <button id="theme-toggle-mobile-top" class="theme-btn font-mono-tech">Invert</button>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <label class="theme-switch">
-                        <input type="checkbox" id="theme-toggle">
-                        <span class="slider"></span>
-                    </label>
-                    <button class="mobile-menu-button md:hidden text-2xl">
-                        <i class="fas fa-bars"></i>
-                    </button>
+
+                <header class="mb-8">
+                    <div class="flex justify-between items-start mb-3">
+                        <div></div>
+                        <button id="theme-toggle" class="theme-btn font-mono-tech hidden md:block">Invert</button>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <img src="assets/profile.jpg" alt="Alex Alvarez" class="w-36 md:w-48 h-auto contrast-125 flex-shrink-0" onerror="this.style.display='none'">
+                        <h1 class="leading-none tracking-tight font-akzidenz" style="font-size: 5.5rem; line-height: 1;">Alex<br>Alvarez</h1>
+                    </div>
+                </header>
+
+                <div class="space-y-4 text-xl leading-relaxed">
+                    <!-- <p>I'm a pre-doc researcher at Harvard Medical School. As an undergrad I was part of the <a href="https://yschoe.github.io/" class="text-link" target="_blank" rel="noopener noreferrer">Brain Networks Lab</a>, <a href="https://sites.google.com/tamu.edu/yamauchi-cognitive-science-lab/research?authuser=0" class="text-link" target="_blank" rel="noopener noreferrer">Cognitive Science Lab</a>, and <a href="https://artsci.tamu.edu/psychological-brain-sciences/contact/profiles/carlos-bolanos.html" class="text-link" target="_blank" rel="noopener noreferrer">Addiction Nueroscience Lab</a> at Texas A&M University.</p> -->
+
+                    <p>
+                        I'm a pre-doctoral researcher studying principles of learning and intelligence across natural and artificial systems. I'm particularly interested in open-endedness, meta-learning, and Human-AI interaction. Previously, I founded two online companies that were later acquired.
+                    </p>
+
+                    <p>
+                        I came to the U.S. when I was eight years old as a <a href="https://en.wikipedia.org/wiki/Wet_feet,_dry_feet_policy" class="text-link" target="_blank" rel="noopener noreferrer">political refugee from Cuba</a>. One day I'd like to provide Cuban students with the same education and resources that I had access to here.
+                    </p>
+                </div>
+
+                <div class="mt-8 font-mono-tech text-xs uppercase tracking-widest space-y-3">
+                    <h2 class="text-sm font-bold border-b brutal-border pb-2 mb-3">Updates</h2>
+
+                    <div class="flex justify-between gap-4">
+                        <a href="https://openreview.net/forum?id=cjo2oadaRz&referrer=%5Bthe%20profile%20of%20Alex%20Alvarez%5D(%2Fprofile%3Fid%3D~Alex_Alvarez1)" class="hover:underline" target="_blank">
+                            Workshop Paper Accepted @ NeurIPS 2025
+                        </a>
+                        <span class="opacity-60">Dec '25</span>
+                    </div>
+
+                    <div class="flex justify-between gap-4">
+                        <a href="https://medium.com/@0xalexrez/your-mind-is-a-storm-856e57553070" class="hover:underline" target="_blank">
+                            Essay on Fernando Pessoa & Consciousness
+                        </a>
+                        <span class="opacity-60">Jan '25</span>
+                    </div>
+
+                    <div class="flex justify-between gap-4">
+                        <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" class="hover:underline" target="_blank">
+                            Feature story for Demographic IQ
+                        </a>
+                        <span class="opacity-60">Oct '24</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </nav>
 
-    <!-- Mobile Menu -->
-    <div class="mobile-menu">
-        <div class="space-y-4">
-            <a href="/index.html" class="nav-link">Home</a>
-            <a href="https://alexrez.substack.com/" class="nav-link">Writing</a>
-            <a href="demographic_iq.html" class="nav-link">Demographic IQ</a>
-        </div>
+            <div class="p-6 md:p-10 border-t brutal-border font-mono-tech text-sm flex flex-col gap-2">
+                caalvarez [at] mgh [dot] harvard [dot] edu
+                <div class="flex gap-4 mt-2">
+                    <a href="https://twitter.com/0xalexrez" class="hover:underline" target="_blank" rel="noopener noreferrer">X</a>
+                    <a href="https://github.com/calvarez0" class="hover:underline" target="_blank" rel="noopener noreferrer">Github</a>
+                    <a href="https://scholar.google.com/citations?user=FqABySkAAAAJ&hl=en" class="hover:underline" target="_blank" rel="noopener noreferrer">Scholar</a>
+                    <a href="https://www.linkedin.com/in/calexalvarez/" class="hover:underline" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="md:w-7/12 lg:w-8/12 md:ml-auto">
+
+            <section class="border-b brutal-border">
+                <div class="p-6 md:p-10 bg-black text-white dark:bg-white dark:text-black">
+                    <h2 class="font-mono-tech text-sm uppercase tracking-widest mb-2">Research</h2>
+                </div>
+
+                <div class="flex flex-col">
+                    <!-- Interference/Subgoals Paper -->
+                    <div class="index-row border-b brutal-border p-6 md:p-10">
+                        <div class="md:flex md:gap-8 items-start">
+                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">Interference & Subgoals in Neural Networks</h3>
+                                <p class="text-base mb-3 opacity-80">Coming soon</p>
+                                <p class="text-base mb-4">TLDR: Placeholder description for interference and subgoals research.</p>
+                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                    <a href="#" class="hover:underline">[Paper]</a>
+                                    <a href="#" class="hover:underline">[Code]</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Syne -->
+                    <div class="index-row border-b brutal-border p-6 md:p-10">
+                        <div class="md:flex md:gap-8 items-start">
+                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">SYNE</h3>
+                                <p class="text-base mb-3 opacity-80">Coming soon</p>
+                                <p class="text-base mb-4">TLDR: Placeholder description for Syne project.</p>
+                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                    <a href="#" class="hover:underline">[Paper]</a>
+                                    <a href="#" class="hover:underline">[Code]</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Side Quest -->
+                    <div class="index-row border-b brutal-border p-6 md:p-10">
+                        <div class="md:flex md:gap-8 items-start">
+                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">Side Quest</h3>
+                                <p class="text-base mb-3 opacity-80">Coming soon</p>
+                                <p class="text-base mb-4">TLDR: Placeholder description for Side Quest.</p>
+                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                    <a href="#" class="hover:underline">[Paper]</a>
+                                    <a href="#" class="hover:underline">[Code]</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- You-Axis -->
+                    <div class="index-row border-b brutal-border p-6 md:p-10">
+                        <div class="md:flex md:gap-8 items-start">
+                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">You-Axis</h3>
+                                <p class="text-base mb-3 opacity-80">Coming soon</p>
+                                <p class="text-base mb-4">TLDR: Placeholder description for You-Axis.</p>
+                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                    <a href="#" class="hover:underline">[Paper]</a>
+                                    <a href="#" class="hover:underline">[Code]</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Saliency -->
+                    <a href="lambert.html" class="index-row border-b brutal-border p-6 md:p-10 block">
+                        <div class="md:flex md:gap-8 items-start">
+                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-48 flex gap-2">
+                                    <img src="assets/wolf/before.jpeg" alt="Before saliency" class="w-1/2 h-full object-cover">
+                                    <img src="assets/wolf/After.png" alt="After saliency" class="w-1/2 h-full object-cover">
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">Saliency Thresholds in Neural Code and its Relation to the Power-Law, Gaussian, and Lambert W Function</h3>
+                                <p class="text-base mb-3 opacity-80">NeurIPS 2025 Workshop on Symmetry and Geometry in Neural Representations</p>
+                                <p class="text-base mb-4">TLDR: How does the brain calculate visual saliency?</p>
+                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                    <span class="hover:underline">[Paper]</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- AblOEh -->
+                    <div class="index-row border-b brutal-border p-6 md:p-10">
+                        <div class="md:flex md:gap-8 items-start">
+                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">Evolutionary Fashion</h3>
+                                <p class="text-base mb-3 opacity-80">Research Project</p>
+                                <p class="text-base mb-4">TLDR: Can we evolve fashion through open-ended algorithms?</p>
+                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                    <a href="openendedness/ablOEh.html" class="hover:underline">[Interactive Demo]</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Synthbreeder -->
+                    <div class="index-row border-b brutal-border p-6 md:p-10">
+                        <div class="md:flex md:gap-8 items-start">
+                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">Synthbreeder</h3>
+                                <p class="text-base mb-3 opacity-80">Coming soon</p>
+                                <p class="text-base mb-4">TLDR: Placeholder description for Synthbreeder.</p>
+                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                    <a href="#" class="hover:underline">[Paper]</a>
+                                    <a href="#" class="hover:underline">[Code]</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Demographic IQ -->
+                    <div class="index-row border-b brutal-border p-6 md:p-10">
+                        <div class="md:flex md:gap-8 items-start">
+                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">Demographic Intelligence Quotient</h3>
+                                <p class="text-base mb-3 opacity-80">Coming soon</p>
+                                <p class="text-base mb-4">TLDR: Placeholder description for Demographic IQ research.</p>
+                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                    <a href="#" class="hover:underline">[Paper]</a>
+                                    <a href="#" class="hover:underline">[Code]</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="p-6 md:p-10 bg-black text-white dark:bg-white dark:text-black">
+                    <h2 class="font-mono-tech text-sm uppercase tracking-widest mb-2">Previously</h2>
+                </div>
+
+                <div class="flex flex-col font-mono-tech text-sm">
+
+                    <a href="assets/Spectral Bias.pdf" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8">
+                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
+                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">RESEARCH</div>
+                            <div class="col-span-10">
+                                <h3 class="font-serif-elegant text-2xl mb-1">Spectral Bias & Saddle Points</h3>
+                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">Is spectral bias correlated to saddle point drops in the loss landscape?</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="assets/Continuum of Algorithms.pdf" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8">
+                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
+                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">PAPER</div>
+                            <div class="col-span-10">
+                                <h3 class="font-serif-elegant text-2xl mb-1">Continuum of Algorithms</h3>
+                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">How does the brain compute physical reasoning?</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="https://chromewebstore.google.com/detail/swati-ai" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
+                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
+                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">TOOL</div>
+                            <div class="col-span-10">
+                                <h3 class="font-serif-elegant text-2xl mb-1">Swati AI</h3>
+                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">Why are research papers so hard to read?</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="connectome_visualization.html" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8">
+                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
+                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">VISUAL</div>
+                            <div class="col-span-10">
+                                <h3 class="font-serif-elegant text-2xl mb-1">C. Elegans Connectome</h3>
+                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">What does the connectome look like on a 3D plane?</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="https://zyntora.com" class="index-row block p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
+                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
+                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">STARTUP</div>
+                            <div class="col-span-10">
+                                <h3 class="font-serif-elegant text-2xl mb-1">Zyntora</h3>
+                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">Can we make a virtual real estate social media app?</p>
+                            </div>
+                        </div>
+                    </a>
+
+                </div>
+            </section>
+            
+            <footer class="p-6 md:p-10 font-fraunces text-xs uppercase opacity-50 border-t brutal-border">
+                I never saved anything for the swim back.
+            </footer>
+        </main>
     </div>
 
-    <main class="pt-24">
-        <!-- Hero Section -->
-        <section class="py-4 px-6">
-            <div class="max-w-6xl mx-auto">
-                <div class="space-y-6">
-                    <!-- <h1 class="section-title">Alex Alvarez</h1> -->
-                    <img src="assets/profile.jpg" alt="Alex Alvarez" class="profile-img float-left w-56 mr-4 mb-2 rounded-lg shadow-lg">
-                    <!-- <p class="text-xl text-secondary">Undergrad @ Texas A&M University
-                        <br> -->
-
-                    
-                    <!-- </p> -->
-                    <div class="mt-4 space-y-3 text-secondary">
-                        <h2 class="section-title"> Alex Alvarez </h2>
-                        <p class="text-lg">I'm an undergrad researcher at the <a href="https://yschoe.github.io/" target="_blank" class="link">Brain Networks Lab</a>, <a href="https://sites.google.com/tamu.edu/yamauchi-cognitive-science-lab/research?authuser=0" target="_blank" class="link">Cognitive Science Lab</a> and <a href="https://artsci.tamu.edu/psychological-brain-sciences/contact/profiles/carlos-bolanos.html" target="_blank" class="link">Bolaños Lab</a> at Texas A&M University. 
-                            In the past I built and sold some companies but at the moment I'm focusing on AI research. 
-                            I'm especially interested in foundational principles of intelligence and learning apparent in AI and neuroscience.
-                        </p>
-                        <p class="text-lg">
-                            I came to America when I was eight years old as a <a href="https://en.wikipedia.org/wiki/Wet_feet,_dry_feet_policy" target="_blank" class="link">political refugee from Cuba</a>. 
-                            I'd like to one day provide Cuban students with the same education and resources that I had access to in America.
-                            I'm always looking to chat with people who think differently  <b>caalvarez [at] mgh [dot] harvard [dot] edu</b>
-                        </p>
-                        <!-- <p class="text-lg">I'm always looking to chat with people who think differently  <b>caalvarez [at] mgh [dot] harvard [dot] edu</b></p> -->
-                    </div>
-                    <p class="text-lg"><b>News</b></p>
-                        <a href="https://openreview.net/forum?id=cjo2oadaRz&referrer=%5Bthe%20profile%20of%20Alex%20Alvarez%5D(%2Fprofile%3Fid%3D~Alex_Alvarez1)" target="_blank" class="news-link">New paper accepted into the NeurIPS Workshop on Symmetry and Geometry in Neural Representations!</a> <br>
-                        <a href="https://medium.com/@0xalexrez/your-mind-is-a-storm-856e57553070" target="_blank" class="news-link">Essay on Fernando Pessoa and consciousness.</a> <br>
-                        <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" target="_blank" class="news-link">My app (and BNL) on the news!</a>
-                    <div class="flex space-x-6 text-2xl">
-                        <a href="https://twitter.com/0xalexrez" target="_blank" class="text-secondary hover:text-accent transition-colors"><i class="fab fa-twitter"></i></a>
-                        <a href="https://linkedin.com/in/calexalvarez" target="_blank" class="text-secondary hover:text-accent transition-colors"><i class="fab fa-linkedin"></i></a>
-                        <a href="https://github.com/calvarez0" target="_blank" class="text-secondary hover:text-accent transition-colors"><i class="fab fa-github"></i></a>
-                        <a href="https://scholar.google.com/citations?user=FqABySkAAAAJ&hl=en" target="_blank" class="text-secondary hover:text-accent transition-colors"><i class="fas fa-graduation-cap"></i></a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Research Interests Section
-        <section class="py-4 px-6">
-            <div class="max-w-6xl mx-auto">
-                <p class="text-xl"><b>Research Interests:</b></p>
-                <div class="grid md:grid-cols-2 gap-4 mt-2">
-                    <div>
-                        <ul class="text-lg text-secondary">
-                            <li class="flex items-start">
-                                <span class="text-primary mr-2">•</span>
-                                <span>Models of Cognition</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-primary mr-2">•</span>
-                                <span>Computational Neuroscience</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-primary mr-2">•</span>
-                                <span>Meta-learning</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-primary mr-2">•</span>
-                                <span>Mechanistic Interpretation</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div>
-                        <ul class="text-lg text-secondary">
-                            <li class="flex items-start">
-                                <span class="text-primary mr-2">•</span>
-                                <span>Lo-fi Whole Brain Emulation</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-primary mr-2">•</span>
-                                <span>Neuroevolution and Evolutionary Computation</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-primary mr-2">•</span>
-                                <span>Synthetic Connectomics</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-primary mr-2">•</span>
-                                <span>AI Safety</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section> -->
-                
-        <!-- Projects Section -->
-        <section class="py-4 px-6">
-            <div class="max-w-6xl mx-auto">
-                
-                <p class="text-xl"><b>Currently on my mind:</b></p>
-                <p id="current-questions" class="text-lg">
-                    <a href="https://www.nature.com/articles/nature03687" target="_blank">Do LLMs exhibit the "Hally Berry Neuron"?</a>
-                    <a href="https://arxiv.org/pdf/2502.06034" target="_blank">How do neural networks use waves to represent information?</a>
-                    <a href="https://arxiv.org/pdf/2406.04268" target="_blank">Will open-endedness play a significant role in the future of intelligence?</a>
-                    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10028332/" target="_blank">Is addiction fundamental to all intelligent agents?</a>
-                    <a href="https://arxiv.org/abs/2505.11581" target="_blank">Can we train ML models in picbreeder-like ways?</a>
-                    <a href="https://arxiv.org/pdf/2312.06681" target="_blank">How do foundation models represent their opinion?</a>
-                    <a href="https://youtu.be/qie5VITX6eQ?si=G4u_f8Ebubic9xGH" target="_blank">Research through the eyes of design (designing information).</a>
-                    <a href="https://arxiv.org/pdf/2502.00873" target="_blank">Language models reveal the geometry of information!</a>
-                </p>
-
-                <br>
-        
-                <p class="text-xl"><b>Previously on my mind:</b></p>
-                <p><em class="text-secondary">(Projects, research, apps, and sundries)</em></p>
-                <p id="previous-questions" class="text-lg">
-                    <a href="https://openreview.net/pdf?id=cjo2oadaRz" target="_blank">How does the brain calculate visual saliency?</a>
-                    <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" target="_blank">Why do we sometimes vote against our economic self-interest?</a>
-                    <a href="https://docs.google.com/presentation/d/1rMFdMBdVgh6TGRvB0lpw7iUoIaQniZWBIVjqAiVCr9o/edit?usp=sharing" target="_blank">How did eyes evolve?</a>
-                    <a href="openendedness/ablOEh.html" target="_blank">Can we evolve fashion?</a>
-                    <a href="https://medium.com/@0xalexrez/your-mind-is-a-storm-856e57553070" target="_blank">Are LLMs conscious?</a>
-                    <a href="https://zyntora.com" target="_blank">Can we make a virtual real estate social media app?</a>
-                    <a href="assets/Spectral Bias.pdf" target="_blank">Is spectral bias correlated to saddle point drops in the loss landscape?</a>
-                    <a href="openendedness/synthbreeder.html" target="_blank">Can we evolve sounds?</a>
-                    <a href="boids.html" target="_blank">How does delay affect complex systems?</a>
-                    <a href="assets/Continumm of Algorithms.pdf" target="_blank">How does the brain compute physical reasoning?</a>
-                    <a href="https://chromewebstore.google.com/detail/swati-ai" target="_blank">Why are research papers so hard to read?</a>
-                    <a href="assets/ticbot.pdf" target="_blank">Can AI emulate professors?</a>
-                    <a href="distribution_visualization.html" target="_blank">Why can't I find a website to interactively visualize distribution parameters?</a>
-                    <a href="evolve-images.html" target="_blank">How can an algorithm evolve?</a>
-                    <a href="https://project-3-team-4c-niwj.vercel.app/" target="_blank">How do you make a SaaS product for fast food chains?</a>
-                    <a href="connectome_visualization.html" target="_blank">What does the C. Ellegans connectome look like on a 3d plane?</a>
-                </p>
-            </div>
-        </section>
-
-        
-    </main>
-
-    
-<footer class="py-4 px-6 border-t border-gray-800">
-            <div class="max-w-6xl mx-auto text-center text-secondary">
-                <p>I never saved anything for the swim back.</p>
-            </div>
-        </footer>
     <script>
-        // Mobile Menu Toggle
-        const mobileMenuButton = document.querySelector('.mobile-menu-button');
-        const mobileMenu = document.querySelector('.mobile-menu');
-        let isMenuOpen = false;
-    
-        mobileMenuButton.addEventListener('click', () => {
-            isMenuOpen = !isMenuOpen;
-            mobileMenu.classList.toggle('active');
-            mobileMenuButton.innerHTML = isMenuOpen ? 
-                '<i class="fas fa-times"></i>' : 
-                '<i class="fas fa-bars"></i>';
-        });
-    
-        // Close mobile menu when clicking a link
-        document.querySelectorAll('.mobile-menu .nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.remove('active');
-                isMenuOpen = false;
-                mobileMenuButton.innerHTML = '<i class="fas fa-bars"></i>';
-            });
-        });
-    
-        // Theme Toggle
-        const themeToggle = document.getElementById('theme-toggle');
+        // Theme Toggle Logic
+        const toggles = document.querySelectorAll('#theme-toggle, #theme-toggle-mobile-top');
         const body = document.body;
-    
-        // Check for saved theme preference, default to light if none saved
+
         const savedTheme = localStorage.getItem('theme') || 'light';
-        body.classList.toggle('dark', savedTheme === 'dark');
-        themeToggle.checked = savedTheme === 'light';
-    
-        themeToggle.addEventListener('change', () => {
-            body.classList.toggle('dark');
-            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
-        });
-    
-        // Smooth Scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+        if (savedTheme === 'dark') body.classList.add('dark');
+
+        toggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                body.classList.toggle('dark');
+                localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
             });
         });
     </script>
