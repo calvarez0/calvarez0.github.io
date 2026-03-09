@@ -369,7 +369,7 @@ class NetworkVisualizer {
         const strokeWidth = this.getConnectionStrokeWidth(conn.weight);
         const hitWidth = this.getConnectionHitWidth(conn.weight);
 
-        line.setAttribute('stroke', (isSelected || isHovered) ? '#0000ff' : '#111');
+        line.style.stroke = (isSelected || isHovered) ? 'var(--accent)' : 'var(--fg)';
         line.setAttribute('stroke-width', strokeWidth.toFixed(2));
         line.setAttribute('stroke-opacity', isSelected ? '0.95' : (isHovered ? '0.78' : (isPositive ? '0.62' : '0.28')));
 
@@ -591,8 +591,8 @@ class NetworkVisualizer {
             circle.setAttribute('cx', pos.x);
             circle.setAttribute('cy', pos.y);
             circle.setAttribute('r', this.nodeRadius);
-            circle.setAttribute('fill', node.type === 'hidden' ? '#111' : '#fff');
-            circle.setAttribute('stroke', '#111');
+            circle.style.fill = node.type === 'hidden' ? 'var(--fg)' : 'var(--bg)';
+            circle.style.stroke = 'var(--fg)';
             circle.setAttribute('stroke-width', 1);
             nodesGroup.appendChild(circle);
 
@@ -600,7 +600,7 @@ class NetworkVisualizer {
             label.setAttribute('x', pos.x);
             label.setAttribute('y', pos.y + 4);
             label.setAttribute('text-anchor', 'middle');
-            label.setAttribute('fill', node.type === 'hidden' ? '#fff' : '#111');
+            label.style.fill = node.type === 'hidden' ? 'var(--bg)' : 'var(--fg)';
             label.setAttribute('font-size', '10px');
 
             if (node.label) {
@@ -616,7 +616,7 @@ class NetworkVisualizer {
                 actLabel.setAttribute('x', pos.x);
                 actLabel.setAttribute('y', pos.y + this.nodeRadius + 12);
                 actLabel.setAttribute('text-anchor', 'middle');
-                actLabel.setAttribute('fill', '#111');
+                actLabel.style.fill = 'var(--fg)';
                 actLabel.setAttribute('font-size', '8px');
                 actLabel.textContent = node.activation;
                 nodesGroup.appendChild(actLabel);
@@ -631,12 +631,12 @@ class NetworkVisualizer {
             tooltipGroup.setAttribute('pointer-events', 'none');
 
             const tooltipRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            tooltipRect.setAttribute('fill', '#fff');
-            tooltipRect.setAttribute('stroke', '#111');
+            tooltipRect.style.fill = 'var(--bg)';
+            tooltipRect.style.stroke = 'var(--fg)';
             tooltipRect.setAttribute('stroke-width', '1');
 
             const tooltipText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            tooltipText.setAttribute('fill', '#111');
+            tooltipText.style.fill = 'var(--fg)';
             tooltipText.setAttribute('font-size', '10px');
             tooltipText.setAttribute('text-anchor', 'start');
 
@@ -981,7 +981,7 @@ class PhylogenyVisualizer {
             const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             label.setAttribute('x', 8);
             label.setAttribute('y', sample.y + 4);
-            label.setAttribute('fill', '#111');
+            label.style.fill = 'var(--fg)';
             label.setAttribute('font-size', '10px');
             label.textContent = `Gen ${generation}`;
             generationLabelGroup.appendChild(label);
@@ -997,7 +997,7 @@ class PhylogenyVisualizer {
             line.setAttribute('y1', fromPos.y + nodeRadius);
             line.setAttribute('x2', toPos.x);
             line.setAttribute('y2', toPos.y - nodeRadius);
-            line.setAttribute('stroke', '#111');
+            line.style.stroke = 'var(--fg)';
             line.setAttribute('stroke-width', '1.25');
             line.setAttribute('stroke-opacity', '0.35');
             edgeGroup.appendChild(line);
@@ -1029,7 +1029,7 @@ class PhylogenyVisualizer {
             frame.setAttribute('width', thumbSize);
             frame.setAttribute('height', thumbSize);
             frame.setAttribute('fill', 'none');
-            frame.setAttribute('stroke', isCurrent ? '#0000ff' : '#111');
+            frame.style.stroke = isCurrent ? 'var(--accent)' : 'var(--fg)';
             frame.setAttribute('stroke-width', isCurrent ? '2.5' : (isRoot ? '2' : '1'));
 
             const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
@@ -1044,7 +1044,7 @@ class PhylogenyVisualizer {
             idText.setAttribute('y', pos.y + nodeRadius + 11);
             idText.setAttribute('text-anchor', 'middle');
             idText.setAttribute('font-size', '8px');
-            idText.setAttribute('fill', '#111');
+            idText.style.fill = 'var(--fg)';
             idText.textContent = `G${nodeRecord.generation} ${shortId}`;
             nodeGroup.appendChild(idText);
         }

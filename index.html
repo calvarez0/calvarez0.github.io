@@ -143,7 +143,7 @@
 
     <div class="md:flex min-h-screen">
         
-        <aside class="md:w-5/12 lg:w-4/12 md:fixed md:h-screen border-b md:border-b-0 md:border-r brutal-border flex flex-col justify-between" style="background-color: var(--bg);">
+        <aside class="md:w-5/12 lg:w-4/12 md:fixed md:h-screen border-b md:border-b-0 md:border-r brutal-border flex flex-col justify-between" style="background-color: var(--bg);" target="_blank" rel="noopener noreferrer">
             
             <div class="p-6 md:p-10 flex-grow overflow-y-auto">
                 <div class="flex justify-between items-start mb-6 md:hidden">
@@ -231,8 +231,8 @@
                                 <p class="text-base mb-3 opacity-80">Coming soon</p>
                                 <p class="text-base mb-4">TLDR: Placeholder description for interference and subgoals research.</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <a href="#" class="hover:underline">[Paper]</a>
-                                    <a href="#" class="hover:underline">[Code]</a>
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
                                 </div>
                             </div>
                         </div>
@@ -251,66 +251,88 @@
                                 <p class="text-base mb-3 opacity-80">Coming soon</p>
                                 <p class="text-base mb-4">TLDR: Placeholder description for Syne project.</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <a href="#" class="hover:underline">[Paper]</a>
-                                    <a href="#" class="hover:underline">[Code]</a>
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
                                 </div>
                             </div>
                         </div>
                     </div> -->
 
-                    <!-- Side Quest -->
-                    <div class="index-row border-b brutal-border p-6 md:p-10">
+                    <!-- Picbreeder -->
+                    <a href="/openendedness/picbreeder/index.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
                         <div class="md:flex md:gap-8 items-start">
                             <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                                <div class="w-full h-48 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
+                                    <img src="assets/picbreeder/alien.png" alt="Picbreeder alien output" class="w-full h-full object-cover">
+                                    <img src="assets/picbreeder/abstract.png" alt="Picbreeder abstract output" class="w-full h-full object-cover">
+                                    <img src="assets/picbreeder/clover.png" alt="Picbreeder clover output" class="w-full h-full object-cover">
+                                    <img src="assets/picbreeder/owl.png" alt="Picbreeder owl output" class="w-full h-full object-cover">
+                                    <img src="assets/picbreeder/torso.png" alt="Picbreeder torso output" class="w-full h-full object-cover">
+                                    <img src="assets/picbreeder/two%20people.png" alt="Picbreeder two people output" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">Picbreeder</h3>
+                                <p class="text-base mb-3 opacity-80">Interactive Demo</p>
+                                <p class="text-base mb-4">My take on Picbreeder!</p>
+                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                    <span class="hover:underline">[Open]</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Side Quest -->
+                    <a href="https://www.sideqoest.com/" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
+                        <div class="md:flex md:gap-8 items-start">
+                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-48 overflow-hidden">
+                                    <img src="assets/platforms/side%20quest.gif" alt="Side Quest preview" class="w-full h-full object-cover">
                                 </div>
                             </div>
                             <div class="flex-grow">
                                 <h3 class="font-akzidenz text-2xl mb-2">Side Quest</h3>
                                 <p class="text-base mb-3 opacity-80">Coming soon</p>
-                                <p class="text-base mb-4">TLDR: Placeholder description for Side Quest.</p>
+                                <p class="text-base mb-4">Picbreeder + LLMs.</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <a href="#" class="hover:underline">[Paper]</a>
-                                    <a href="#" class="hover:underline">[Code]</a>
+                                    <span class="hover:underline">[Open]</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- You-Axis -->
                     <div class="index-row border-b brutal-border p-6 md:p-10">
                         <div class="md:flex md:gap-8 items-start">
                             <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                                <div class="w-full h-48 overflow-hidden">
+                                    <img src="assets/you-axis.png" alt="You-Axis preview" class="w-full h-full object-cover">
                                 </div>
                             </div>
                             <div class="flex-grow">
                                 <h3 class="font-akzidenz text-2xl mb-2">You-Axis</h3>
                                 <p class="text-base mb-3 opacity-80">Coming soon</p>
-                                <p class="text-base mb-4">TLDR: Placeholder description for You-Axis.</p>
+                                <p class="text-base mb-4">Using Contrastive Activation Addition, we isolate a direction in space that invokes the model's subjective opinions. Shifting the embeddings along this axis in latent space can reveal the model's ideological bias. When we force the model to give us an opinion, where does it draw its ethical model from? What does the LLM's moral compass look like?</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <a href="#" class="hover:underline">[Paper]</a>
-                                    <a href="#" class="hover:underline">[Code]</a>
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Visual Saliency -->
-                    <a href="lambert.html" class="index-row border-b brutal-border p-6 md:p-10 block">
+                    <a href="lambert.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
                         <div class="md:flex md:gap-8 items-start">
                             <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 flex gap-2">
-                                    <img src="assets/wolf/before.jpeg" alt="Before saliency" class="w-1/2 h-full object-cover">
-                                    <img src="assets/wolf/After.png" alt="After saliency" class="w-1/2 h-full object-cover">
+                                <div class="w-full h-48 overflow-hidden">
+                                    <img src="assets/lambert/saliency_process_preview.gif" alt="Saliency process preview" class="w-full h-full object-cover">
                                 </div>
                             </div>
                             <div class="flex-grow">
                                 <h3 class="font-akzidenz text-2xl mb-2">Saliency Thresholds in Neural Code and its Relation to the Power-Law, Gaussian, and Lambert W Function</h3>
                                 <p class="text-base mb-3 opacity-80">NeurIPS 2025 Workshop on Symmetry and Geometry in Neural Representations</p>
-                                <p class="text-base mb-4">TLDR: How does the brain calculate visual saliency?</p>
+                                <p class="text-base mb-4">How does the brain calculate visual saliency?</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
                                     <span class="hover:underline">[Paper]</span>
                                 </div>
@@ -319,11 +341,11 @@
                     </a>
 
                     <!-- AblOEh -->
-                    <div class="index-row border-b brutal-border p-6 md:p-10">
+                    <a href="openendedness/ablOEh.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
                         <div class="md:flex md:gap-8 items-start">
                             <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                                <div class="w-full h-48 overflow-hidden">
+                                    <img src="assets/platforms/abloeh.gif" alt="AblOEh preview" class="w-full h-full object-cover">
                                 </div>
                             </div>
                             <div class="flex-grow">
@@ -331,34 +353,52 @@
                                 <p class="text-base mb-3 opacity-80">Research Project</p>
                                 <p class="text-base mb-4">TLDR: Can we evolve fashion through open-ended algorithms?</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <a href="openendedness/ablOEh.html" class="hover:underline">[Interactive Demo]</a>
+                                    <span class="hover:underline">[Interactive Demo]</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Synthbreeder -->
-                    <div class="index-row border-b brutal-border p-6 md:p-10">
+                    <a href="openendedness/synthbreeder.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
                         <div class="md:flex md:gap-8 items-start">
                             <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                                <div class="w-full h-48 overflow-hidden">
+                                    <img src="assets/platforms/synthbreeder.gif" alt="Synthbreeder preview" class="w-full h-full object-cover">
                                 </div>
                             </div>
                             <div class="flex-grow">
                                 <h3 class="font-akzidenz text-2xl mb-2">Synthbreeder</h3>
                                 <p class="text-base mb-3 opacity-80">Coming soon</p>
-                                <p class="text-base mb-4">TLDR: Placeholder description for Synthbreeder.</p>
+                                <p class="text-base mb-4">Breed synthesizer sounds.</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <a href="#" class="hover:underline">[Paper]</a>
-                                    <a href="#" class="hover:underline">[Code]</a>
+                                    <span class="hover:underline">[Open]</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
+
+                    <!-- Boids -->
+                    <a href="boids.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
+                        <div class="md:flex md:gap-8 items-start">
+                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-48 overflow-hidden">
+                                    <img src="assets/boids.gif" alt="Boids dynamic perception delay preview" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">BOIDS + Dynamic Perception Delay</h3>
+                                <p class="text-base mb-3 opacity-80">Interactive Demo</p>
+                                <p class="text-base mb-4">How does collective behavior emerge from simple local rules?</p>
+                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                    <span class="hover:underline">[Interactive Demo]</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
 
                     <!-- Demographic IQ -->
-                    <div class="index-row border-b brutal-border p-6 md:p-10">
+                    <a href="demographic_iq.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
                         <div class="md:flex md:gap-8 items-start">
                             <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
                                 <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
@@ -370,12 +410,11 @@
                                 <p class="text-base mb-3 opacity-80">Coming soon</p>
                                 <p class="text-base mb-4">TLDR: Placeholder description for Demographic IQ research.</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <a href="#" class="hover:underline">[Paper]</a>
-                                    <a href="#" class="hover:underline">[Code]</a>
+                                    <span class="hover:underline">[Open]</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </section>
 
@@ -386,7 +425,7 @@
 
                 <div class="flex flex-col font-mono-tech text-sm">
 
-                    <a href="assets/Spectral Bias.pdf" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8">
+                    <a href="assets/Spectral Bias.pdf" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
                         <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
                             <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">RESEARCH</div>
                             <div class="col-span-10">
@@ -396,7 +435,7 @@
                         </div>
                     </a>
 
-                    <a href="assets/Continuum of Algorithms.pdf" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8">
+                    <a href="assets/Continuum of Algorithms.pdf" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
                         <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
                             <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">PAPER</div>
                             <div class="col-span-10">
@@ -406,17 +445,7 @@
                         </div>
                     </a>
 
-                    <a href="https://chromewebstore.google.com/detail/swati-ai" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
-                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
-                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">TOOL</div>
-                            <div class="col-span-10">
-                                <h3 class="font-serif-elegant text-2xl mb-1">Swati AI</h3>
-                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">Why are research papers so hard to read?</p>
-                            </div>
-                        </div>
-                    </a>
-
-                    <a href="connectome_visualization.html" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8">
+                    <a href="connectome_visualization.html" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
                         <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
                             <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">VISUAL</div>
                             <div class="col-span-10">

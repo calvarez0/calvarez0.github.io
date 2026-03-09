@@ -9,8 +9,11 @@
 <body class="activation-lab-page">
     <div class="container">
         <div class="lab-header">
-            <h1>Activation Lab</h1>
-            <a href="index.html" class="secondary-btn">Back to Evolution</a>
+            <nav class="page-tabs" aria-label="Picbreeder pages">
+                <a href="index.html" class="page-tab">CPPN Explorer</a>
+                <a href="activation-lab.html" class="page-tab is-active">Activation Lab</a>
+            </nav>
+            <button id="theme-toggle" class="theme-btn">Invert</button>
         </div>
 
         <div class="main-layout">
@@ -82,5 +85,17 @@
     <script src="neat.js"></script>
     <script src="cppn.js"></script>
     <script src="activation-lab.js"></script>
+    <script>
+        const toggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') body.classList.add('dark');
+
+        toggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+        });
+    </script>
 </body>
 </html>
