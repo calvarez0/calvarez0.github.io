@@ -28,6 +28,53 @@ body {
     transition: background-color 0.1s, color 0.1s;
 }
 
+.activation-lab-page {
+    overflow-x: hidden;
+}
+
+.font-mono-tech {
+    font-family: 'Space Mono', monospace;
+}
+
+.site-nav {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+}
+
+.site-nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.site-brand {
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.site-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.nav-link {
+    color: var(--fg);
+    text-decoration: none;
+    transition: color 0.2s;
+    font-size: 0.875rem;
+}
+
+.nav-link:hover {
+    color: var(--accent);
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -99,11 +146,11 @@ body {
     background: transparent;
     border: 1px solid var(--border);
     color: var(--fg);
-    padding: 2px 12px;
+    padding: 4px 12px;
     text-transform: uppercase;
     font-size: 0.75rem;
     cursor: pointer;
-    transition: all 0.1s;
+    transition: all 0.2s;
 }
 
 .theme-btn:hover {
@@ -333,7 +380,7 @@ body {
 .lab-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 12px;
     margin-bottom: 16px;
 }
@@ -556,11 +603,95 @@ body {
 }
 
 @media (max-width: 900px) {
+    .site-nav {
+        padding: 12px 16px;
+    }
+
+    .activation-lab-page .container {
+        padding: 12px 16px;
+    }
+
+    .activation-lab-page .main-layout > * {
+        min-width: 0;
+    }
+
     .lab-zoom-controls {
         margin-left: 0;
     }
 
     .lab-network-stage {
         min-height: 300px;
+    }
+}
+
+@media (max-width: 520px) {
+    body:not(.activation-lab-page) .evolution-panel .controls {
+        flex-wrap: nowrap;
+        gap: 6px;
+    }
+
+    body:not(.activation-lab-page) .evolution-panel .generation-info,
+    body:not(.activation-lab-page) .evolution-panel .selection-info {
+        font-size: 10px;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+    }
+
+    body:not(.activation-lab-page) .evolution-panel .controls #evolve-btn {
+        margin-left: auto;
+        padding: 6px 8px;
+        font-size: 10px;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+    }
+
+    .activation-lab-page .page-tabs {
+        display: flex;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .activation-lab-page .page-tab {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 8px 6px;
+        font-size: 11px;
+        letter-spacing: 0.04em;
+    }
+
+    .activation-lab-page .lab-controls {
+        gap: 6px;
+    }
+
+    .activation-lab-page .lab-controls .secondary-btn,
+    .activation-lab-page .lab-controls .file-upload-btn {
+        min-width: 0;
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+
+    .activation-lab-page .lab-zoom-controls {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        width: 100%;
+    }
+
+    .activation-lab-page .lab-zoom-controls .secondary-btn {
+        min-width: 0;
+        width: 100%;
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+
+    .activation-lab-page .connection-row {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .activation-lab-page #connection-value-input,
+    .activation-lab-page #connection-value-slider {
+        width: 100%;
+        max-width: 100%;
     }
 }

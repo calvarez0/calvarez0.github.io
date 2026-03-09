@@ -137,6 +137,44 @@
             background: var(--fg);
             color: var(--bg);
         }
+
+        .profile-hero {
+            display: flex;
+            align-items: flex-end;
+            gap: clamp(0.5rem, 1.8vw, 1rem);
+            min-width: 0;
+        }
+
+        .profile-avatar {
+            width: clamp(4.75rem, 18vw, 12rem);
+            height: auto;
+            flex: 0 0 auto;
+        }
+
+        .profile-name {
+            font-size: clamp(2.1rem, 10.8vw, 5.5rem);
+            line-height: 0.92;
+            letter-spacing: -0.02em;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        @media (max-width: 767px) {
+            .profile-hero {
+                width: 100%;
+                justify-content: flex-start;
+                gap: clamp(0.45rem, 2.2vw, 0.9rem);
+            }
+
+            .profile-avatar {
+                width: clamp(6.5rem, 34vw, 9.5rem);
+            }
+
+            .profile-name {
+                font-size: clamp(3.3rem, 16vw, 5rem);
+                line-height: 0.88;
+            }
+        }
     </style>
 </head>
 <body class="antialiased min-h-screen font-akzidenz selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
@@ -155,9 +193,9 @@
                         <div></div>
                         <button id="theme-toggle" class="theme-btn font-mono-tech hidden md:block">Invert</button>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <img src="assets/profile.jpg" alt="Alex Alvarez" class="w-36 md:w-48 h-auto contrast-125 flex-shrink-0" onerror="this.style.display='none'">
-                        <h1 class="leading-none tracking-tight font-akzidenz" style="font-size: 5.5rem; line-height: 1;">Alex<br>Alvarez</h1>
+                    <div class="profile-hero">
+                        <img src="assets/profile.jpg" alt="Alex Alvarez" class="profile-avatar contrast-125" onerror="this.style.display='none'">
+                        <h1 class="profile-name tracking-tight font-akzidenz">Alex<br>Alvarez</h1>
                     </div>
                 </header>
 
