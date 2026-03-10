@@ -325,6 +325,19 @@ class Genome {
             });
     }
 
+    getStructureSignature() {
+        const nodes = this.serializeNodes();
+        const connections = this.serializeConnections().map((conn) => ({
+            fromId: conn.fromId,
+            toId: conn.toId,
+            enabled: conn.enabled !== false,
+            // Round tiny float noise so exact clones hash together reliably.
+            weight: Number.isFinite(conn.weight) ? Number(conn.weight.toFixed(8)) : 0
+        }));
+
+        return JSON.stringify({ nodes, connections });
+    }
+
     updateLineageRecord() {
         this.lineageRecords[this.historyId] = {
             historyId: this.historyId,
@@ -680,6 +693,8 @@ class Population {
             genome.setAsInitial(this.generation);
             this.genomes.push(genome);
         }
+
+        this.ensureUniqueGenomeStructures();
     }
 
     evolve(selectedParents) {
@@ -718,6 +733,41 @@ class Population {
 
         this.genomes = newGenomes;
         this.generation = nextGeneration;
+        this.ensureUniqueGenomeStructures();
+    }
+
+    ensureUniqueGenomeStructures(maxAttemptsPerGenome = 24) {
+        const seen = new Set();
+
+        for (const genome of this.genomes) {
+            if (!genome) continue;
+
+            let signature = genome.getStructureSignature();
+            let attempts = 0;
+
+            while (seen.has(signature) && attempts < maxAttemptsPerGenome) {
+                // Always perturb at least one connection so exact clones diverge.
+                if (genome.connections.length > 0) {
+                    const idx = Math.floor(Math.random() * genome.connections.length);
+                    const conn = genome.connections[idx];
+                    const perturb = (Math.random() * 2 - 1) * Math.max(0.05, NEAT_CONFIG.weightPerturbPower);
+                    conn.weight = Math.max(
+                        NEAT_CONFIG.weightMin,
+                        Math.min(NEAT_CONFIG.weightMax, conn.weight + perturb)
+                    );
+                }
+
+                // Escalate to structural changes if simple perturbations still collide.
+                if (attempts % 4 === 0) genome.addRandomConnection();
+                if (attempts % 7 === 0) genome.addRandomNode();
+
+                genome.updateLineageRecord();
+                signature = genome.getStructureSignature();
+                attempts += 1;
+            }
+
+            seen.add(signature);
+        }
     }
 
     getGenomes() {
@@ -754,6 +804,7 @@ class Population {
             ? state.generation
             : 1;
         population.genomes = state.genomes.map((serializedGenome) => Genome.deserialize(serializedGenome));
+        population.ensureUniqueGenomeStructures();
         return population;
     }
 }

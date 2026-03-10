@@ -15,6 +15,7 @@ const AppState = {
     mutationProfile: 'steppingStone'
 };
 const GRID_SIZE = 20;
+const MOBILE_LAYOUT_BREAKPOINT = 900;
 const EVOLUTION_STATE_STORAGE_KEY = 'cppn-evolution-state-v1';
 const LAB_SEED_STORAGE_KEY = 'cppn-activation-seed-v1';
 const ARCHIVE_DIR = 'archive';
@@ -380,6 +381,7 @@ async function loadPopulationFromArchive(targetSize = GRID_SIZE) {
     shuffleInPlace(shuffledPaths);
 
     const genomes = [];
+    const seenSignatures = new Set();
     for (const path of shuffledPaths) {
         try {
             const response = await fetch(toFetchUrl(path), { cache: 'no-store' });
@@ -387,8 +389,11 @@ async function loadPopulationFromArchive(targetSize = GRID_SIZE) {
 
             const payload = await response.json();
             const genome = parseArchiveGenomePayload(payload);
+            const signature = genome.getStructureSignature();
+            if (seenSignatures.has(signature)) continue;
             genome.id = Math.random().toString(36).substr(2, 9);
             genome.updateLineageRecord();
+            seenSignatures.add(signature);
             genomes.push(genome);
         } catch (error) {
             continue;
@@ -416,6 +421,7 @@ async function loadPopulationFromArchive(targetSize = GRID_SIZE) {
             ? Math.max(maxGeneration, Math.floor(genome.generation))
             : maxGeneration;
     }, 1);
+    population.ensureUniqueGenomeStructures();
     return population;
 }
 
@@ -448,6 +454,7 @@ function createPopulationFromSeedGenome(seedGenome, targetSize = GRID_SIZE) {
             ? Math.max(maxGeneration, Math.floor(genome.generation))
             : maxGeneration;
     }, baseGeneration);
+    population.ensureUniqueGenomeStructures();
     return population;
 }
 
@@ -481,6 +488,7 @@ async function initApp() {
     applyMutationProfile(AppState.mutationProfile);
 
     setupImageGrid();
+    setupMobileActionPlacement();
     setupEventListeners();
 
     const restored = restoreAppStateFromSession();
@@ -495,6 +503,54 @@ async function initApp() {
     renderPopulation({ preserveState: restored, persist: false });
     setPanelMode(AppState.panelMode, { persist: false });
     saveAppStateToSession();
+}
+
+function setupMobileActionPlacement() {
+    const actionRow = document.querySelector('.network-panel .panel-footer-actions');
+    const controls = document.querySelector('.evolution-panel .controls');
+    const evolveBtn = document.getElementById('evolve-btn');
+    const evolutionPanel = document.querySelector('.evolution-panel');
+    const imageGrid = document.getElementById('image-grid');
+    if (!actionRow || !controls || !evolveBtn || !evolutionPanel || !imageGrid) return;
+
+    const actionOriginalParent = actionRow.parentElement;
+    const actionOriginalNextSibling = actionRow.nextElementSibling;
+    const evolveOriginalParent = evolveBtn.parentElement;
+    const evolveOriginalNextSibling = evolveBtn.nextElementSibling;
+
+    const placeActionRow = () => {
+        const isMobile = window.matchMedia(`(max-width: ${MOBILE_LAYOUT_BREAKPOINT}px)`).matches;
+
+        if (isMobile) {
+            if (actionRow.parentElement !== controls) {
+                controls.appendChild(actionRow);
+            }
+
+            if (evolveBtn.parentElement !== evolutionPanel || evolveBtn.previousElementSibling !== imageGrid) {
+                imageGrid.insertAdjacentElement('afterend', evolveBtn);
+            }
+            return;
+        }
+
+        if (actionRow.parentElement !== actionOriginalParent) {
+            if (actionOriginalNextSibling && actionOriginalNextSibling.parentElement === actionOriginalParent) {
+                actionOriginalParent.insertBefore(actionRow, actionOriginalNextSibling);
+            } else {
+                actionOriginalParent.appendChild(actionRow);
+            }
+        }
+
+        if (evolveBtn.parentElement !== evolveOriginalParent) {
+            if (evolveOriginalNextSibling && evolveOriginalNextSibling.parentElement === evolveOriginalParent) {
+                evolveOriginalParent.insertBefore(evolveBtn, evolveOriginalNextSibling);
+            } else {
+                evolveOriginalParent.appendChild(evolveBtn);
+            }
+        }
+    };
+
+    placeActionRow();
+    window.addEventListener('resize', placeActionRow);
 }
 
 function setupImageGrid() {

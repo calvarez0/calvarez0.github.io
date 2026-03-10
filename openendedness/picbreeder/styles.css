@@ -628,11 +628,23 @@ body {
     .lab-network-stage {
         min-height: 300px;
     }
+
+    body:not(.activation-lab-page) .evolution-panel .controls .panel-footer-actions {
+        margin-top: 0;
+        margin-left: auto;
+        width: auto;
+    }
+
+    body:not(.activation-lab-page) .evolution-panel > #evolve-btn {
+        width: 100%;
+        display: flex;
+        margin-top: 14px;
+    }
 }
 
 @media (max-width: 520px) {
     body:not(.activation-lab-page) .evolution-panel .controls {
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         gap: 6px;
     }
 
@@ -643,12 +655,22 @@ body {
         white-space: nowrap;
     }
 
-    body:not(.activation-lab-page) .evolution-panel .controls #evolve-btn {
-        margin-left: auto;
+    body:not(.activation-lab-page) .evolution-panel .controls .panel-footer-actions {
+        gap: 6px;
+    }
+
+    body:not(.activation-lab-page) .evolution-panel .controls .panel-footer-actions .secondary-btn {
+        flex: 0 0 auto;
         padding: 6px 8px;
         font-size: 10px;
         letter-spacing: 0.03em;
         white-space: nowrap;
+    }
+
+    body:not(.activation-lab-page) .evolution-panel > #evolve-btn {
+        padding: 8px 10px;
+        font-size: 10px;
+        letter-spacing: 0.03em;
     }
 
     .page-tabs {
