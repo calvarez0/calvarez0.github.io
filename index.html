@@ -84,9 +84,21 @@
             color: var(--bg);
         }
 
+        .index-row:hover:has(.card-link-chip:hover),
+        .index-row:hover:has(.card-link-chip:focus-visible) {
+            background-color: transparent;
+            color: inherit;
+        }
+
         .index-row:hover .subtext {
             color: var(--bg);
             opacity: 0.7;
+        }
+
+        .index-row:hover:has(.card-link-chip:hover) .subtext,
+        .index-row:hover:has(.card-link-chip:focus-visible) .subtext {
+            color: inherit;
+            opacity: inherit;
         }
 
         .index-row:hover .index-arrow {
@@ -138,11 +150,41 @@
             color: var(--bg);
         }
 
+        .card-link-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid currentColor;
+            padding: 3px 9px;
+            font-size: 0.65rem;
+            line-height: 1.2;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .card-link-chip:hover,
+        .card-link-chip:focus-visible {
+            background-color: var(--fg);
+            border-color: var(--fg);
+            color: var(--bg);
+            text-decoration: none;
+        }
+
         .profile-hero {
+            display: flex;
+            align-items: flex-start;
+            gap: clamp(0.5rem, 1.8vw, 1rem);
+            min-width: 0;
+        }
+
+        .profile-identity {
             display: flex;
             align-items: flex-end;
             gap: clamp(0.5rem, 1.8vw, 1rem);
             min-width: 0;
+            flex: 1 1 auto;
         }
 
         .profile-avatar {
@@ -159,10 +201,18 @@
             flex: 1 1 auto;
         }
 
+        .profile-invert-btn {
+            margin-left: auto;
+            align-self: flex-start;
+            white-space: nowrap;
+        }
+
         @media (max-width: 767px) {
             .profile-hero {
                 width: 100%;
-                justify-content: flex-start;
+            }
+
+            .profile-identity {
                 gap: clamp(0.45rem, 2.2vw, 0.9rem);
             }
 
@@ -174,6 +224,11 @@
                 font-size: clamp(3.3rem, 16vw, 5rem);
                 line-height: 0.88;
             }
+
+            .profile-invert-btn {
+                padding: 2px 10px;
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
@@ -184,18 +239,13 @@
         <aside class="md:w-5/12 lg:w-4/12 md:fixed md:h-screen border-b md:border-b-0 md:border-r brutal-border flex flex-col justify-between" style="background-color: var(--bg);" target="_blank" rel="noopener noreferrer">
             
             <div class="p-6 md:p-10 flex-grow overflow-y-auto">
-                <div class="flex justify-between items-start mb-6 md:hidden">
-                    <button id="theme-toggle-mobile-top" class="theme-btn font-mono-tech">Invert</button>
-                </div>
-
                 <header class="mb-8">
-                    <div class="flex justify-between items-start mb-3">
-                        <div></div>
-                        <button id="theme-toggle" class="theme-btn font-mono-tech hidden md:block">Invert</button>
-                    </div>
                     <div class="profile-hero">
-                        <img src="assets/profile.jpg" alt="Alex Alvarez" class="profile-avatar contrast-125" onerror="this.style.display='none'">
-                        <h1 class="profile-name tracking-tight font-akzidenz">Alex<br>Alvarez</h1>
+                        <div class="profile-identity">
+                            <img src="assets/profile.jpg" alt="Alex Alvarez" class="profile-avatar contrast-125" onerror="this.style.display='none'">
+                            <h1 class="profile-name tracking-tight font-akzidenz">Alex<br>Alvarez</h1>
+                        </div>
+                        <button id="theme-toggle" class="theme-btn font-mono-tech profile-invert-btn">Invert</button>
                     </div>
                 </header>
 
@@ -314,7 +364,7 @@
                                 <p class="text-base mb-3 opacity-80">Interactive Platform</p>
                                 <p class="text-base mb-4">My take on Picbreeder!</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <span class="hover:underline">[Open]</span>
+                                    <span class="card-link-chip">Web App</span>
                                 </div>
                             </div>
                         </div>
@@ -333,7 +383,7 @@
                                 <p class="text-base mb-3 opacity-80">Interactive Platform</p>
                                 <p class="text-base mb-4">Picbreeder + LLMs.</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <span class="hover:underline">[Beta]</span>
+                                    <span class="card-link-chip">Beta</span>
                                 </div>
                             </div>
                         </div>
@@ -364,7 +414,7 @@
                         <div class="md:flex md:gap-8 items-start">
                             <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
                                 <div class="w-full h-48 overflow-hidden">
-                                    <img src="assets/lambert/saliency_process_preview.gif" alt="Saliency process preview" class="h-full object-cover max-w-none" style="width: calc(100% + 10px); margin-left: -5px;">
+                                    <img src="assets/lambert/saliency_process_preview_v6.gif" alt="Saliency process preview" class="h-full object-cover max-w-none" style="width: calc(100% + 10px); margin-left: -5px;">
                                 </div>
                             </div>
                             <div class="flex-grow">
@@ -372,8 +422,8 @@
                                 <p class="text-base mb-3 opacity-80">NeurIPS 2025 Workshop on Symmetry and Geometry in Neural Representations</p>
                                 <p class="text-base mb-4">How does the brain calculate visual saliency?</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <a href="https://openreview.net/pdf?id=cjo2oadaRz" class="hover:underline" target="_blank" rel="noopener noreferrer">[PDF]</a>
-                                    <a href="lambert.html" class="hover:underline" target="_blank" rel="noopener noreferrer">[Web Paper]</a>
+                                    <a href="https://openreview.net/pdf?id=cjo2oadaRz" class="card-link-chip" target="_blank" rel="noopener noreferrer">PDF</a>
+                                    <a href="lambert.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web Paper</a>
                                 </div>
                             </div>
                         </div>
@@ -392,7 +442,7 @@
                                 <p class="text-base mb-3 opacity-80">Interactive Platform </p>
                                 <p class="text-base mb-4">Interactive neuroevolutionary platform for open-ended dress design.</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <span class="hover:underline">[Web App]</span>
+                                    <span class="card-link-chip">Web App</span>
                                 </div>
                             </div>
                         </div>
@@ -411,7 +461,7 @@
                                 <p class="text-base mb-3 opacity-80">Interactive Platform</p>
                                 <p class="text-base mb-4">Breed synthesizer sounds.</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <span class="hover:underline">[Web App]</span>
+                                    <span class="card-link-chip">Web App</span>
                                 </div>
                             </div>
                         </div>
@@ -430,7 +480,7 @@
                                 <p class="text-base mb-3 opacity-80">Interactive Demo</p>
                                 <p class="text-base mb-4">How does collective behavior emerge from simple local rules?</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <span class="hover:underline">[Web App]</span>
+                                    <span class="card-link-chip">Web App</span>
                                 </div>
                             </div>
                         </div>
@@ -449,9 +499,9 @@
                                 <p class="text-base mb-3 opacity-80">Human-Policy Interface</p>
                                 <p class="text-base mb-4">Voter information tool for the 2024 presidential election.</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <a href="demographic_iq.html" class="hover:underline" target="_blank" rel="noopener noreferrer">[Web App]</a>
-                                    <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" class="hover:underline" target="_blank" rel="noopener noreferrer">[Press]</a>
-                                    <a href="https://x.com/0xalexrez/status/1851390704796176734" class="hover:underline" target="_blank" rel="noopener noreferrer">[Tweet]</a>
+                                    <a href="demographic_iq.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web App</a>
+                                    <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" class="card-link-chip" target="_blank" rel="noopener noreferrer">News</a>
+                                    <a href="https://x.com/0xalexrez/status/1851390704796176734" class="card-link-chip" target="_blank" rel="noopener noreferrer">Tweet</a>
                                 </div>
                             </div>
                         </div>
@@ -509,15 +559,15 @@
                 </div>
             </section>
             
-            <footer class="p-6 md:p-10 font-akzidenz text-xs opacity-50 border-t brutal-border">
-                I never saved anything for the swim back
+            <footer class="p-6 md:p-10 font-akzidenz text-xs opacity-50 border-t brutal-border text-center">
+                I never saved anything for the swim back.
             </footer>
         </main>
     </div>
 
     <script>
         // Theme Toggle Logic
-        const toggles = document.querySelectorAll('#theme-toggle, #theme-toggle-mobile-top');
+        const toggles = document.querySelectorAll('#theme-toggle');
         const body = document.body;
 
         const savedTheme = localStorage.getItem('theme') || 'dark';
