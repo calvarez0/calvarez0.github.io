@@ -41,6 +41,21 @@ body {
     padding: 16px 24px;
 }
 
+.site-footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 24px;
+    margin-top: 48px;
+}
+
+.site-footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    opacity: 0.5;
+}
+
 .site-nav-inner {
     max-width: 1200px;
     margin: 0 auto;
@@ -610,6 +625,10 @@ body {
 
 @media (max-width: 900px) {
     .site-nav {
+        padding: 12px 16px;
+    }
+
+    .site-footer {
         padding: 12px 16px;
     }
 
