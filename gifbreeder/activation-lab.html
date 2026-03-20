@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPPN Activation Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="activation-lab-page">
+    <nav class="site-nav">
+        <div class="site-nav-inner">
+            <a href="../../index.html" class="site-brand">AA</a>
+            <div class="site-nav-actions">
+                <a href="../../index.html" class="nav-link font-mono-tech">Home</a>
+                <button id="theme-toggle" class="theme-btn font-mono-tech">Invert</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="lab-header">
+            <nav class="page-tabs" aria-label="Gifbreeder pages">
+                <a href="index.html" class="page-tab">GIFBreeder</a>
+                <a href="activation-lab.html" class="page-tab is-active">Activation Lab</a>
+            </nav>
+        </div>
+
+        <div class="main-layout">
+            <section class="evolution-panel lab-network-panel">
+                <div class="controls lab-controls">
+                    <label class="secondary-btn file-upload-btn">
+                        Upload Genome JSON
+                        <input id="genome-upload-input" type="file" accept=".json,application/json">
+                    </label>
+                    <button id="randomize-network-btn" class="secondary-btn">Random Network</button>
+                    <div class="mode-toggle">
+                        <span class="toggle-label">Color</span>
+                        <div class="view-toggle">
+                            <button id="lab-output-rgb-btn" class="secondary-btn" data-output-mode="rgb">RGB</button>
+                            <button id="lab-output-hsv-btn" class="secondary-btn is-active" data-output-mode="hsv">HSV</button>
+                        </div>
+                    </div>
+                    <div class="lab-zoom-controls">
+                        <button id="network-zoom-in-btn" class="secondary-btn">Zoom +</button>
+                        <button id="network-zoom-out-btn" class="secondary-btn">Zoom -</button>
+                        <button id="network-reset-view-btn" class="secondary-btn">Reset View</button>
+                    </div>
+                </div>
+
+                <div class="lab-network-stage">
+                    <svg id="editor-network-svg"></svg>
+                </div>
+            </section>
+
+            <section class="network-panel lab-preview-panel">
+                <h2>GIF Preview</h2>
+                <div class="network-info" id="preview-status">
+                    <p class="placeholder">Upload a genome JSON to start</p>
+                </div>
+                <div class="lab-preview-stage">
+                    <canvas id="preview-canvas"></canvas>
+                </div>
+                <div class="lab-connection-picker" id="connection-picker"></div>
+
+                <div class="lab-connection-editor" id="connection-editor">
+                    <p class="placeholder" id="connection-placeholder">
+                        Click a connection to edit its activation value
+                    </p>
+                    <div class="lab-connection-controls hidden" id="connection-controls">
+                        <div class="connection-row">
+                            <span class="connection-label">Connection</span>
+                            <span id="connection-name"></span>
+                        </div>
+                        <div class="connection-row">
+                            <span class="connection-label">Activation Value</span>
+                            <input id="connection-value-input" type="number" step="0.01">
+                        </div>
+                        <div class="connection-row connection-slider-row">
+                            <span class="connection-label">Slide</span>
+                            <input id="connection-value-slider" type="range" step="0.01">
+                        </div>
+                        <div class="connection-buttons">
+                            <button class="secondary-btn" data-delta="-0.25">-0.25</button>
+                            <button class="secondary-btn" data-delta="-0.1">-0.10</button>
+                            <button class="secondary-btn" data-delta="0.1">+0.10</button>
+                            <button class="secondary-btn" data-delta="0.25">+0.25</button>
+                        </div>
+                        <button id="reset-connection-btn" class="secondary-btn connection-wide-btn" disabled>
+                            Reset Activation Value
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-footer-actions">
+                    <button id="save-lab-genome-btn" class="secondary-btn" disabled>Save Genome</button>
+                    <button id="download-preview-btn" class="secondary-btn" disabled>Download GIF</button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <!-- <footer class="site-footer">
+        <div class="site-footer-inner">
+            <p>I never saved anything for the swim back. &copy; 2025 Alex Alvarez</p>
+        </div>
+    </footer> -->
+
+    <script src="neat.js"></script>
+    <script src="cppn.js"></script>
+    <script src="activation-lab.js"></script>
+    <script>
+        const toggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'dark') body.classList.add('dark');
+
+        toggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+        });
+    </script>
+</body>
+</html>

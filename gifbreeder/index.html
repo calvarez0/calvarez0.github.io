@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIFBreeder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="site-nav">
+        <div class="site-nav-inner">
+            <a href="../../index.html" class="site-brand">AA</a>
+            <div class="site-nav-actions">
+                <a href="../../index.html" class="nav-link font-mono-tech">Home</a>
+                <button id="theme-toggle" class="theme-btn font-mono-tech">Invert</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="lab-header">
+            <nav class="page-tabs" aria-label="Gifbreeder pages">
+                <a href="index.html" class="page-tab is-active">GIFBreeder</a>
+                <a href="activation-lab.html" class="page-tab">Activation Lab</a>
+            </nav>
+        </div>
+
+        <div class="main-layout">
+            <section class="evolution-panel">
+                <div class="controls">
+                    <div class="generation-info">
+                        Gen <span id="generation-count">1</span>
+                    </div>
+                    <div class="selection-info">
+                        Selected: <span id="selected-count">0</span>
+                    </div>
+                    <button id="evolve-btn" class="primary-btn">Evolve Selected</button>
+                </div>
+
+                <div class="image-grid" id="image-grid"></div>
+            </section>
+
+            <section class="network-panel">
+                <h2 id="inspector-title">Network</h2>
+                <div class="inspector-actions">
+                    <div class="view-toggle">
+                        <button id="network-view-btn" class="secondary-btn is-active">Network</button>
+                        <button id="phylogeny-view-btn" class="secondary-btn">Phylogeny</button>
+                    </div>
+                    <div class="mode-toggle">
+                        <span class="toggle-label">Color</span>
+                        <div class="view-toggle">
+                            <button id="output-rgb-btn" class="secondary-btn" data-output-mode="rgb">RGB</button>
+                            <button id="output-hsv-btn" class="secondary-btn is-active" data-output-mode="hsv">HSV</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="network-info" id="network-info">
+                    <p class="placeholder">Click a GIF to view its CPPN</p>
+                </div>
+                <div class="network-visualization" id="network-viz">
+                    <svg id="network-svg"></svg>
+                    <svg id="phylogeny-svg" class="hidden"></svg>
+                </div>
+                <div class="phylogeny-controls hidden" id="phylogeny-controls">
+                    <button id="phylo-zoom-in-btn" class="secondary-btn">Zoom +</button>
+                    <button id="phylo-zoom-out-btn" class="secondary-btn">Zoom -</button>
+                    <button id="phylo-up-btn" class="secondary-btn">Up</button>
+                    <button id="phylo-down-btn" class="secondary-btn">Down</button>
+                    <button id="phylo-reset-btn" class="secondary-btn">Reset View</button>
+                </div>
+                <div class="network-stats" id="network-stats"></div>
+                <div class="panel-footer-actions">
+                    <button id="restart-btn" class="secondary-btn">Randomize</button>
+                    <button id="reset-btn" class="secondary-btn">Start Fresh</button>
+                </div>
+                <div class="save-actions panel-wide-action">
+                    <button id="save-genome-btn" class="secondary-btn" disabled>Save Genome</button>
+                    <label class="secondary-btn icon-upload-btn" title="Start From Uploaded Genome JSON">
+                        &#8682;
+                        <input id="upload-start-genome-input" type="file" accept=".json,application/json">
+                    </label>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <!-- <footer class="site-footer">
+        <div class="site-footer-inner">
+            <p>I never saved anything for the swim back. &copy; 2025 Alex Alvarez</p>
+        </div>
+    </footer> -->
+
+    <script src="neat.js"></script>
+    <script src="cppn.js"></script>
+    <script src="app.js"></script>
+    <script>
+        const toggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'dark') body.classList.add('dark');
+
+        toggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+        });
+    </script>
+</body>
+</html>

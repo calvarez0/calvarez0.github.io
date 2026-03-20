@@ -1,0 +1,758 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #f4f4f0;
+    --fg: #111111;
+    --border: #111111;
+    --accent: #0000ff;
+    --panel-bg: #f9f9f5;
+}
+
+.dark {
+    --bg: #111111;
+    --fg: #e0e0e0;
+    --border: #444444;
+    --accent: #40A2E3;
+    --panel-bg: #1a1a1a;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    transition: background-color 0.1s, color 0.1s;
+}
+
+.activation-lab-page {
+    overflow-x: hidden;
+}
+
+.font-mono-tech {
+    font-family: 'Space Mono', monospace;
+}
+
+.site-nav {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+}
+
+.site-footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 24px;
+    margin-top: 48px;
+}
+
+.site-footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    opacity: 0.5;
+}
+
+.site-nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.site-brand {
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.site-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.nav-link {
+    color: var(--fg);
+    text-decoration: none;
+    transition: color 0.2s;
+    font-size: 0.875rem;
+}
+
+.nav-link:hover {
+    color: var(--accent);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.placeholder {
+    opacity: 0.5;
+    font-style: italic;
+}
+
+.main-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.evolution-panel {
+    border: 1px solid var(--border);
+    padding: 16px;
+}
+
+.controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+}
+
+.controls #evolve-btn {
+    margin-left: auto;
+}
+
+.primary-btn, .secondary-btn {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.primary-btn:hover, .secondary-btn:hover {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.theme-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 4px 12px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.theme-btn:hover {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.primary-btn:disabled, .secondary-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.primary-btn:disabled:hover, .secondary-btn:disabled:hover {
+    background: transparent;
+    color: var(--fg);
+}
+
+.generation-info, .selection-info {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    min-width: 0;
+}
+
+.image-cell {
+    position: relative;
+    aspect-ratio: 1;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    box-shadow: inset 0 0 0 0 var(--border);
+    transition: box-shadow 0.1s, border-color 0.1s;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.image-cell:hover {
+    box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.image-cell.selected {
+    box-shadow: inset 0 0 0 2px var(--border);
+}
+
+.image-cell.viewing {
+    border-style: dashed;
+}
+
+.image-cell canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    max-width: 100%;
+}
+
+.image-cell .select-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    background: var(--fg);
+    color: var(--bg);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.image-cell.selected .select-badge {
+    display: flex;
+}
+
+.network-panel {
+    border: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+}
+
+.network-panel h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.inspector-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 6px;
+}
+
+.mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.toggle-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.65;
+}
+
+.view-toggle .secondary-btn {
+    padding: 6px 10px;
+}
+
+.view-toggle .secondary-btn.is-active {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.network-info {
+    font-size: 12px;
+    margin-bottom: 12px;
+    min-height: 20px;
+}
+
+.network-info .placeholder {
+    opacity: 0.5;
+    font-style: italic;
+}
+
+.network-visualization {
+    border: 1px solid var(--border);
+    height: 300px;
+    overflow: hidden;
+}
+
+#network-svg {
+    width: 100%;
+    height: 300px;
+    display: block;
+}
+
+#phylogeny-svg {
+    width: 100%;
+    height: 300px;
+    display: block;
+    cursor: grab;
+    user-select: none;
+}
+
+#phylogeny-svg.dragging {
+    cursor: grabbing;
+}
+
+.phylogeny-controls {
+    margin-top: 8px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.phylogeny-controls .secondary-btn {
+    padding: 6px 8px;
+}
+
+.network-stats {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.panel-footer-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.panel-footer-actions .secondary-btn {
+    flex: 1;
+}
+
+.panel-wide-action {
+    margin-top: 8px;
+    width: 100%;
+}
+
+.save-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.save-actions #save-genome-btn {
+    flex: 1;
+}
+
+.icon-upload-btn {
+    width: 36px;
+    min-width: 36px;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.icon-upload-btn input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 8px 4px;
+    border: 1px solid var(--border);
+}
+
+.stat-item .stat-value {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.stat-item .stat-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+}
+
+.lab-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.lab-header h1 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.lab-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-tabs {
+    display: inline-flex;
+    border: 1px solid var(--border);
+}
+
+.page-tab {
+    border: 0;
+    border-right: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg);
+    padding: 8px 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.page-tab:last-child {
+    border-right: 0;
+}
+
+.page-tab:hover {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.page-tab.is-active {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.lab-network-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lab-controls {
+    margin-bottom: 0;
+    align-items: center;
+}
+
+.file-upload-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.file-upload-btn input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.lab-zoom-controls {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.lab-zoom-controls .secondary-btn {
+    padding: 6px 10px;
+}
+
+.lab-network-stage {
+    border: 1px solid var(--border);
+    width: 100%;
+    aspect-ratio: 5 / 4;
+    min-height: 420px;
+    overflow: hidden;
+}
+
+#editor-network-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: grab;
+    user-select: none;
+}
+
+#editor-network-svg.dragging {
+    cursor: grabbing;
+}
+
+.lab-connection-editor {
+    border: 1px solid var(--border);
+    padding: 10px;
+    min-height: 88px;
+}
+
+.lab-connection-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.connection-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.connection-label {
+    opacity: 0.65;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 10px;
+}
+
+#connection-value-input {
+    width: 112px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--fg);
+    padding: 4px 6px;
+    font-size: 12px;
+}
+
+.connection-slider-row {
+    align-items: center;
+}
+
+#connection-value-slider {
+    width: 180px;
+}
+
+.connection-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.connection-buttons .secondary-btn {
+    padding: 6px 8px;
+    min-width: 58px;
+}
+
+.connection-wide-btn {
+    width: 100%;
+}
+
+.lab-preview-panel {
+    gap: 12px;
+}
+
+.lab-preview-stage {
+    border: 1px solid var(--border);
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: var(--panel-bg);
+}
+
+.lab-preview-stage canvas {
+    width: 100%;
+    height: auto;
+    max-height: 460px;
+    display: block;
+}
+
+.lab-connection-picker {
+    border: 1px solid var(--border);
+    padding: 8px;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    max-height: 170px;
+    overflow-y: auto;
+}
+
+.lab-connection-picker .placeholder {
+    grid-column: 1 / -1;
+    margin: 2px 0;
+}
+
+.connection-chip {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg);
+    font-size: 10px;
+    min-height: 28px;
+    padding: 0;
+    cursor: pointer;
+}
+
+.connection-chip:hover {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.connection-chip.is-active {
+    background: #0000ff;
+    color: #fff;
+    border-color: #0000ff;
+}
+
+@media (max-width: 900px) {
+    .site-nav {
+        padding: 12px 16px;
+    }
+
+    .site-footer {
+        padding: 12px 16px;
+    }
+
+    .activation-lab-page .container {
+        padding: 12px 16px;
+    }
+
+    .activation-lab-page .main-layout > * {
+        min-width: 0;
+    }
+
+    .lab-zoom-controls {
+        margin-left: 0;
+    }
+
+    .lab-network-stage {
+        min-height: 300px;
+    }
+
+    body:not(.activation-lab-page) .evolution-panel .controls .panel-footer-actions {
+        margin-top: 0;
+        margin-left: auto;
+        width: auto;
+    }
+
+    body:not(.activation-lab-page) .evolution-panel > #evolve-btn {
+        width: 100%;
+        display: flex;
+        margin-top: 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    body:not(.activation-lab-page) .evolution-panel .controls {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    body:not(.activation-lab-page) .evolution-panel .generation-info,
+    body:not(.activation-lab-page) .evolution-panel .selection-info {
+        font-size: 10px;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+    }
+
+    body:not(.activation-lab-page) .evolution-panel .controls .panel-footer-actions {
+        gap: 6px;
+    }
+
+    body:not(.activation-lab-page) .evolution-panel .controls .panel-footer-actions .secondary-btn {
+        flex: 0 0 auto;
+        padding: 6px 8px;
+        font-size: 10px;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+    }
+
+    body:not(.activation-lab-page) .evolution-panel > #evolve-btn {
+        padding: 8px 10px;
+        font-size: 10px;
+        letter-spacing: 0.03em;
+    }
+
+    .page-tabs {
+        display: flex;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .page-tab {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 8px 6px;
+        font-size: 11px;
+        letter-spacing: 0.04em;
+    }
+
+    .activation-lab-page .lab-controls {
+        gap: 6px;
+    }
+
+    .activation-lab-page .lab-controls .secondary-btn,
+    .activation-lab-page .lab-controls .file-upload-btn {
+        min-width: 0;
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+
+    .activation-lab-page .lab-zoom-controls {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        width: 100%;
+    }
+
+    .activation-lab-page .lab-zoom-controls .secondary-btn {
+        min-width: 0;
+        width: 100%;
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+
+    .activation-lab-page .connection-row {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .activation-lab-page #connection-value-input,
+    .activation-lab-page #connection-value-slider {
+        width: 100%;
+        max-width: 100%;
+    }
+}
