@@ -12,12 +12,16 @@ const LabState = {
     originalGenomeSnapshot: null,
     selectedConnectionIndex: null,
     renderPending: false,
+    exportInProgress: false,
     loadedGenomeName: 'No genome loaded'
 };
 const LAB_SEED_STORAGE_KEY = 'cppn-activation-seed-v1';
 const LAB_ARCHIVE_DIR = 'archive';
 const LAB_ARCHIVE_MANIFEST_PATH = `${LAB_ARCHIVE_DIR}/manifest.json`;
 const LAB_WEIGHT_BOUNDS = { min: -8, max: 8 };
+const LAB_DOWNLOAD_GIF_RESOLUTION = 512;
+const LAB_GIF_EXPORT_WORKER_PATH = 'gif-export-worker.js';
+const LAB_DOWNLOAD_RESOLUTION_OPTIONS = [64, 128, 512, 1024];
 
 function getOutputColorModeManager() {
     return window.CPPN && window.CPPN.OutputColorModeManager
@@ -70,7 +74,8 @@ function setupActivationLabEvents() {
     document.getElementById('network-zoom-out-btn').addEventListener('click', () => LabState.visualizer.zoomOut());
     document.getElementById('network-reset-view-btn').addEventListener('click', () => LabState.visualizer.resetView());
     document.getElementById('save-lab-genome-btn').addEventListener('click', downloadLabGenomeJson);
-    document.getElementById('download-preview-btn').addEventListener('click', downloadPreviewImage);
+    document.getElementById('download-preview-btn').addEventListener('click', toggleDownloadResolutionMenu);
+    document.getElementById('download-resolution-menu').addEventListener('click', handleDownloadResolutionMenuClick);
     document.getElementById('connection-picker').addEventListener('click', handleConnectionPickerClick);
     document.querySelector('.lab-controls').addEventListener('click', handleLabOutputModeButtonClick);
     window.addEventListener('cppn-output-mode-change', handleLabOutputModeChange);
@@ -108,6 +113,15 @@ function setupActivationLabEvents() {
         if (!LabState.genome) return;
         renderNetwork({ preserveView: true, preserveSelection: true });
         queuePreviewRender();
+    });
+
+    document.addEventListener('click', (event) => {
+        const menuRoot = event.target instanceof Element ? event.target.closest('.download-menu') : null;
+        if (!menuRoot) closeDownloadResolutionMenu();
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeDownloadResolutionMenu();
     });
 }
 
@@ -162,10 +176,54 @@ function applyLoadedGenome(genome, label) {
 function setLabActionsEnabled(hasGenome) {
     const enabled = Boolean(hasGenome);
     document.getElementById('save-lab-genome-btn').disabled = !enabled;
-    document.getElementById('download-preview-btn').disabled = !enabled;
+    const downloadButton = document.getElementById('download-preview-btn');
+    downloadButton.disabled = !enabled || LabState.exportInProgress;
+    document.querySelectorAll('button[data-download-resolution]').forEach((button) => {
+        button.disabled = !enabled || LabState.exportInProgress;
+    });
+    if (!enabled) closeDownloadResolutionMenu();
     if (!enabled) {
         document.getElementById('reset-connection-btn').disabled = true;
     }
+}
+
+function toggleDownloadResolutionMenu(event) {
+    if (event) event.preventDefault();
+    const trigger = document.getElementById('download-preview-btn');
+    if (!trigger || trigger.disabled || LabState.exportInProgress || !LabState.genome) return;
+
+    const menu = document.getElementById('download-resolution-menu');
+    if (!menu) return;
+    const shouldOpen = menu.classList.contains('hidden');
+    setDownloadResolutionMenuOpen(shouldOpen);
+}
+
+function setDownloadResolutionMenuOpen(isOpen) {
+    const menu = document.getElementById('download-resolution-menu');
+    const trigger = document.getElementById('download-preview-btn');
+    if (!menu || !trigger) return;
+
+    menu.classList.toggle('hidden', !isOpen);
+    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+}
+
+function closeDownloadResolutionMenu() {
+    setDownloadResolutionMenuOpen(false);
+}
+
+function handleDownloadResolutionMenuClick(event) {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const optionButton = target.closest('button[data-download-resolution]');
+    if (!optionButton) return;
+    event.preventDefault();
+
+    const resolution = Number.parseInt(optionButton.dataset.downloadResolution || '', 10);
+    if (!LAB_DOWNLOAD_RESOLUTION_OPTIONS.includes(resolution)) return;
+
+    closeDownloadResolutionMenu();
+    downloadPreviewImage(resolution);
 }
 
 function serializeGenomeForLab(genome) {
@@ -518,23 +576,62 @@ function renderCPPNPreview() {
     LabState.renderer.renderProgressive(LabState.genome, LabState.previewCanvas);
 }
 
-async function downloadPreviewImage() {
+async function downloadPreviewImage(resolution = LAB_DOWNLOAD_GIF_RESOLUTION) {
     if (!LabState.genome) return;
 
     const button = document.getElementById('download-preview-btn');
     const originalText = button ? button.textContent : '';
+    const exportResolution = LAB_DOWNLOAD_RESOLUTION_OPTIONS.includes(resolution)
+        ? resolution
+        : LAB_DOWNLOAD_GIF_RESOLUTION;
 
+    LabState.exportInProgress = true;
+    setLabActionsEnabled(true);
+    closeDownloadResolutionMenu();
     if (button) {
-        button.disabled = true;
-        button.textContent = 'Encoding GIF...';
+        button.textContent = `Encoding GIF (${exportResolution})...`;
     }
 
     try {
-        const blob = LabState.renderer.createGifBlob(LabState.genome, {
-            resolution: window.CPPN && window.CPPN.GIF_CONFIG
-                ? window.CPPN.GIF_CONFIG.resolution
-                : 64
-        });
+        const serializedGenome = serializeGenomeForLab(LabState.genome);
+        if (!serializedGenome) {
+            throw new Error('No genome available for export.');
+        }
+
+        const outputModeManager = getOutputColorModeManager();
+        const frameRate = window.CPPN && window.CPPN.GIF_CONFIG && Number.isFinite(window.CPPN.GIF_CONFIG.frameRate)
+            ? window.CPPN.GIF_CONFIG.frameRate
+            : 15;
+        const frameCount = window.CPPN && window.CPPN.GIF_CONFIG && Number.isFinite(window.CPPN.GIF_CONFIG.frameCount)
+            ? window.CPPN.GIF_CONFIG.frameCount
+            : 45;
+        const frameDurationMs = 1000 / Math.max(1, frameRate);
+
+        let blob;
+        try {
+            blob = await createGifBlobViaWorker(
+                serializedGenome,
+                {
+                    resolution: exportResolution,
+                    frameCount,
+                    frameDurationMs,
+                    outputColorMode: outputModeManager ? outputModeManager.getMode() : 'hsv'
+                },
+                (progress) => {
+                    if (!button) return;
+                    if (!progress || !Number.isInteger(progress.completedFrames) || !Number.isInteger(progress.totalFrames)) {
+                        button.textContent = `Encoding GIF (${exportResolution})...`;
+                        return;
+                    }
+                    button.textContent = `Encoding GIF (${exportResolution})... ${progress.completedFrames}/${progress.totalFrames}`;
+                }
+            );
+        } catch (workerError) {
+            blob = LabState.renderer.createGifBlob(LabState.genome, {
+                resolution: exportResolution
+            });
+        }
+
         const url = URL.createObjectURL(blob);
         const genomeId = typeof LabState.genome.id === 'string' && LabState.genome.id
             ? LabState.genome.id
@@ -553,11 +650,76 @@ async function downloadPreviewImage() {
         const message = error instanceof Error ? error.message : 'unknown GIF export error';
         setPreviewStatus(`Could not export GIF: ${message}`);
     } finally {
+        LabState.exportInProgress = false;
+        setLabActionsEnabled(Boolean(LabState.genome));
         if (button) {
-            button.disabled = false;
             button.textContent = originalText || 'Download GIF';
         }
     }
+}
+
+function createGifBlobViaWorker(genome, options, onProgress) {
+    return new Promise((resolve, reject) => {
+        if (typeof Worker === 'undefined') {
+            reject(new Error('Web Workers are not supported in this browser.'));
+            return;
+        }
+
+        let settled = false;
+        let worker;
+
+        const cleanup = () => {
+            if (worker) {
+                worker.terminate();
+                worker = null;
+            }
+        };
+
+        const fail = (error) => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            reject(error);
+        };
+
+        try {
+            worker = new Worker(LAB_GIF_EXPORT_WORKER_PATH);
+        } catch (error) {
+            fail(error instanceof Error ? error : new Error('Could not create GIF export worker.'));
+            return;
+        }
+
+        worker.onmessage = (event) => {
+            const data = event.data || {};
+            if (data.type === 'progress') {
+                if (typeof onProgress === 'function') onProgress(data);
+                return;
+            }
+
+            if (data.type === 'success') {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                resolve(new Blob([data.bytes], { type: 'image/gif' }));
+                return;
+            }
+
+            if (data.type === 'error') {
+                const message = typeof data.message === 'string' ? data.message : 'Worker export failed.';
+                fail(new Error(message));
+            }
+        };
+
+        worker.onerror = () => {
+            fail(new Error('Worker crashed while exporting GIF.'));
+        };
+
+        worker.postMessage({
+            type: 'export-gif',
+            genome,
+            options
+        });
+    });
 }
 
 function downloadLabGenomeJson() {

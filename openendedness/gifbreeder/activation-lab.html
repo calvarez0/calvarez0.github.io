@@ -95,7 +95,15 @@
                 </div>
                 <div class="panel-footer-actions">
                     <button id="save-lab-genome-btn" class="secondary-btn" disabled>Save Genome</button>
-                    <button id="download-preview-btn" class="secondary-btn" disabled>Download GIF</button>
+                    <div class="download-menu">
+                        <button id="download-preview-btn" class="secondary-btn" type="button" aria-haspopup="menu" aria-expanded="false" disabled>Download GIF</button>
+                        <div id="download-resolution-menu" class="download-resolution-menu hidden" role="menu" aria-label="Download GIF resolution">
+                            <button class="secondary-btn resolution-option-btn" type="button" data-download-resolution="64">64 x 64</button>
+                            <button class="secondary-btn resolution-option-btn" type="button" data-download-resolution="128">128 x 128</button>
+                            <button class="secondary-btn resolution-option-btn" type="button" data-download-resolution="512">512 x 512</button>
+                            <button class="secondary-btn resolution-option-btn" type="button" data-download-resolution="1024">1024 x 1024</button>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
