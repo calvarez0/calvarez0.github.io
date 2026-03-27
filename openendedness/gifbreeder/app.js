@@ -514,9 +514,17 @@ async function initApp() {
     }
     syncOutputModeUI();
 
-    initializeFreshPopulation('startFresh');
+    const restoredFromSession = restoreAppStateFromSession();
+    if (!restoredFromSession) {
+        try {
+            AppState.population = await loadPopulationFromArchive(GRID_SIZE);
+            applyMutationProfile('steppingStone');
+        } catch (error) {
+            initializeFreshPopulation('steppingStone');
+        }
+    }
 
-    renderPopulation({ preserveState: false, persist: false });
+    renderPopulation({ preserveState: restoredFromSession, persist: false });
     setPanelMode(AppState.panelMode, { persist: false });
 }
 

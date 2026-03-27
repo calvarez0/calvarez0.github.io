@@ -282,7 +282,7 @@ function lzwEncodeGifIndices(indices, minimumCodeSize = 8) {
             dictionary.set(candidate, nextCode);
             nextCode += 1;
 
-            if (nextCode === (1 << codeSize) && codeSize < 12) {
+            if (nextCode > (1 << codeSize) && codeSize < 12) {
                 codeSize += 1;
             }
         } else {
