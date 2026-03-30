@@ -33,6 +33,7 @@
             --fg: #111111;
             --border: #111111;
             --accent: #0000ff; /* Deep electric blue for subtle links */
+            --section-band-bg: #f4f4f0;
         }
  
         .dark {
@@ -40,6 +41,7 @@
             --fg: #e0e0e0;
             --border: #444444;
             --accent: #40A2E3;
+            --section-band-bg: #000000;
         }
 
         body {
@@ -172,6 +174,11 @@
             text-decoration: none;
         }
 
+        .section-band {
+            background-color: var(--section-band-bg);
+            color: var(--fg);
+        }
+
         .profile-hero {
             display: flex;
             align-items: flex-start;
@@ -265,8 +272,16 @@
                     <h2 class="text-sm font-bold border-b brutal-border pb-2 mb-3">Updates</h2>
 
                     <div class="flex justify-between gap-4">
+                        <a href="https://youtu.be/7O-lRBVaEag?si=a2lmCHKPbRfNpg6i" class="hover:underline" target="_blank">
+                            Talk at INRIA Flowers Lab
+                        </a>
+                        <span class="opacity-60">Mar '26</span>
+                    </div>
+
+
+                    <div class="flex justify-between gap-4">
                         <a href="https://openreview.net/forum?id=cjo2oadaRz&referrer=%5Bthe%20profile%20of%20Alex%20Alvarez%5D(%2Fprofile%3Fid%3D~Alex_Alvarez1)" class="hover:underline" target="_blank">
-                            Workshop Paper Accepted @ NeurIPS 2025
+                            Workshop Paper Accepted at NeurIPS 2025
                         </a>
                         <span class="opacity-60">Dec '25</span>
                     </div>
@@ -280,7 +295,7 @@
 
                     <div class="flex justify-between gap-4">
                         <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" class="hover:underline" target="_blank">
-                            Feature story for Demographic IQ
+                            Feature story for Demographic IQ (KBTX)
                         </a>
                         <span class="opacity-60">Oct '24</span>
                     </div>
@@ -301,7 +316,7 @@
         <main class="md:w-7/12 lg:w-8/12 md:ml-auto">
 
             <section class="border-b brutal-border">
-                <div class="p-6 md:p-10 bg-black text-white dark:bg-white dark:text-black">
+                <div class="p-6 md:p-10 section-band border-b-2 brutal-border">
                     <h2 class="font-mono-tech text-sm uppercase tracking-widest mb-2">Research</h2>
                 </div>
 
@@ -345,6 +360,30 @@
                             </div>
                         </div>
                     </div> -->
+
+                    <!-- GIFBreeder -->
+                    <a href="/openendedness/gifbreeder/index.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
+                        <div class="md:flex md:gap-8 items-start">
+                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-48 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
+                                    <img src="assets/gifbreeder/activation-lab-output-trwerhx67.gif" alt="GIFBreeder output 1" class="w-full h-full object-cover">
+                                    <img src="assets/gifbreeder/activation-lab-output-09fy1uuyk.gif" alt="GIFBreeder output 2" class="w-full h-full object-cover">
+                                    <img src="assets/gifbreeder/activation-lab-output-n30hi1h8h.gif" alt="GIFBreeder output 3" class="w-full h-full object-cover">
+                                    <img src="assets/gifbreeder/activation-lab-output-kqv0p6vk5%20copy.gif" alt="GIFBreeder output 4" class="w-full h-full object-cover">
+                                    <img src="assets/gifbreeder/activation-lab-output-qeoe3k9y6.gif" alt="GIFBreeder output 5" class="w-full h-full object-cover">
+                                    <img src="assets/gifbreeder/activation-lab-output-l0p7avjzp.gif" alt="GIFBreeder output 6" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">GIFBreeder</h3>
+                                <p class="text-base mb-3 opacity-80">Interactive Platform</p>
+                                <p class="text-base mb-4">Adding a time variable to Picbreeder brings images to life.</p>
+                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                    <span class="card-link-chip">Web App</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
 
                     <!-- Picbreeder -->
                     <a href="/openendedness/picbreeder/index.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
@@ -510,7 +549,7 @@
             </section>
 
             <section>
-                <div class="p-6 md:p-10 bg-black text-white dark:bg-white dark:text-black">
+                <div class="p-6 md:p-10 section-band border-b-2 brutal-border">
                     <h2 class="font-mono-tech text-sm uppercase tracking-widest mb-2">Previously</h2>
                 </div>
 
