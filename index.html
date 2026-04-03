@@ -34,6 +34,8 @@
             --border: #111111;
             --accent: #0000ff; /* Deep electric blue for subtle links */
             --section-band-bg: #f4f4f0;
+            --selection-bg: #111111;
+            --selection-fg: #e0e0e0;
         }
  
         .dark {
@@ -42,12 +44,24 @@
             --border: #444444;
             --accent: #40A2E3;
             --section-band-bg: #000000;
+            --selection-bg: #f4f4f0;
+            --selection-fg: #111111;
         }
 
         body {
             background-color: var(--bg);
             color: var(--fg);
             transition: background-color 0.1s, color 0.1s;
+        }
+
+        ::selection {
+            background-color: var(--selection-bg);
+            color: var(--selection-fg);
+        }
+
+        ::-moz-selection {
+            background-color: var(--selection-bg);
+            color: var(--selection-fg);
         }
 
         /* Typography */
@@ -239,7 +253,7 @@
         }
     </style>
 </head>
-<body class="antialiased min-h-screen font-akzidenz selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
+<body class="antialiased min-h-screen font-akzidenz">
 
     <div class="md:flex min-h-screen">
         
@@ -526,7 +540,7 @@
                     </a>
 
                     <!-- Demographic IQ -->
-                    <div class="index-row border-b brutal-border p-6 md:p-10" data-card-link="demographic_iq.html" data-card-target="_blank" role="link" tabindex="0">
+                    <div class="index-row border-b brutal-border p-6 md:p-10" data-card-link="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" data-card-target="_blank" role="link" tabindex="0">
                         <div class="md:flex md:gap-8 items-start">
                             <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
                                 <div class="w-full h-48 overflow-hidden">
@@ -539,7 +553,7 @@
                                 <p class="text-base mb-4">Voter information tool for the 2024 presidential election.</p>
                                 <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
                                     <a href="demographic_iq.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web App</a>
-                                    <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" class="card-link-chip" target="_blank" rel="noopener noreferrer">News</a>
+                                    <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" class="card-link-chip" target="_blank" rel="noopener noreferrer">Press</a>
                                     <a href="https://x.com/0xalexrez/status/1851390704796176734" class="card-link-chip" target="_blank" rel="noopener noreferrer">Tweet</a>
                                 </div>
                             </div>

@@ -24,6 +24,8 @@
             --fg: #111111;
             --border: #111111;
             --accent: #0000ff;
+            --selection-bg: #111111;
+            --selection-fg: #e0e0e0;
         }
 
         .dark {
@@ -31,6 +33,8 @@
             --fg: #e0e0e0;
             --border: #444444;
             --accent: #40A2E3;
+            --selection-bg: #f4f4f0;
+            --selection-fg: #111111;
         }
 
         body {
@@ -39,6 +43,16 @@
             transition: background-color 0.1s, color 0.1s;
             font-family: 'Akzidenz-Grotesk Pro', sans-serif;
             font-weight: 500;
+        }
+
+        ::selection {
+            background-color: var(--selection-bg);
+            color: var(--selection-fg);
+        }
+
+        ::-moz-selection {
+            background-color: var(--selection-bg);
+            color: var(--selection-fg);
         }
 
         .font-mono-tech {
