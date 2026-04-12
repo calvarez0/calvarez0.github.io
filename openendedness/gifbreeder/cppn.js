@@ -1,7 +1,6 @@
-/**
- * CPPN Implementation - Based on nbenko1's PicBreeder
- */
 
+/* The set of functions used within CPPNs in the original Picbreeder are 
+cosine, sine, Gaussian, identity, and sigmoid. */
 const ActivationFunctions = {
     sigmoid: (x) => 1 / (1 + Math.exp(-x)),
     tanh: (x) => Math.tanh(x),

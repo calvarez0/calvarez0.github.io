@@ -363,6 +363,14 @@ function loadSeedGenomeFromSession() {
 
         const parsed = JSON.parse(raw);
         if (!parsed || !parsed.genome) return false;
+        if (window.NEAT && typeof window.NEAT.resetInnovationState === 'function') {
+            window.NEAT.resetInnovationState();
+        }
+        if (parsed.innovationState
+            && window.NEAT
+            && typeof window.NEAT.importInnovationState === 'function') {
+            window.NEAT.importInnovationState(parsed.innovationState);
+        }
 
         const genome = NEAT.Genome.deserialize(parsed.genome);
         const label = typeof parsed.label === 'string'
@@ -500,6 +508,9 @@ function handleGenomeUpload(event) {
         try {
             const raw = typeof reader.result === 'string' ? reader.result : '';
             const parsed = JSON.parse(raw);
+            if (window.NEAT && typeof window.NEAT.resetInnovationState === 'function') {
+                window.NEAT.resetInnovationState();
+            }
             const loadResult = parseGenomePayload(parsed);
 
             applyLoadedGenome(loadResult.genome, loadResult.label || file.name);
@@ -520,6 +531,12 @@ function handleGenomeUpload(event) {
 function parseGenomePayload(payload) {
     if (!payload || typeof payload !== 'object') {
         throw new Error('missing genome payload');
+    }
+
+    if (payload.innovationState
+        && window.NEAT
+        && typeof window.NEAT.importInnovationState === 'function') {
+        window.NEAT.importInnovationState(payload.innovationState);
     }
 
     if (Array.isArray(payload.genomes) && payload.genomes.length > 0) {
@@ -732,6 +749,9 @@ function downloadLabGenomeJson() {
         format: 'cppn-activation-lab-genome-v1',
         savedAt: new Date().toISOString(),
         label: LabState.loadedGenomeName || `Genome ${LabState.genome.id}`,
+        innovationState: window.NEAT && typeof window.NEAT.exportInnovationState === 'function'
+            ? window.NEAT.exportInnovationState()
+            : null,
         genome: serialized
     };
 

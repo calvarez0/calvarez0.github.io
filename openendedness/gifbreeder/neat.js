@@ -21,18 +21,218 @@ const NEAT_CONFIG = {
     weightMin: -5,
     weightMax: 5,
 
-    // PicBreeder activation functions
+    // Activation functions
     activationFunctions: ['sigmoid', 'tanh', 'gaussian', 'sin', 'cos', 'abs', 'relu', 'identity']
 };
 
 let NEXT_HISTORY_ID = 1;
+let NEXT_CONNECTION_INNOVATION = 1;
 const REQUIRED_INPUT_LABELS = ['x', 'y', 'd', 't', 'bias'];
 const REQUIRED_OUTPUT_LABELS = ['R', 'G', 'B'];
+const CANONICAL_INPUT_NODE_IDS = Object.freeze({
+    x: 0,
+    y: 1,
+    d: 2,
+    t: 3,
+    bias: 4
+});
+const CANONICAL_OUTPUT_NODE_IDS = Object.freeze({
+    R: 5,
+    G: 6,
+    B: 7
+});
+let NEXT_NODE_ID = Math.max(...Object.values(CANONICAL_OUTPUT_NODE_IDS)) + 1;
+const CONNECTION_INNOVATION_BY_KEY = new Map();
+const CONNECTION_KEY_BY_INNOVATION = new Map();
+const SPLIT_MUTATION_RECORDS = new Map();
 const LEGACY_OUTPUT_LABEL_MAP = {
     H: 'R',
     S: 'G',
     V: 'B'
 };
+
+function isValidNodeId(nodeId) {
+    return Number.isInteger(nodeId) && nodeId >= 0;
+}
+
+function isValidInnovationNumber(innovation) {
+    return Number.isInteger(innovation) && innovation > 0;
+}
+
+function observeNodeId(nodeId) {
+    if (!isValidNodeId(nodeId)) return null;
+    NEXT_NODE_ID = Math.max(NEXT_NODE_ID, nodeId + 1);
+    return nodeId;
+}
+
+function allocateNodeId() {
+    return observeNodeId(NEXT_NODE_ID);
+}
+
+function getCanonicalNodeId(type, label) {
+    if (type === 'input') return CANONICAL_INPUT_NODE_IDS[label] ?? null;
+    if (type === 'output') return CANONICAL_OUTPUT_NODE_IDS[normalizeOutputLabel(label)] ?? null;
+    return null;
+}
+
+function getConnectionInnovationKey(fromId, toId) {
+    return `${fromId}->${toId}`;
+}
+
+function registerConnectionInnovation(fromId, toId, innovation = null) {
+    const key = getConnectionInnovationKey(fromId, toId);
+    const existingInnovation = CONNECTION_INNOVATION_BY_KEY.get(key);
+
+    if (isValidInnovationNumber(existingInnovation)) {
+        if (isValidInnovationNumber(innovation)) {
+            NEXT_CONNECTION_INNOVATION = Math.max(NEXT_CONNECTION_INNOVATION, innovation + 1);
+            CONNECTION_KEY_BY_INNOVATION.set(innovation, key);
+        }
+        return existingInnovation;
+    }
+
+    const resolvedInnovation = isValidInnovationNumber(innovation)
+        ? innovation
+        : NEXT_CONNECTION_INNOVATION++;
+
+    CONNECTION_INNOVATION_BY_KEY.set(key, resolvedInnovation);
+    CONNECTION_KEY_BY_INNOVATION.set(resolvedInnovation, key);
+    NEXT_CONNECTION_INNOVATION = Math.max(NEXT_CONNECTION_INNOVATION, resolvedInnovation + 1);
+    return resolvedInnovation;
+}
+
+function registerSplitMutation(sourceConnection, options = {}) {
+    if (!sourceConnection) return null;
+
+    const sourceInnovation = registerConnectionInnovation(
+        sourceConnection.fromId,
+        sourceConnection.toId,
+        sourceConnection.innovation
+    );
+
+    const existingRecord = SPLIT_MUTATION_RECORDS.get(sourceInnovation);
+    if (existingRecord) {
+        observeNodeId(existingRecord.nodeId);
+        registerConnectionInnovation(
+            sourceConnection.fromId,
+            existingRecord.nodeId,
+            existingRecord.fromInnovation
+        );
+        registerConnectionInnovation(
+            existingRecord.nodeId,
+            sourceConnection.toId,
+            existingRecord.toInnovation
+        );
+        return { ...existingRecord };
+    }
+
+    const nodeId = isValidNodeId(options.nodeId)
+        ? observeNodeId(options.nodeId)
+        : allocateNodeId();
+    const activation = typeof options.activation === 'string'
+        ? options.activation
+        : 'sigmoid';
+    const fromInnovation = registerConnectionInnovation(
+        sourceConnection.fromId,
+        nodeId,
+        options.fromInnovation
+    );
+    const toInnovation = registerConnectionInnovation(
+        nodeId,
+        sourceConnection.toId,
+        options.toInnovation
+    );
+    const record = {
+        sourceInnovation,
+        nodeId,
+        activation,
+        fromInnovation,
+        toInnovation
+    };
+
+    SPLIT_MUTATION_RECORDS.set(sourceInnovation, record);
+    return { ...record };
+}
+
+function resetInnovationTracking() {
+    NEXT_CONNECTION_INNOVATION = 1;
+    NEXT_NODE_ID = Math.max(...Object.values(CANONICAL_OUTPUT_NODE_IDS)) + 1;
+    CONNECTION_INNOVATION_BY_KEY.clear();
+    CONNECTION_KEY_BY_INNOVATION.clear();
+    SPLIT_MUTATION_RECORDS.clear();
+}
+
+function exportInnovationState() {
+    return {
+        nextConnectionInnovation: NEXT_CONNECTION_INNOVATION,
+        nextNodeId: NEXT_NODE_ID,
+        connectionInnovations: Array.from(CONNECTION_INNOVATION_BY_KEY.entries())
+            .map(([key, innovation]) => ({ key, innovation }))
+            .sort((a, b) => a.innovation - b.innovation),
+        splitMutations: Array.from(SPLIT_MUTATION_RECORDS.entries())
+            .map(([sourceInnovation, record]) => ({
+                sourceInnovation,
+                nodeId: record.nodeId,
+                activation: record.activation,
+                fromInnovation: record.fromInnovation,
+                toInnovation: record.toInnovation
+            }))
+            .sort((a, b) => a.sourceInnovation - b.sourceInnovation)
+    };
+}
+
+function importInnovationState(state, options = {}) {
+    if (options.reset === true) {
+        resetInnovationTracking();
+    }
+
+    if (!state || typeof state !== 'object') return;
+
+    if (Array.isArray(state.connectionInnovations)) {
+        for (const entry of state.connectionInnovations) {
+            if (!entry || typeof entry !== 'object') continue;
+            let fromId = null;
+            let toId = null;
+
+            if (typeof entry.key === 'string') {
+                const match = /^(-?\d+)->(-?\d+)$/.exec(entry.key);
+                if (match) {
+                    fromId = Number.parseInt(match[1], 10);
+                    toId = Number.parseInt(match[2], 10);
+                }
+            }
+
+            if (!isValidNodeId(fromId) || !isValidNodeId(toId)) continue;
+            registerConnectionInnovation(fromId, toId, entry.innovation);
+            observeNodeId(fromId);
+            observeNodeId(toId);
+        }
+    }
+
+    if (Array.isArray(state.splitMutations)) {
+        for (const entry of state.splitMutations) {
+            if (!entry || typeof entry !== 'object') continue;
+            if (!isValidInnovationNumber(entry.sourceInnovation)) continue;
+            if (!isValidNodeId(entry.nodeId)) continue;
+
+            observeNodeId(entry.nodeId);
+            SPLIT_MUTATION_RECORDS.set(entry.sourceInnovation, {
+                sourceInnovation: entry.sourceInnovation,
+                nodeId: entry.nodeId,
+                activation: typeof entry.activation === 'string' ? entry.activation : 'sigmoid',
+                fromInnovation: isValidInnovationNumber(entry.fromInnovation) ? entry.fromInnovation : null,
+                toInnovation: isValidInnovationNumber(entry.toInnovation) ? entry.toInnovation : null
+            });
+        }
+    }
+
+    if (Number.isInteger(state.nextConnectionInnovation) && state.nextConnectionInnovation > 0) {
+        NEXT_CONNECTION_INNOVATION = Math.max(NEXT_CONNECTION_INNOVATION, state.nextConnectionInnovation);
+    }
+    if (isValidNodeId(state.nextNodeId)) {
+        NEXT_NODE_ID = Math.max(NEXT_NODE_ID, state.nextNodeId);
+    }
+}
 
 function normalizeOutputLabel(label) {
     if (typeof label !== 'string') return label;
@@ -94,6 +294,35 @@ function syncNextHistoryIdFromGenome(genome) {
     }
 }
 
+function syncInnovationTrackingFromGenome(genome) {
+    if (!genome) return;
+
+    for (const node of genome.nodes.values()) {
+        observeNodeId(node.id);
+    }
+    for (const conn of genome.connections) {
+        observeNodeId(conn.fromId);
+        observeNodeId(conn.toId);
+        if (isValidInnovationNumber(conn.innovation)) {
+            registerConnectionInnovation(conn.fromId, conn.toId, conn.innovation);
+        }
+    }
+
+    for (const record of Object.values(genome.lineageRecords || {})) {
+        if (!record || typeof record !== 'object') continue;
+        for (const node of Array.isArray(record.nodes) ? record.nodes : []) {
+            observeNodeId(node.id);
+        }
+        for (const conn of Array.isArray(record.connections) ? record.connections : []) {
+            observeNodeId(conn.fromId);
+            observeNodeId(conn.toId);
+            if (isValidInnovationNumber(conn.innovation)) {
+                registerConnectionInnovation(conn.fromId, conn.toId, conn.innovation);
+            }
+        }
+    }
+}
+
 class NodeGene {
     constructor(id, type, activation = 'sigmoid') {
         this.id = id;
@@ -110,15 +339,16 @@ class NodeGene {
 }
 
 class ConnectionGene {
-    constructor(fromId, toId, weight, enabled = true) {
+    constructor(fromId, toId, weight, enabled = true, innovation = null) {
         this.fromId = fromId;
         this.toId = toId;
         this.weight = weight;
         this.enabled = enabled;
+        this.innovation = registerConnectionInnovation(fromId, toId, innovation);
     }
 
     clone() {
-        return new ConnectionGene(this.fromId, this.toId, this.weight, this.enabled);
+        return new ConnectionGene(this.fromId, this.toId, this.weight, this.enabled, this.innovation);
     }
 }
 
@@ -126,7 +356,7 @@ class Genome {
     constructor() {
         this.nodes = new Map();
         this.connections = [];
-        this.nextNodeId = 0;
+        this.nextNodeId = NEXT_NODE_ID;
         this.id = Math.random().toString(36).substr(2, 9);
         this.historyId = getNextHistoryId();
         this.generation = 1;
@@ -134,8 +364,15 @@ class Genome {
         this.lineageRecords = {};
     }
 
+    trackNodeId(nodeId) {
+        if (!isValidNodeId(nodeId)) return null;
+        observeNodeId(nodeId);
+        this.nextNodeId = Math.max(this.nextNodeId, nodeId + 1);
+        return nodeId;
+    }
+
     getNextNodeId() {
-        return this.nextNodeId++;
+        return this.trackNodeId(allocateNodeId());
     }
 
     // GifBreeder mapping: x, y, d, t, bias -> R, G, B
@@ -146,7 +383,7 @@ class Genome {
         const inputLabels = REQUIRED_INPUT_LABELS;
         const inputIds = [];
         for (const label of inputLabels) {
-            const id = genome.getNextNodeId();
+            const id = genome.trackNodeId(getCanonicalNodeId('input', label));
             const node = new NodeGene(id, 'input', 'identity');
             node.label = label;
             genome.nodes.set(id, node);
@@ -157,7 +394,7 @@ class Genome {
         const outputLabels = REQUIRED_OUTPUT_LABELS;
         const outputIds = [];
         for (const label of outputLabels) {
-            const id = genome.getNextNodeId();
+            const id = genome.trackNodeId(getCanonicalNodeId('output', label));
             const node = new NodeGene(id, 'output', 'identity');
             node.label = label;
             genome.nodes.set(id, node);
@@ -213,7 +450,7 @@ class Genome {
         for (const label of REQUIRED_INPUT_LABELS) {
             if (inputLabelToNode.has(label)) continue;
 
-            const id = this.getNextNodeId();
+            const id = this.trackNodeId(getCanonicalNodeId('input', label));
             const node = new NodeGene(id, 'input', 'identity');
             node.label = label;
             this.nodes.set(id, node);
@@ -245,7 +482,7 @@ class Genome {
         for (const label of REQUIRED_OUTPUT_LABELS) {
             if (outputLabelToNode.has(label)) continue;
 
-            const id = this.getNextNodeId();
+            const id = this.trackNodeId(getCanonicalNodeId('output', label));
             const node = new NodeGene(id, 'output', 'identity');
             node.label = label;
             this.nodes.set(id, node);
@@ -277,6 +514,113 @@ class Genome {
         return genome;
     }
 
+    static cloneSerializedLineageRecord(record) {
+        if (!record || typeof record !== 'object') return null;
+        return {
+            ...record,
+            nodes: Array.isArray(record.nodes) ? record.nodes.map((node) => ({ ...node })) : [],
+            connections: Array.isArray(record.connections) ? record.connections.map((conn) => ({ ...conn })) : []
+        };
+    }
+
+    static prepareSerializedGenome(serializedGenome) {
+        const prepared = {
+            ...serializedGenome,
+            nodes: Array.isArray(serializedGenome.nodes)
+                ? serializedGenome.nodes.map((node) => ({ ...node }))
+                : [],
+            connections: Array.isArray(serializedGenome.connections)
+                ? serializedGenome.connections.map((conn) => ({ ...conn }))
+                : []
+        };
+
+        prepared.lineageRecords = {};
+        if (serializedGenome.lineageRecords && typeof serializedGenome.lineageRecords === 'object') {
+            for (const [historyId, record] of Object.entries(serializedGenome.lineageRecords)) {
+                const clonedRecord = Genome.cloneSerializedLineageRecord(record);
+                if (clonedRecord) prepared.lineageRecords[historyId] = clonedRecord;
+            }
+        }
+
+        const allConnectionLists = [prepared.connections];
+        for (const record of Object.values(prepared.lineageRecords)) {
+            allConnectionLists.push(Array.isArray(record.connections) ? record.connections : []);
+        }
+        const hasCompleteInnovationData = allConnectionLists.every((connections) => {
+            return connections.every((conn) => isValidInnovationNumber(conn.innovation));
+        });
+
+        if (!hasCompleteInnovationData) {
+            Genome.upgradeLegacySerializedGenome(prepared);
+        }
+
+        return prepared;
+    }
+
+    static upgradeLegacySerializedGenome(serializedGenome) {
+        const nodeIdMap = new Map();
+        const nodeCollections = [serializedGenome.nodes];
+        const connectionCollections = [serializedGenome.connections];
+
+        for (const record of Object.values(serializedGenome.lineageRecords || {})) {
+            if (!record || typeof record !== 'object') continue;
+            nodeCollections.push(Array.isArray(record.nodes) ? record.nodes : []);
+            connectionCollections.push(Array.isArray(record.connections) ? record.connections : []);
+        }
+
+        const remapNodes = (nodes) => {
+            for (const nodeData of nodes) {
+                if (!nodeData || !nodeData.type) continue;
+
+                const oldId = nodeData.id;
+                nodeData.label = normalizeNodeLabel(nodeData.type, nodeData.label) || null;
+
+                if (!isValidNodeId(oldId)) {
+                    const canonicalId = getCanonicalNodeId(nodeData.type, nodeData.label);
+                    nodeData.id = isValidNodeId(canonicalId) ? canonicalId : allocateNodeId();
+                    observeNodeId(nodeData.id);
+                    continue;
+                }
+
+                if (!nodeIdMap.has(oldId)) {
+                    const canonicalId = getCanonicalNodeId(nodeData.type, nodeData.label);
+                    nodeIdMap.set(
+                        oldId,
+                        isValidNodeId(canonicalId) ? canonicalId : allocateNodeId()
+                    );
+                }
+
+                nodeData.id = nodeIdMap.get(oldId);
+                observeNodeId(nodeData.id);
+            }
+        };
+
+        const remapNodeId = (nodeId) => {
+            if (!isValidNodeId(nodeId)) return nodeId;
+            if (nodeIdMap.has(nodeId)) return nodeIdMap.get(nodeId);
+            return nodeId;
+        };
+
+        for (const nodes of nodeCollections) {
+            remapNodes(Array.isArray(nodes) ? nodes : []);
+        }
+
+        for (const connections of connectionCollections) {
+            for (const connData of Array.isArray(connections) ? connections : []) {
+                if (!connData) continue;
+                connData.fromId = remapNodeId(connData.fromId);
+                connData.toId = remapNodeId(connData.toId);
+                if (isValidNodeId(connData.fromId)) observeNodeId(connData.fromId);
+                if (isValidNodeId(connData.toId)) observeNodeId(connData.toId);
+                connData.innovation = registerConnectionInnovation(
+                    connData.fromId,
+                    connData.toId,
+                    connData.innovation
+                );
+            }
+        }
+    }
+
     serialize() {
         this.updateLineageRecord();
 
@@ -305,42 +649,50 @@ class Genome {
         const genome = new Genome();
         genome.nodes = new Map();
         genome.connections = [];
+        const preparedGenome = Genome.prepareSerializedGenome(serializedGenome);
 
         let maxNodeId = -1;
-        for (const nodeData of serializedGenome.nodes) {
+        for (const nodeData of preparedGenome.nodes) {
             if (!Number.isInteger(nodeData.id) || !nodeData.type) continue;
             const activation = typeof nodeData.activation === 'string' ? nodeData.activation : 'sigmoid';
             const node = new NodeGene(nodeData.id, nodeData.type, activation);
             node.label = normalizeNodeLabel(node.type, nodeData.label) || null;
             genome.nodes.set(node.id, node);
             if (node.id > maxNodeId) maxNodeId = node.id;
+            genome.trackNodeId(node.id);
         }
 
-        for (const connData of serializedGenome.connections) {
+        for (const connData of preparedGenome.connections) {
             if (!Number.isInteger(connData.fromId) || !Number.isInteger(connData.toId)) continue;
             const weight = Number.isFinite(connData.weight) ? connData.weight : 0;
             const enabled = connData.enabled !== false;
-            genome.connections.push(new ConnectionGene(connData.fromId, connData.toId, weight, enabled));
+            genome.connections.push(new ConnectionGene(
+                connData.fromId,
+                connData.toId,
+                weight,
+                enabled,
+                connData.innovation
+            ));
         }
 
         if (genome.nodes.size === 0 || genome.connections.length === 0) {
             throw new Error('genome has no usable nodes/connections');
         }
 
-        genome.nextNodeId = Number.isInteger(serializedGenome.nextNodeId)
-            ? serializedGenome.nextNodeId
+        genome.nextNodeId = Number.isInteger(preparedGenome.nextNodeId)
+            ? preparedGenome.nextNodeId
             : (maxNodeId + 1);
         genome.nextNodeId = Math.max(genome.nextNodeId, maxNodeId + 1);
-        genome.id = typeof serializedGenome.id === 'string' ? serializedGenome.id : genome.id;
-        genome.historyId = typeof serializedGenome.historyId === 'string' ? serializedGenome.historyId : genome.historyId;
-        genome.generation = Number.isFinite(serializedGenome.generation) ? serializedGenome.generation : genome.generation;
-        genome.parentHistoryIds = Array.isArray(serializedGenome.parentHistoryIds)
-            ? serializedGenome.parentHistoryIds.filter((id) => typeof id === 'string')
+        genome.id = typeof preparedGenome.id === 'string' ? preparedGenome.id : genome.id;
+        genome.historyId = typeof preparedGenome.historyId === 'string' ? preparedGenome.historyId : genome.historyId;
+        genome.generation = Number.isFinite(preparedGenome.generation) ? preparedGenome.generation : genome.generation;
+        genome.parentHistoryIds = Array.isArray(preparedGenome.parentHistoryIds)
+            ? preparedGenome.parentHistoryIds.filter((id) => typeof id === 'string')
             : [];
 
         genome.lineageRecords = {};
-        if (serializedGenome.lineageRecords && typeof serializedGenome.lineageRecords === 'object') {
-            for (const [historyId, record] of Object.entries(serializedGenome.lineageRecords)) {
+        if (preparedGenome.lineageRecords && typeof preparedGenome.lineageRecords === 'object') {
+            for (const [historyId, record] of Object.entries(preparedGenome.lineageRecords)) {
                 if (!record || typeof record !== 'object') continue;
                 const normalizedRecord = {
                     ...record,
@@ -357,6 +709,7 @@ class Genome {
             genome.updateLineageRecord();
         }
 
+        syncInnovationTrackingFromGenome(genome);
         syncNextHistoryIdFromGenome(genome);
         return genome;
     }
@@ -426,9 +779,13 @@ class Genome {
                 fromId: conn.fromId,
                 toId: conn.toId,
                 weight: conn.weight,
-                enabled: conn.enabled
+                enabled: conn.enabled,
+                innovation: conn.innovation
             }))
             .sort((a, b) => {
+                if ((a.innovation || 0) !== (b.innovation || 0)) {
+                    return (a.innovation || 0) - (b.innovation || 0);
+                }
                 if (a.fromId !== b.fromId) return a.fromId - b.fromId;
                 return a.toId - b.toId;
             });
@@ -538,17 +895,31 @@ class Genome {
 
         const conn = enabledConns[Math.floor(Math.random() * enabledConns.length)];
         conn.enabled = false;
-
-        const newId = this.getNextNodeId();
         const activation = NEAT_CONFIG.activationFunctions[
             Math.floor(Math.random() * NEAT_CONFIG.activationFunctions.length)
         ];
+        const splitRecord = registerSplitMutation(conn, { activation });
 
-        const newNode = new NodeGene(newId, 'hidden', activation);
-        this.nodes.set(newId, newNode);
+        this.trackNodeId(splitRecord.nodeId);
+        if (!this.nodes.has(splitRecord.nodeId)) {
+            const newNode = new NodeGene(splitRecord.nodeId, 'hidden', splitRecord.activation);
+            this.nodes.set(splitRecord.nodeId, newNode);
+        }
 
-        this.connections.push(new ConnectionGene(conn.fromId, newId, 1.0));
-        this.connections.push(new ConnectionGene(newId, conn.toId, conn.weight));
+        this.connections.push(new ConnectionGene(
+            conn.fromId,
+            splitRecord.nodeId,
+            1.0,
+            true,
+            splitRecord.fromInnovation
+        ));
+        this.connections.push(new ConnectionGene(
+            splitRecord.nodeId,
+            conn.toId,
+            conn.weight,
+            true,
+            splitRecord.toInnovation
+        ));
     }
 
     addRandomConnection() {
@@ -609,51 +980,82 @@ class Genome {
 
     static crossover(parent1, parent2) {
         const child = new Genome();
-        child.nextNodeId = Math.max(parent1.nextNodeId, parent2.nextNodeId);
+        child.nextNodeId = Math.max(parent1.nextNodeId, parent2.nextNodeId, NEXT_NODE_ID);
 
-        for (const [id, node] of parent1.nodes) {
-            child.nodes.set(id, node.clone());
-        }
-        for (const [id, node] of parent2.nodes) {
-            if (!child.nodes.has(id)) {
-                child.nodes.set(id, node.clone());
-            }
-        }
+        const dominantParent = Math.random() < 0.5 ? parent1 : parent2;
+        const recessiveParent = dominantParent === parent1 ? parent2 : parent1;
+        const dominantMap = new Map();
+        const recessiveMap = new Map();
 
-        const p1Conns = new Map();
-        for (const conn of parent1.connections) {
-            p1Conns.set(`${conn.fromId}-${conn.toId}`, conn);
+        for (const conn of dominantParent.connections) {
+            if (!isValidInnovationNumber(conn.innovation)) continue;
+            dominantMap.set(conn.innovation, conn);
         }
-
-        const p2Conns = new Map();
-        for (const conn of parent2.connections) {
-            p2Conns.set(`${conn.fromId}-${conn.toId}`, conn);
+        for (const conn of recessiveParent.connections) {
+            if (!isValidInnovationNumber(conn.innovation)) continue;
+            recessiveMap.set(conn.innovation, conn);
         }
 
-        const allKeys = new Set([...p1Conns.keys(), ...p2Conns.keys()]);
+        const sortedInnovations = Array.from(new Set([
+            ...dominantMap.keys(),
+            ...recessiveMap.keys()
+        ])).sort((a, b) => a - b);
 
-        for (const key of allKeys) {
-            const c1 = p1Conns.get(key);
-            const c2 = p2Conns.get(key);
-            let chosen = null;
+        const inheritedConnections = [];
+        for (const innovation of sortedInnovations) {
+            const dominantConn = dominantMap.get(innovation) || null;
+            const recessiveConn = recessiveMap.get(innovation) || null;
+            let candidate = null;
 
-            if (c1 && c2) {
-                chosen = Math.random() < 0.5 ? c1 : c2;
-            } else if (c1) {
-                chosen = c1;
-            } else if (c2) {
-                chosen = c2;
-            }
+            if (dominantConn && recessiveConn) {
+                const weightSource = Math.random() < 0.5 ? dominantConn : recessiveConn;
+                let enabled = weightSource.enabled;
+                if (dominantConn.enabled === false || recessiveConn.enabled === false) {
+                    enabled = Math.random() >= 0.75;
+                }
 
-            if (!chosen) continue;
-
-            const candidate = chosen.clone();
-            if (candidate.enabled && child.createsCycle(candidate.fromId, candidate.toId)) {
+                candidate = new ConnectionGene(
+                    dominantConn.fromId,
+                    dominantConn.toId,
+                    weightSource.weight,
+                    enabled,
+                    innovation
+                );
+            } else if (dominantConn) {
+                candidate = dominantConn.clone();
+            } else {
                 continue;
             }
 
-            child.connections.push(candidate);
+            if (candidate.enabled && child.createsCycle(candidate.fromId, candidate.toId)) {
+                continue;
+            }
+            inheritedConnections.push(candidate);
         }
+
+        const copyNodeFromParents = (nodeId) => {
+            if (!isValidNodeId(nodeId) || child.nodes.has(nodeId)) return;
+            const sourceNode = dominantParent.nodes.get(nodeId) || recessiveParent.nodes.get(nodeId);
+            if (!sourceNode) return;
+            child.nodes.set(nodeId, sourceNode.clone());
+            child.trackNodeId(nodeId);
+        };
+
+        for (const parent of [dominantParent, recessiveParent]) {
+            for (const node of parent.nodes.values()) {
+                if (node.type === 'input' || node.type === 'output') {
+                    copyNodeFromParents(node.id);
+                }
+            }
+        }
+        for (const conn of inheritedConnections) {
+            copyNodeFromParents(conn.fromId);
+            copyNodeFromParents(conn.toId);
+        }
+
+        child.connections = inheritedConnections;
+        child.ensureRequiredInputs();
+        child.ensureRequiredOutputs();
 
         return child;
     }
@@ -741,6 +1143,7 @@ class Genome {
         return {
             format: 'cppn-lineage-v1',
             exportedAt: new Date().toISOString(),
+            innovationState: exportInnovationState(),
             genome: {
                 id: this.id,
                 historyId: this.historyId,
@@ -793,6 +1196,7 @@ class Population {
     }
 
     initialize() {
+        resetInnovationTracking();
         this.genomes = [];
         this.generation = 1;
 
@@ -887,6 +1291,7 @@ class Population {
         return {
             format: 'cppn-population-v1',
             exportedAt: new Date().toISOString(),
+            innovationState: exportInnovationState(),
             size: this.size,
             generation: this.generation,
             genomes: this.genomes.map((genome) => genome.serialize())
@@ -903,6 +1308,11 @@ class Population {
     static fromState(state) {
         if (!state || !Array.isArray(state.genomes) || state.genomes.length === 0) {
             throw new Error('invalid population state');
+        }
+
+        resetInnovationTracking();
+        if (state.innovationState && typeof state.innovationState === 'object') {
+            importInnovationState(state.innovationState);
         }
 
         const size = Number.isInteger(state.size) && state.size > 0
@@ -923,5 +1333,8 @@ window.NEAT = {
     ConnectionGene,
     Genome,
     Population,
-    CONFIG: NEAT_CONFIG
+    CONFIG: NEAT_CONFIG,
+    exportInnovationState,
+    importInnovationState,
+    resetInnovationState: resetInnovationTracking
 };

@@ -187,6 +187,9 @@ function buildPopulationStateForSession(compact = false) {
     return {
         format: 'cppn-population-v1',
         exportedAt: new Date().toISOString(),
+        innovationState: window.NEAT && typeof window.NEAT.exportInnovationState === 'function'
+            ? window.NEAT.exportInnovationState()
+            : null,
         size: AppState.population.size,
         generation: AppState.population.generation,
         genomes: genomes.map((genome) => serializeGenomeForStorage(genome, false)),
@@ -309,6 +312,12 @@ function parseArchiveGenomePayload(payload) {
         throw new Error('invalid genome payload');
     }
 
+    if (payload.innovationState
+        && window.NEAT
+        && typeof window.NEAT.importInnovationState === 'function') {
+        window.NEAT.importInnovationState(payload.innovationState);
+    }
+
     if (payload.genome && typeof payload.genome === 'object') {
         const serialized = { ...payload.genome };
         if (payload.lineage && payload.lineage.records && typeof payload.lineage.records === 'object') {
@@ -393,6 +402,10 @@ async function getArchiveGenomeFiles() {
 }
 
 async function loadPopulationFromArchive(targetSize = GRID_SIZE) {
+    if (window.NEAT && typeof window.NEAT.resetInnovationState === 'function') {
+        window.NEAT.resetInnovationState();
+    }
+
     const archiveFiles = await getArchiveGenomeFiles();
     if (archiveFiles.length === 0) {
         throw new Error('archive has no readable genome JSON files');
@@ -492,6 +505,9 @@ function seedActivationLabFromCurrentGenome() {
             format: 'cppn-activation-seed-v1',
             savedAt: new Date().toISOString(),
             label: `Genome ${genome.id}`,
+            innovationState: window.NEAT && typeof window.NEAT.exportInnovationState === 'function'
+                ? window.NEAT.exportInnovationState()
+                : null,
             genome: serializeGenomeForStorage(genome, false)
         };
         sessionStorage.setItem(LAB_SEED_STORAGE_KEY, JSON.stringify(payload));
@@ -896,6 +912,9 @@ function handleStartFromUploadedGenome(event) {
         try {
             const raw = typeof reader.result === 'string' ? reader.result : '';
             const parsed = JSON.parse(raw);
+            if (window.NEAT && typeof window.NEAT.resetInnovationState === 'function') {
+                window.NEAT.resetInnovationState();
+            }
             const seedGenome = parseArchiveGenomePayload(parsed);
             applyMutationProfile('steppingStone');
             AppState.population = createPopulationFromSeedGenome(seedGenome, GRID_SIZE);
