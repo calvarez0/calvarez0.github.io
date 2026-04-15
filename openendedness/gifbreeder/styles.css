@@ -150,6 +150,16 @@ body {
     margin-left: auto;
 }
 
+.undo-redo-btn {
+    padding: 8px 10px;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.undo-redo-btn.hidden {
+    display: none;
+}
+
 .primary-btn, .secondary-btn {
     background: transparent;
     color: var(--fg);

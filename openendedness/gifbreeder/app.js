@@ -12,14 +12,22 @@ const AppState = {
     panelMode: 'network',
     cells: [],
     sessionSaveMode: 'full',
-    mutationProfile: 'steppingStone'
+    mutationProfile: 'steppingStone',
+    undoStack: [],
+    redoStack: []
 };
+const MAX_UNDO_HISTORY = 50;
 const GRID_SIZE = 20;
 const MOBILE_LAYOUT_BREAKPOINT = 900;
 const EVOLUTION_STATE_STORAGE_KEY = 'cppn-evolution-state-v1';
 const LAB_SEED_STORAGE_KEY = 'cppn-activation-seed-v1';
 const ARCHIVE_DIR = 'archive';
 const ARCHIVE_MANIFEST_PATH = `${ARCHIVE_DIR}/manifest.json`;
+const ArchiveLineageCache = {
+    recordsByHistoryId: new Map(),
+    loaded: false,
+    loadPromise: null
+};
 const MUTATION_PROFILES = {
     steppingStone: {
         weightMutationRate: 0.1,
@@ -65,6 +73,60 @@ function applyMutationProfile(profileName) {
         Object.assign(window.NEAT.CONFIG, profile);
     }
     AppState.mutationProfile = resolvedProfileName;
+}
+
+function snapshotState() {
+    if (!AppState.population) return null;
+    return {
+        population: AppState.population.exportState(),
+        mutationProfile: AppState.mutationProfile
+    };
+}
+
+function restoreSnapshot(snapshot) {
+    if (!snapshot || !snapshot.population) return;
+    AppState.population = NEAT.Population.fromState(snapshot.population);
+    applyMutationProfile(snapshot.mutationProfile || 'steppingStone');
+    AppState.selectedGenomes.clear();
+    AppState.viewingGenome = null;
+    renderPopulation({ preserveState: false });
+}
+
+function pushUndo() {
+    const snapshot = snapshotState();
+    if (!snapshot) return;
+    AppState.undoStack.push(snapshot);
+    if (AppState.undoStack.length > MAX_UNDO_HISTORY) {
+        AppState.undoStack.shift();
+    }
+    AppState.redoStack.length = 0;
+    updateUndoRedoUI();
+}
+
+function handleUndo() {
+    if (AppState.undoStack.length === 0) return;
+    const current = snapshotState();
+    if (current) AppState.redoStack.push(current);
+    restoreSnapshot(AppState.undoStack.pop());
+    updateUndoRedoUI();
+}
+
+function handleRedo() {
+    if (AppState.redoStack.length === 0) return;
+    const current = snapshotState();
+    if (current) AppState.undoStack.push(current);
+    restoreSnapshot(AppState.redoStack.pop());
+    updateUndoRedoUI();
+}
+
+function updateUndoRedoUI() {
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    if (undoBtn) undoBtn.disabled = AppState.undoStack.length === 0;
+    if (redoBtn) {
+        redoBtn.classList.toggle('hidden', AppState.redoStack.length === 0);
+        redoBtn.disabled = AppState.redoStack.length === 0;
+    }
 }
 
 function getOutputColorModeManager() {
@@ -131,6 +193,134 @@ function serializeCompactLineageRecord(record, fallbackHistoryId) {
         nodes,
         connections
     };
+}
+
+function extractLineageRecordsFromPayload(payload) {
+    if (!payload || typeof payload !== 'object') return null;
+
+    if (payload.lineage && payload.lineage.records && typeof payload.lineage.records === 'object') {
+        return payload.lineage.records;
+    }
+    if (payload.genome && payload.genome.lineageRecords && typeof payload.genome.lineageRecords === 'object') {
+        return payload.genome.lineageRecords;
+    }
+    if (payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+        return payload.lineageRecords;
+    }
+
+    return null;
+}
+
+function cacheArchiveLineageRecords(records) {
+    if (!records || typeof records !== 'object') return;
+
+    for (const [historyId, record] of Object.entries(records)) {
+        if (ArchiveLineageCache.recordsByHistoryId.has(historyId)) continue;
+        ArchiveLineageCache.recordsByHistoryId.set(
+            historyId,
+            serializeCompactLineageRecord(record, historyId)
+        );
+    }
+}
+
+function getMissingLineageHistoryIds(genome) {
+    if (!genome || !genome.historyId) return [];
+
+    const records = genome.lineageRecords && typeof genome.lineageRecords === 'object'
+        ? genome.lineageRecords
+        : {};
+    const visited = new Set();
+    const missing = new Set();
+    const stack = [genome.historyId];
+
+    while (stack.length > 0) {
+        const historyId = stack.pop();
+        if (!historyId || visited.has(historyId)) continue;
+        visited.add(historyId);
+
+        const record = records[historyId];
+        if (!record || typeof record !== 'object') {
+            missing.add(historyId);
+            continue;
+        }
+
+        for (const parentId of Array.isArray(record.parentHistoryIds) ? record.parentHistoryIds : []) {
+            if (!parentId || visited.has(parentId)) continue;
+            if (!records[parentId]) {
+                missing.add(parentId);
+            } else {
+                stack.push(parentId);
+            }
+        }
+    }
+
+    missing.delete(genome.historyId);
+    return Array.from(missing);
+}
+
+async function ensureArchiveLineageCacheLoaded() {
+    if (ArchiveLineageCache.loaded) return;
+    if (ArchiveLineageCache.loadPromise) {
+        await ArchiveLineageCache.loadPromise;
+        return;
+    }
+
+    ArchiveLineageCache.loadPromise = (async () => {
+        const archiveFiles = await getArchiveGenomeFiles();
+        for (const path of archiveFiles) {
+            try {
+                const response = await fetch(toFetchUrl(path), { cache: 'no-store' });
+                if (!response.ok) continue;
+
+                const payload = await response.json();
+                cacheArchiveLineageRecords(extractLineageRecordsFromPayload(payload));
+            } catch (error) {
+                continue;
+            }
+        }
+
+        ArchiveLineageCache.loaded = true;
+        ArchiveLineageCache.loadPromise = null;
+    })();
+
+    await ArchiveLineageCache.loadPromise;
+}
+
+async function hydrateGenomeLineageFromArchive(genome) {
+    if (!genome) return genome;
+
+    let missingHistoryIds = getMissingLineageHistoryIds(genome);
+    if (missingHistoryIds.length === 0) return genome;
+
+    await ensureArchiveLineageCacheLoaded();
+
+    let changed = false;
+    while (missingHistoryIds.length > 0) {
+        let addedThisPass = false;
+
+        for (const historyId of missingHistoryIds) {
+            if (genome.lineageRecords && genome.lineageRecords[historyId]) continue;
+
+            const cachedRecord = ArchiveLineageCache.recordsByHistoryId.get(historyId);
+            if (!cachedRecord) continue;
+
+            if (!genome.lineageRecords || typeof genome.lineageRecords !== 'object') {
+                genome.lineageRecords = {};
+            }
+            genome.lineageRecords[historyId] = serializeCompactLineageRecord(cachedRecord, historyId);
+            changed = true;
+            addedThisPass = true;
+        }
+
+        if (!addedThisPass) break;
+        missingHistoryIds = getMissingLineageHistoryIds(genome);
+    }
+
+    if (changed) {
+        genome.updateLineageRecord();
+    }
+
+    return genome;
 }
 
 function buildCompactLineageRecordsForPopulation(genomes) {
@@ -312,6 +502,10 @@ function parseArchiveGenomePayload(payload) {
         throw new Error('invalid genome payload');
     }
 
+    if (payload.population && typeof payload.population === 'object') {
+        return parseArchiveGenomePayload(payload.population);
+    }
+
     if (payload.innovationState
         && window.NEAT
         && typeof window.NEAT.importInnovationState === 'function') {
@@ -323,11 +517,18 @@ function parseArchiveGenomePayload(payload) {
         if (payload.lineage && payload.lineage.records && typeof payload.lineage.records === 'object') {
             serialized.lineageRecords = payload.lineage.records;
         }
+        if (payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+            serialized.lineageRecords = payload.lineageRecords;
+        }
         return NEAT.Genome.deserialize(serialized);
     }
 
     if (Array.isArray(payload.nodes) && Array.isArray(payload.connections)) {
-        return NEAT.Genome.deserialize(payload);
+        const serialized = { ...payload };
+        if (payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+            serialized.lineageRecords = payload.lineageRecords;
+        }
+        return NEAT.Genome.deserialize(serialized);
     }
 
     if (Array.isArray(payload.genomes) && payload.genomes.length > 0) {
@@ -337,10 +538,19 @@ function parseArchiveGenomePayload(payload) {
             if (firstEntry.lineage && firstEntry.lineage.records && typeof firstEntry.lineage.records === 'object') {
                 serialized.lineageRecords = firstEntry.lineage.records;
             }
+            if (payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+                serialized.lineageRecords = payload.lineageRecords;
+            }
             return NEAT.Genome.deserialize(serialized);
         }
 
-        return NEAT.Genome.deserialize(firstEntry);
+        const serialized = firstEntry && typeof firstEntry === 'object'
+            ? { ...firstEntry }
+            : firstEntry;
+        if (serialized && payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+            serialized.lineageRecords = payload.lineageRecords;
+        }
+        return NEAT.Genome.deserialize(serialized);
     }
 
     throw new Error('no genome found in archive JSON');
@@ -422,7 +632,7 @@ async function loadPopulationFromArchive(targetSize = GRID_SIZE) {
             if (!response.ok) continue;
 
             const payload = await response.json();
-            const genome = parseArchiveGenomePayload(payload);
+            const genome = await hydrateGenomeLineageFromArchive(parseArchiveGenomePayload(payload));
             const signature = genome.getStructureSignature();
             if (seenSignatures.has(signature)) continue;
             genome.id = Math.random().toString(36).substr(2, 9);
@@ -508,7 +718,7 @@ function seedActivationLabFromCurrentGenome() {
             innovationState: window.NEAT && typeof window.NEAT.exportInnovationState === 'function'
                 ? window.NEAT.exportInnovationState()
                 : null,
-            genome: serializeGenomeForStorage(genome, false)
+            genome: genome.serialize()
         };
         sessionStorage.setItem(LAB_SEED_STORAGE_KEY, JSON.stringify(payload));
     } catch (error) {
@@ -542,6 +752,7 @@ async function initApp() {
 
     renderPopulation({ preserveState: restoredFromSession, persist: false });
     setPanelMode(AppState.panelMode, { persist: false });
+    updateUndoRedoUI();
 }
 
 function showInitializationError(error) {
@@ -688,6 +899,8 @@ function setupEventListeners() {
     document.getElementById('phylogeny-view-btn').addEventListener('click', () => setPanelMode('phylogeny'));
     document.getElementById('save-genome-btn').addEventListener('click', handleSaveGenome);
     document.getElementById('upload-start-genome-input').addEventListener('change', handleStartFromUploadedGenome);
+    document.getElementById('undo-btn').addEventListener('click', handleUndo);
+    document.getElementById('redo-btn').addEventListener('click', handleRedo);
     document.getElementById('phylo-zoom-in-btn').addEventListener('click', () => AppState.phylogenyVisualizer.zoomIn());
     document.getElementById('phylo-zoom-out-btn').addEventListener('click', () => AppState.phylogenyVisualizer.zoomOut());
     document.getElementById('phylo-up-btn').addEventListener('click', () => AppState.phylogenyVisualizer.pan(0, 60));
@@ -709,6 +922,17 @@ function setupEventListeners() {
     });
 
     document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z') {
+            e.preventDefault();
+            handleRedo();
+            return;
+        }
+        if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+            e.preventDefault();
+            handleUndo();
+            return;
+        }
+
         if (e.key === 'Enter') handleEvolve();
         if (e.key === 'Escape') clearSelection();
 
@@ -819,9 +1043,12 @@ function updateInspectorVisualization(genome) {
     }
 
     const lineageStats = genome.getLineageStats();
+    const missingLineageText = lineageStats.missingRecordCount > 0
+        ? `, <strong>${lineageStats.missingRecordCount}</strong> missing archived record${lineageStats.missingRecordCount === 1 ? '' : 's'}`
+        : '';
     document.getElementById('network-info').innerHTML = `
         <strong>${lineageStats.ancestorCount}</strong> ancestors,
-        generations <strong>${lineageStats.minGeneration}</strong>-${lineageStats.maxGeneration}
+        generations <strong>${lineageStats.minGeneration}</strong>-${lineageStats.maxGeneration}${missingLineageText}
     `;
 
     document.getElementById('network-stats').innerHTML = `
@@ -872,12 +1099,14 @@ function handleEvolve() {
         return;
     }
 
+    pushUndo();
     const parents = Array.from(AppState.selectedGenomes);
     AppState.population.evolve(parents);
     renderPopulation();
 }
 
 function handleReset() {
+    pushUndo();
     initializeFreshPopulation('startFresh');
     renderPopulation({ preserveState: false, persist: false });
 }
@@ -889,6 +1118,7 @@ async function handleRestart() {
     if (restartBtn) restartBtn.disabled = true;
     if (resetBtn) resetBtn.disabled = true;
 
+    pushUndo();
     try {
         AppState.population = await loadPopulationFromArchive(GRID_SIZE);
         applyMutationProfile('steppingStone');
@@ -902,37 +1132,74 @@ async function handleRestart() {
     }
 }
 
-function handleStartFromUploadedGenome(event) {
+function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+        reader.onerror = () => reject(new Error(`Could not read ${file.name}`));
+        reader.readAsText(file);
+    });
+}
+
+async function handleStartFromUploadedGenome(event) {
     const input = event.target;
-    const file = input && input.files ? input.files[0] : null;
-    if (!file) return;
+    const files = input && input.files ? Array.from(input.files) : [];
+    if (files.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-        try {
-            const raw = typeof reader.result === 'string' ? reader.result : '';
-            const parsed = JSON.parse(raw);
-            if (window.NEAT && typeof window.NEAT.resetInnovationState === 'function') {
-                window.NEAT.resetInnovationState();
-            }
-            const seedGenome = parseArchiveGenomePayload(parsed);
-            applyMutationProfile('steppingStone');
-            AppState.population = createPopulationFromSeedGenome(seedGenome, GRID_SIZE);
-            renderPopulation();
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Invalid JSON';
-            window.alert(`Could not load uploaded genome: ${message}`);
-        } finally {
-            input.value = '';
+    const maxUploadGenomes = GRID_SIZE - 1; // 19
+    const filesToRead = files.slice(0, maxUploadGenomes);
+
+    try {
+        if (window.NEAT && typeof window.NEAT.resetInnovationState === 'function') {
+            window.NEAT.resetInnovationState();
         }
-    };
 
-    reader.onerror = () => {
-        window.alert('Could not read that JSON file.');
+        const genomes = [];
+        const errors = [];
+        for (const file of filesToRead) {
+            try {
+                const raw = await readFileAsText(file);
+                const parsed = JSON.parse(raw);
+                const genome = await hydrateGenomeLineageFromArchive(parseArchiveGenomePayload(parsed));
+                genome.id = Math.random().toString(36).substr(2, 9);
+                genome.updateLineageRecord();
+                genomes.push(genome);
+            } catch (error) {
+                errors.push(file.name);
+            }
+        }
+
+        if (genomes.length === 0) {
+            window.alert('Could not parse any of the uploaded genome files.');
+            return;
+        }
+
+        if (errors.length > 0) {
+            console.warn('Skipped files that could not be parsed:', errors);
+        }
+
+        pushUndo();
+        applyMutationProfile('steppingStone');
+
+        if (genomes.length === 1) {
+            // Single genome: seed a new population from it (original behavior).
+            AppState.population = createPopulationFromSeedGenome(genomes[0], GRID_SIZE);
+        } else {
+            // Multiple genomes: treat them as selected parents and evolve.
+            if (!AppState.population) {
+                AppState.population = new NEAT.Population(GRID_SIZE);
+                AppState.population.initialize();
+            }
+            AppState.population.evolve(genomes);
+        }
+
+        renderPopulation();
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Invalid JSON';
+        window.alert(`Could not load uploaded genome(s): ${message}`);
+    } finally {
         input.value = '';
-    };
-
-    reader.readAsText(file);
+    }
 }
 
 function handleSaveGenome() {

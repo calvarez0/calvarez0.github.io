@@ -533,6 +533,10 @@ function parseGenomePayload(payload) {
         throw new Error('missing genome payload');
     }
 
+    if (payload.population && typeof payload.population === 'object') {
+        return parseGenomePayload(payload.population);
+    }
+
     if (payload.innovationState
         && window.NEAT
         && typeof window.NEAT.importInnovationState === 'function') {
@@ -541,8 +545,11 @@ function parseGenomePayload(payload) {
 
     if (Array.isArray(payload.genomes) && payload.genomes.length > 0) {
         const first = payload.genomes[0] && payload.genomes[0].genome
-            ? payload.genomes[0].genome
-            : payload.genomes[0];
+            ? { ...payload.genomes[0].genome }
+            : { ...payload.genomes[0] };
+        if (payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+            first.lineageRecords = payload.lineageRecords;
+        }
         return {
             genome: NEAT.Genome.deserialize(first),
             label: 'Genome 1 from genomes[]'
@@ -554,6 +561,9 @@ function parseGenomePayload(payload) {
         if (payload.lineage && payload.lineage.records && typeof payload.lineage.records === 'object') {
             serialized.lineageRecords = payload.lineage.records;
         }
+        if (payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+            serialized.lineageRecords = payload.lineageRecords;
+        }
 
         const genome = NEAT.Genome.deserialize(serialized);
         return {
@@ -563,8 +573,12 @@ function parseGenomePayload(payload) {
     }
 
     if (Array.isArray(payload.nodes) && Array.isArray(payload.connections)) {
+        const serialized = { ...payload };
+        if (payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+            serialized.lineageRecords = payload.lineageRecords;
+        }
         return {
-            genome: NEAT.Genome.deserialize(payload),
+            genome: NEAT.Genome.deserialize(serialized),
             label: payload.id ? `Genome ${payload.id}` : 'Loaded genome'
         };
     }
@@ -742,17 +756,18 @@ function createGifBlobViaWorker(genome, options, onProgress) {
 function downloadLabGenomeJson() {
     if (!LabState.genome) return;
 
-    const serialized = serializeGenomeForLab(LabState.genome);
-    if (!serialized) return;
+    const exported = typeof LabState.genome.exportWithLineage === 'function'
+        ? LabState.genome.exportWithLineage()
+        : null;
+    if (!exported || !exported.genome) return;
 
     const payload = {
-        format: 'cppn-activation-lab-genome-v1',
+        format: 'cppn-activation-lab-genome-v2',
         savedAt: new Date().toISOString(),
         label: LabState.loadedGenomeName || `Genome ${LabState.genome.id}`,
-        innovationState: window.NEAT && typeof window.NEAT.exportInnovationState === 'function'
-            ? window.NEAT.exportInnovationState()
-            : null,
-        genome: serialized
+        innovationState: exported.innovationState,
+        genome: exported.genome,
+        lineage: exported.lineage
     };
 
     const genomeId = typeof LabState.genome.id === 'string' && LabState.genome.id

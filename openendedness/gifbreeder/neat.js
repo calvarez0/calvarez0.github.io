@@ -1078,23 +1078,49 @@ class Genome {
         const visited = new Set();
         const nodes = [];
         const edges = [];
-        const stack = [this.historyId];
+        const stack = [{
+            historyId: this.historyId,
+            generationHint: Number.isFinite(this.generation) ? this.generation : null
+        }];
 
         while (stack.length > 0) {
-            const historyId = stack.pop();
+            const entry = stack.pop();
+            const historyId = entry && entry.historyId;
             if (!historyId || visited.has(historyId)) continue;
             visited.add(historyId);
 
             const record = records[historyId];
-            if (!record) continue;
+            if (!record) {
+                nodes.push({
+                    historyId,
+                    genomeId: null,
+                    generation: Number.isFinite(entry && entry.generationHint) ? entry.generationHint : null,
+                    parentHistoryIds: [],
+                    nodes: [],
+                    connections: [],
+                    missingRecord: true
+                });
+                continue;
+            }
 
-            nodes.push(Genome.cloneLineageRecord(record));
+            const clonedRecord = Genome.cloneLineageRecord(record);
+            if (!Number.isFinite(clonedRecord.generation)
+                && Number.isFinite(entry && entry.generationHint)) {
+                clonedRecord.generation = entry.generationHint;
+            }
+            nodes.push(clonedRecord);
 
-            for (const parentId of record.parentHistoryIds || []) {
+            const nextGenerationHint = Number.isFinite(clonedRecord.generation)
+                ? clonedRecord.generation - 1
+                : null;
+            for (const parentId of clonedRecord.parentHistoryIds || []) {
                 if (!parentId) continue;
                 edges.push({ from: parentId, to: historyId });
                 if (!visited.has(parentId)) {
-                    stack.push(parentId);
+                    stack.push({
+                        historyId: parentId,
+                        generationHint: nextGenerationHint
+                    });
                 }
             }
         }
@@ -1115,6 +1141,7 @@ class Genome {
         const generations = graph.nodes
             .map(node => node.generation)
             .filter(generation => Number.isFinite(generation));
+        const missingRecordCount = graph.nodes.filter(node => node && node.missingRecord === true).length;
 
         const minGeneration = generations.length > 0 ? Math.min(...generations) : this.generation;
         const maxGeneration = generations.length > 0 ? Math.max(...generations) : this.generation;
@@ -1127,7 +1154,8 @@ class Genome {
             rootCount: roots.length,
             minGeneration,
             maxGeneration,
-            depth
+            depth,
+            missingRecordCount
         };
     }
 

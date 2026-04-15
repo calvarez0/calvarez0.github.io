@@ -31,6 +31,8 @@
         <div class="main-layout">
             <section class="evolution-panel">
                 <div class="controls">
+                    <button id="undo-btn" class="secondary-btn undo-redo-btn" disabled title="Undo (Ctrl+Z)">&#x21A9;</button>
+                    <button id="redo-btn" class="secondary-btn undo-redo-btn hidden" disabled title="Redo (Ctrl+Shift+Z)">&#x21AA;</button>
                     <div class="generation-info">
                         Gen <span id="generation-count">1</span>
                     </div>
@@ -79,9 +81,9 @@
                 </div>
                 <div class="save-actions panel-wide-action">
                     <button id="save-genome-btn" class="secondary-btn" disabled>Save Genome</button>
-                    <label class="secondary-btn icon-upload-btn" title="Start From Uploaded Genome JSON">
+                    <label class="secondary-btn icon-upload-btn" title="Upload Genome JSON(s) — up to 19 as selected parents">
                         &#8682;
-                        <input id="upload-start-genome-input" type="file" accept=".json,application/json">
+                        <input id="upload-start-genome-input" type="file" accept=".json,application/json" multiple>
                     </label>
                 </div>
             </section>

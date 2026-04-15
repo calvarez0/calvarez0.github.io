@@ -109,7 +109,7 @@ function getCPPNDisplayNodeLabel(node, mode = null) {
 
 function normalizeCPPNTimeInput(value) {
     if (!Number.isFinite(value)) return 0;
-    if (Math.abs(value) <= 1) return value;
+    if (value > 0 && value < 1) return value;
     return value / Math.max(GIF_FRAME_COUNT - 1, 1);
 }
 
@@ -1445,7 +1445,7 @@ class PhylogenyVisualizer {
             label.setAttribute('y', sample.y + 4);
             label.style.fill = 'var(--fg)';
             label.setAttribute('font-size', '10px');
-            label.textContent = `Gen ${generation}`;
+            label.textContent = Number.isFinite(generation) ? `Gen ${generation}` : 'Gen ?';
             generationLabelGroup.appendChild(label);
         }
 
@@ -1471,6 +1471,7 @@ class PhylogenyVisualizer {
 
             const isCurrent = nodeRecord.historyId === graph.currentHistoryId;
             const isRoot = (nodeRecord.parentHistoryIds || []).length === 0;
+            const isPlaceholder = nodeRecord.missingRecord === true;
             const shortId = nodeRecord.historyId.slice(-4);
             const thumbSize = nodeRadius * 2;
             const thumbUrl = this.getThumbnailForRecord(nodeRecord, thumbSize);
@@ -1493,11 +1494,16 @@ class PhylogenyVisualizer {
             frame.setAttribute('fill', 'none');
             frame.style.stroke = isCurrent ? 'var(--accent)' : 'var(--fg)';
             frame.setAttribute('stroke-width', isCurrent ? '2.5' : (isRoot ? '2' : '1'));
+            if (isPlaceholder) {
+                frame.setAttribute('stroke-dasharray', '4 3');
+                frame.setAttribute('stroke-opacity', '0.75');
+            }
 
             const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
             const parentText = (nodeRecord.parentHistoryIds || []).join(', ') || 'none';
-            title.textContent =
-                `${nodeRecord.historyId} | genome ${nodeRecord.genomeId} | generation ${nodeRecord.generation} | parents ${parentText}`;
+            title.textContent = isPlaceholder
+                ? `${nodeRecord.historyId} | missing archived ancestor record`
+                : `${nodeRecord.historyId} | genome ${nodeRecord.genomeId} | generation ${nodeRecord.generation} | parents ${parentText}`;
             frame.appendChild(title);
             nodeGroup.appendChild(frame);
 
@@ -1507,7 +1513,7 @@ class PhylogenyVisualizer {
             idText.setAttribute('text-anchor', 'middle');
             idText.setAttribute('font-size', '8px');
             idText.style.fill = 'var(--fg)';
-            idText.textContent = `G${nodeRecord.generation} ${shortId}`;
+            idText.textContent = `${Number.isFinite(nodeRecord.generation) ? `G${nodeRecord.generation}` : 'G?'} ${shortId}`;
             nodeGroup.appendChild(idText);
         }
 
