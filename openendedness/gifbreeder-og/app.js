@@ -1,0 +1,1173 @@
+/**
+ * Main Application - PicBreeder-style CPPN Evolution
+ */
+
+const AppState = {
+    population: null,
+    selectedGenomes: new Set(),
+    viewingGenome: null,
+    renderer: null,
+    visualizer: null,
+    phylogenyVisualizer: null,
+    panelMode: 'network',
+    cells: [],
+    sessionSaveMode: 'full',
+    undoStack: [],
+    redoStack: []
+};
+const MAX_UNDO_HISTORY = 50;
+const GRID_SIZE = 20;
+const MOBILE_LAYOUT_BREAKPOINT = 900;
+const EVOLUTION_STATE_STORAGE_KEY = 'cppn-evolution-state-v1';
+const LAB_SEED_STORAGE_KEY = 'cppn-activation-seed-v1';
+const ARCHIVE_DIR = 'archive';
+const EXPRESSIONS_DIR = 'expressions';
+const ARCHIVE_MANIFEST_PATH = `${ARCHIVE_DIR}/manifest.json`;
+const ArchiveLineageCache = {
+    recordsByHistoryId: new Map(),
+    loaded: false,
+    loadPromise: null
+};
+let ProjectSaveRootHandle = null;
+
+function getCurrentVersionDirectoryName() {
+    const path = typeof window !== 'undefined' && window.location
+        ? decodeURIComponent(window.location.pathname || '')
+        : '';
+    const match = /(?:^|\/)(legacy_v[\w.]+)(?:\/|$)/.exec(path);
+    return match ? match[1] : '';
+}
+
+function getTargetSaveDirectorySegments(subdirectoryName) {
+    const versionDirectory = getCurrentVersionDirectoryName();
+    if (!versionDirectory) return [subdirectoryName];
+    if (ProjectSaveRootHandle && ProjectSaveRootHandle.name === versionDirectory) {
+        return [subdirectoryName];
+    }
+    return [versionDirectory, subdirectoryName];
+}
+
+async function getNestedDirectoryHandle(rootHandle, segments) {
+    let directoryHandle = rootHandle;
+    for (const segment of segments) {
+        directoryHandle = await directoryHandle.getDirectoryHandle(segment, { create: true });
+    }
+    return directoryHandle;
+}
+
+function downloadBlobFallback(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 0);
+}
+
+async function saveBlobToVersionSubdirectory(blob, fileName, subdirectoryName) {
+    if (typeof window !== 'undefined' && typeof window.showDirectoryPicker === 'function') {
+        try {
+            if (!ProjectSaveRootHandle) {
+                ProjectSaveRootHandle = await window.showDirectoryPicker({
+                    id: 'gifbreeder-save-root',
+                    mode: 'readwrite'
+                });
+            }
+
+            const targetDirectory = await getNestedDirectoryHandle(
+                ProjectSaveRootHandle,
+                getTargetSaveDirectorySegments(subdirectoryName)
+            );
+            const fileHandle = await targetDirectory.getFileHandle(fileName, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            return true;
+        } catch (error) {
+            if (error && error.name === 'AbortError') return false;
+            console.warn('Falling back to browser download:', error);
+        }
+    }
+
+    downloadBlobFallback(blob, fileName);
+    return false;
+}
+function getGenomeById(genomeId) {
+    if (!genomeId || !AppState.population) return null;
+    return AppState.population.getGenomes().find((genome) => genome.id === genomeId) || null;
+}
+
+function updateCellClasses() {
+    const genomes = AppState.population ? AppState.population.getGenomes() : [];
+
+    AppState.cells.forEach(({ cell }, index) => {
+        const genome = genomes[index];
+        const isSelected = genome ? AppState.selectedGenomes.has(genome) : false;
+        const isViewing = genome ? AppState.viewingGenome === genome : false;
+        cell.classList.toggle('selected', isSelected);
+        cell.classList.toggle('viewing', isViewing);
+    });
+}
+
+function snapshotState() {
+    if (!AppState.population) return null;
+    return {
+        population: AppState.population.exportState()
+    };
+}
+
+function restoreSnapshot(snapshot) {
+    if (!snapshot || !snapshot.population) return;
+    AppState.population = NEAT.Population.fromState(snapshot.population);
+    AppState.selectedGenomes.clear();
+    AppState.viewingGenome = null;
+    renderPopulation({ preserveState: false });
+}
+
+function pushUndo() {
+    const snapshot = snapshotState();
+    if (!snapshot) return;
+    AppState.undoStack.push(snapshot);
+    if (AppState.undoStack.length > MAX_UNDO_HISTORY) {
+        AppState.undoStack.shift();
+    }
+    AppState.redoStack.length = 0;
+    updateUndoRedoUI();
+}
+
+function handleUndo() {
+    if (AppState.undoStack.length === 0) return;
+    const current = snapshotState();
+    if (current) AppState.redoStack.push(current);
+    restoreSnapshot(AppState.undoStack.pop());
+    updateUndoRedoUI();
+}
+
+function handleRedo() {
+    if (AppState.redoStack.length === 0) return;
+    const current = snapshotState();
+    if (current) AppState.undoStack.push(current);
+    restoreSnapshot(AppState.redoStack.pop());
+    updateUndoRedoUI();
+}
+
+function updateUndoRedoUI() {
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    if (undoBtn) undoBtn.disabled = AppState.undoStack.length === 0;
+    if (redoBtn) {
+        redoBtn.classList.toggle('hidden', AppState.redoStack.length === 0);
+        redoBtn.disabled = AppState.redoStack.length === 0;
+    }
+}
+
+function getOutputColorModeManager() {
+    return window.CPPN && window.CPPN.OutputColorModeManager
+        ? window.CPPN.OutputColorModeManager
+        : null;
+}
+
+function syncOutputModeUI() {
+    const manager = getOutputColorModeManager();
+    const mode = manager ? manager.getMode() : 'hsv';
+
+    document.querySelectorAll('button[data-output-mode]').forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.outputMode === mode);
+    });
+}
+
+function initializeFreshPopulation() {
+    AppState.population = new NEAT.Population(GRID_SIZE);
+    AppState.population.initialize();
+}
+
+function serializeGenomeForStorage(genome, includeLineage = true) {
+    if (!genome) return null;
+    if (includeLineage) return genome.serialize();
+
+    return {
+        id: genome.id,
+        historyId: genome.historyId,
+        generation: genome.generation,
+        parentHistoryIds: Array.isArray(genome.parentHistoryIds) ? [...genome.parentHistoryIds] : [],
+        nextNodeId: genome.nextNodeId,
+        nodes: genome.serializeNodes(),
+        connections: genome.serializeConnections()
+    };
+}
+
+function serializeCompactLineageRecord(record, fallbackHistoryId) {
+    const historyId = record && typeof record.historyId === 'string'
+        ? record.historyId
+        : fallbackHistoryId;
+    const generation = record && Number.isFinite(record.generation)
+        ? record.generation
+        : 0;
+    const parentHistoryIds = record && Array.isArray(record.parentHistoryIds)
+        ? record.parentHistoryIds.filter((id) => typeof id === 'string')
+        : [];
+    const genomeId = record && typeof record.genomeId === 'string'
+        ? record.genomeId
+        : null;
+    const nodes = record && Array.isArray(record.nodes)
+        ? record.nodes.map((node) => ({ ...node }))
+        : [];
+    const connections = record && Array.isArray(record.connections)
+        ? record.connections.map((conn) => ({ ...conn }))
+        : [];
+
+    return {
+        historyId,
+        genomeId,
+        generation,
+        parentHistoryIds,
+        nodes,
+        connections
+    };
+}
+
+function extractLineageRecordsFromPayload(payload) {
+    if (!payload || typeof payload !== 'object') return null;
+
+    if (payload.lineage && payload.lineage.records && typeof payload.lineage.records === 'object') {
+        return payload.lineage.records;
+    }
+    if (payload.genome && payload.genome.lineageRecords && typeof payload.genome.lineageRecords === 'object') {
+        return payload.genome.lineageRecords;
+    }
+    if (payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+        return payload.lineageRecords;
+    }
+
+    return null;
+}
+
+function cacheArchiveLineageRecords(records) {
+    if (!records || typeof records !== 'object') return;
+
+    for (const [historyId, record] of Object.entries(records)) {
+        if (ArchiveLineageCache.recordsByHistoryId.has(historyId)) continue;
+        ArchiveLineageCache.recordsByHistoryId.set(
+            historyId,
+            serializeCompactLineageRecord(record, historyId)
+        );
+    }
+}
+
+function getMissingLineageHistoryIds(genome) {
+    if (!genome || !genome.historyId) return [];
+
+    const records = genome.lineageRecords && typeof genome.lineageRecords === 'object'
+        ? genome.lineageRecords
+        : {};
+    const visited = new Set();
+    const missing = new Set();
+    const stack = [genome.historyId];
+
+    while (stack.length > 0) {
+        const historyId = stack.pop();
+        if (!historyId || visited.has(historyId)) continue;
+        visited.add(historyId);
+
+        const record = records[historyId];
+        if (!record || typeof record !== 'object') {
+            missing.add(historyId);
+            continue;
+        }
+
+        for (const parentId of Array.isArray(record.parentHistoryIds) ? record.parentHistoryIds : []) {
+            if (!parentId || visited.has(parentId)) continue;
+            if (!records[parentId]) {
+                missing.add(parentId);
+            } else {
+                stack.push(parentId);
+            }
+        }
+    }
+
+    missing.delete(genome.historyId);
+    return Array.from(missing);
+}
+
+async function ensureArchiveLineageCacheLoaded() {
+    if (ArchiveLineageCache.loaded) return;
+    if (ArchiveLineageCache.loadPromise) {
+        await ArchiveLineageCache.loadPromise;
+        return;
+    }
+
+    ArchiveLineageCache.loadPromise = (async () => {
+        const archiveFiles = await getArchiveGenomeFiles();
+        for (const path of archiveFiles) {
+            try {
+                const response = await fetch(toFetchUrl(path), { cache: 'no-store' });
+                if (!response.ok) continue;
+
+                const payload = await response.json();
+                cacheArchiveLineageRecords(extractLineageRecordsFromPayload(payload));
+            } catch (error) {
+                continue;
+            }
+        }
+
+        ArchiveLineageCache.loaded = true;
+        ArchiveLineageCache.loadPromise = null;
+    })();
+
+    await ArchiveLineageCache.loadPromise;
+}
+
+async function hydrateGenomeLineageFromArchive(genome) {
+    if (!genome) return genome;
+
+    let missingHistoryIds = getMissingLineageHistoryIds(genome);
+    if (missingHistoryIds.length === 0) return genome;
+
+    await ensureArchiveLineageCacheLoaded();
+
+    let changed = false;
+    while (missingHistoryIds.length > 0) {
+        let addedThisPass = false;
+
+        for (const historyId of missingHistoryIds) {
+            if (genome.lineageRecords && genome.lineageRecords[historyId]) continue;
+
+            const cachedRecord = ArchiveLineageCache.recordsByHistoryId.get(historyId);
+            if (!cachedRecord) continue;
+
+            if (!genome.lineageRecords || typeof genome.lineageRecords !== 'object') {
+                genome.lineageRecords = {};
+            }
+            genome.lineageRecords[historyId] = serializeCompactLineageRecord(cachedRecord, historyId);
+            changed = true;
+            addedThisPass = true;
+        }
+
+        if (!addedThisPass) break;
+        missingHistoryIds = getMissingLineageHistoryIds(genome);
+    }
+
+    if (changed) {
+        genome.updateLineageRecord();
+    }
+
+    return genome;
+}
+
+function buildCompactLineageRecordsForPopulation(genomes) {
+    const compactRecords = {};
+    if (!Array.isArray(genomes)) return compactRecords;
+
+    for (const genome of genomes) {
+        const lineageRecords = genome && genome.lineageRecords && typeof genome.lineageRecords === 'object'
+            ? genome.lineageRecords
+            : {};
+        for (const [historyId, record] of Object.entries(lineageRecords)) {
+            if (!compactRecords[historyId]) {
+                compactRecords[historyId] = serializeCompactLineageRecord(record, historyId);
+            }
+        }
+    }
+
+    return compactRecords;
+}
+
+function applyCompactLineageRecordsToPopulation(population, compactRecords) {
+    if (!population || !Array.isArray(population.genomes)) return;
+    if (!compactRecords || typeof compactRecords !== 'object') return;
+
+    const normalizedRecords = {};
+    for (const [historyId, record] of Object.entries(compactRecords)) {
+        const normalized = serializeCompactLineageRecord(record, historyId);
+        normalizedRecords[historyId] = normalized;
+    }
+
+    for (const genome of population.genomes) {
+        const hydrated = {};
+        for (const [historyId, record] of Object.entries(normalizedRecords)) {
+            hydrated[historyId] = {
+                historyId: record.historyId,
+                genomeId: record.genomeId,
+                generation: record.generation,
+                parentHistoryIds: [...record.parentHistoryIds],
+                nodes: record.nodes.map((node) => ({ ...node })),
+                connections: record.connections.map((conn) => ({ ...conn }))
+            };
+        }
+        genome.lineageRecords = hydrated;
+        genome.updateLineageRecord();
+    }
+}
+
+function buildPopulationStateForSession(compact = false) {
+    if (!AppState.population) return null;
+    if (!compact) return AppState.population.exportState();
+
+    const genomes = AppState.population.getGenomes();
+
+    return {
+        format: 'cppn-population-v1',
+        exportedAt: new Date().toISOString(),
+        innovationState: window.NEAT && typeof window.NEAT.exportInnovationState === 'function'
+            ? window.NEAT.exportInnovationState()
+            : null,
+        size: AppState.population.size,
+        generation: AppState.population.generation,
+        genomes: genomes.map((genome) => serializeGenomeForStorage(genome, false)),
+        lineageRecords: buildCompactLineageRecordsForPopulation(genomes)
+    };
+}
+
+function buildEvolutionSessionPayload(compact = false) {
+    return {
+        format: compact ? 'cppn-evolution-state-v1-compact' : 'cppn-evolution-state-v1',
+        savedAt: new Date().toISOString(),
+        panelMode: AppState.panelMode,
+        viewingGenomeId: AppState.viewingGenome ? AppState.viewingGenome.id : null,
+        selectedGenomeIds: Array.from(AppState.selectedGenomes)
+            .map((genome) => genome.id)
+            .filter((id) => typeof id === 'string'),
+        compact,
+        population: buildPopulationStateForSession(compact)
+    };
+}
+
+function saveAppStateToSession() {
+    if (!AppState.population) return;
+
+    try {
+        const genomes = AppState.population.getGenomes();
+        if (!Array.isArray(genomes) || genomes.length === 0) return;
+
+        if (AppState.sessionSaveMode !== 'compact') {
+            const fullPayload = buildEvolutionSessionPayload(false);
+            sessionStorage.setItem(EVOLUTION_STATE_STORAGE_KEY, JSON.stringify(fullPayload));
+            AppState.sessionSaveMode = 'full';
+            return;
+        }
+    } catch (error) {
+        AppState.sessionSaveMode = 'compact';
+    }
+
+    try {
+        const compactPayload = buildEvolutionSessionPayload(true);
+        sessionStorage.setItem(EVOLUTION_STATE_STORAGE_KEY, JSON.stringify(compactPayload));
+    } catch (error) {
+        // Ignore session persistence issues (private mode/quota, etc.).
+    }
+}
+
+function restoreAppStateFromSession() {
+    try {
+        const raw = sessionStorage.getItem(EVOLUTION_STATE_STORAGE_KEY);
+        if (!raw) return false;
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.population) return false;
+
+        AppState.population = NEAT.Population.fromState(parsed.population);
+        if (parsed.compact && parsed.population && typeof parsed.population.lineageRecords === 'object') {
+            applyCompactLineageRecordsToPopulation(AppState.population, parsed.population.lineageRecords);
+        }
+        AppState.sessionSaveMode = parsed.compact ? 'compact' : 'full';
+        AppState.panelMode = parsed.panelMode === 'phylogeny' ? 'phylogeny' : 'network';
+
+        const viewingGenome = getGenomeById(parsed.viewingGenomeId);
+        AppState.viewingGenome = viewingGenome;
+
+        AppState.selectedGenomes = new Set();
+        if (Array.isArray(parsed.selectedGenomeIds)) {
+            for (const genomeId of parsed.selectedGenomeIds) {
+                const genome = getGenomeById(genomeId);
+                if (genome) AppState.selectedGenomes.add(genome);
+            }
+        }
+
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function normalizeArchivePath(path) {
+    if (typeof path !== 'string') return null;
+    const trimmed = path.trim();
+    if (!trimmed) return null;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+    const withoutLeadingDot = trimmed.startsWith('./') ? trimmed.slice(2) : trimmed;
+    if (withoutLeadingDot.startsWith(`${ARCHIVE_DIR}/`)) {
+        return withoutLeadingDot;
+    }
+
+    return `${ARCHIVE_DIR}/${withoutLeadingDot}`;
+}
+
+function toFetchUrl(path) {
+    if (typeof path !== 'string') return path;
+    if (/^https?:\/\//i.test(path)) return path;
+    return encodeURI(path);
+}
+
+function isArchiveGenomePath(path) {
+    if (typeof path !== 'string') return false;
+    const lowered = path.toLowerCase();
+    if (!lowered.endsWith('.json')) return false;
+    return !lowered.endsWith('/manifest.json') && lowered !== 'manifest.json';
+}
+
+function parseArchiveGenomePayload(payload) {
+    if (!payload || typeof payload !== 'object') {
+        throw new Error('invalid genome payload');
+    }
+
+    if (payload.population && typeof payload.population === 'object') {
+        return parseArchiveGenomePayload(payload.population);
+    }
+
+    if (payload.innovationState
+        && window.NEAT
+        && typeof window.NEAT.importInnovationState === 'function') {
+        window.NEAT.importInnovationState(payload.innovationState);
+    }
+
+    if (payload.genome && typeof payload.genome === 'object') {
+        const serialized = { ...payload.genome };
+        if (payload.lineage && payload.lineage.records && typeof payload.lineage.records === 'object') {
+            serialized.lineageRecords = payload.lineage.records;
+        }
+        if (payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+            serialized.lineageRecords = payload.lineageRecords;
+        }
+        return NEAT.Genome.deserialize(serialized);
+    }
+
+    if (Array.isArray(payload.nodes) && Array.isArray(payload.connections)) {
+        const serialized = { ...payload };
+        if (payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+            serialized.lineageRecords = payload.lineageRecords;
+        }
+        return NEAT.Genome.deserialize(serialized);
+    }
+
+    if (Array.isArray(payload.genomes) && payload.genomes.length > 0) {
+        const firstEntry = payload.genomes[0];
+        if (firstEntry && typeof firstEntry === 'object' && firstEntry.genome && typeof firstEntry.genome === 'object') {
+            const serialized = { ...firstEntry.genome };
+            if (firstEntry.lineage && firstEntry.lineage.records && typeof firstEntry.lineage.records === 'object') {
+                serialized.lineageRecords = firstEntry.lineage.records;
+            }
+            if (payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+                serialized.lineageRecords = payload.lineageRecords;
+            }
+            return NEAT.Genome.deserialize(serialized);
+        }
+
+        const serialized = firstEntry && typeof firstEntry === 'object'
+            ? { ...firstEntry }
+            : firstEntry;
+        if (serialized && payload.lineageRecords && typeof payload.lineageRecords === 'object') {
+            serialized.lineageRecords = payload.lineageRecords;
+        }
+        return NEAT.Genome.deserialize(serialized);
+    }
+
+    throw new Error('no genome found in archive JSON');
+}
+
+async function loadArchiveManifestFiles() {
+    try {
+        const response = await fetch(ARCHIVE_MANIFEST_PATH, { cache: 'no-store' });
+        if (!response.ok) return [];
+
+        const manifest = await response.json();
+        if (!manifest || !Array.isArray(manifest.files)) return [];
+
+        return Array.from(new Set(
+            manifest.files
+                .map((name) => normalizeArchivePath(name))
+                .filter((path) => isArchiveGenomePath(path))
+        ));
+    } catch (error) {
+        return [];
+    }
+}
+
+async function loadArchiveFilesFromDirectoryListing() {
+    try {
+        const response = await fetch(`${ARCHIVE_DIR}/`, { cache: 'no-store' });
+        if (!response.ok) return [];
+
+        const html = await response.text();
+        const matches = html.matchAll(/href="([^"]+\.json)"/gi);
+        const files = [];
+
+        for (const match of matches) {
+            const href = match[1];
+            if (!href) continue;
+
+            let resolvedPath = href;
+            try {
+                const url = new URL(href, window.location.href);
+                resolvedPath = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+            } catch (error) {
+                resolvedPath = href;
+            }
+
+            const normalized = normalizeArchivePath(resolvedPath);
+            if (isArchiveGenomePath(normalized)) files.push(normalized);
+        }
+
+        return Array.from(new Set(files));
+    } catch (error) {
+        return [];
+    }
+}
+
+async function getArchiveGenomeFiles() {
+    const manifestFiles = await loadArchiveManifestFiles();
+    if (manifestFiles.length > 0) return manifestFiles;
+    return loadArchiveFilesFromDirectoryListing();
+}
+
+function createPopulationFromSeedGenome(seedGenome, targetSize = GRID_SIZE) {
+    const size = Number.isInteger(targetSize) && targetSize > 0 ? targetSize : GRID_SIZE;
+    const base = seedGenome.clone();
+    const baseGeneration = Number.isFinite(base.generation) ? Math.max(1, Math.floor(base.generation)) : 1;
+
+    base.id = Math.random().toString(36).substr(2, 9);
+    base.updateLineageRecord();
+
+    const genomes = [base];
+    while (genomes.length < size) {
+        const child = base.clone();
+        child.id = Math.random().toString(36).substr(2, 9);
+
+        // Picbreeder reproduction: each offspring receives one mutation generator.
+        child.mutate();
+
+        child.setChildLineage([base], baseGeneration + 1);
+        genomes.push(child);
+    }
+
+    const population = new NEAT.Population(size);
+    population.genomes = genomes;
+    population.generation = genomes.reduce((maxGeneration, genome) => {
+        return Number.isFinite(genome.generation)
+            ? Math.max(maxGeneration, Math.floor(genome.generation))
+            : maxGeneration;
+    }, baseGeneration);
+    return population;
+}
+
+function seedActivationLabFromCurrentGenome() {
+    if (!AppState.population) return;
+
+    const fallback = AppState.population.getGenomes()[0] || null;
+    const selected = Array.from(AppState.selectedGenomes)[0] || null;
+    const genome = AppState.viewingGenome || selected || fallback;
+    if (!genome) return;
+
+    try {
+        const payload = {
+            format: 'cppn-activation-seed-v1',
+            savedAt: new Date().toISOString(),
+            label: `Genome ${genome.id}`,
+            innovationState: window.NEAT && typeof window.NEAT.exportInnovationState === 'function'
+                ? window.NEAT.exportInnovationState()
+                : null,
+            genome: genome.serialize()
+        };
+        sessionStorage.setItem(LAB_SEED_STORAGE_KEY, JSON.stringify(payload));
+    } catch (error) {
+        // Ignore session persistence issues.
+    }
+}
+
+async function initApp() {
+    AppState.renderer = new CPPN.CPPNRenderer();
+    AppState.visualizer = new CPPN.NetworkVisualizer(document.getElementById('network-svg'));
+    AppState.phylogenyVisualizer = new CPPN.PhylogenyVisualizer(document.getElementById('phylogeny-svg'));
+
+    setupImageGrid();
+    setupMobileActionPlacement();
+    setupEventListeners();
+    const outputModeManager = getOutputColorModeManager();
+    if (outputModeManager) {
+        outputModeManager.setMode('hsv', { reason: 'startup' });
+    }
+    syncOutputModeUI();
+
+    const restoredFromSession = restoreAppStateFromSession();
+    if (!restoredFromSession) {
+        initializeFreshPopulation();
+    }
+
+    renderPopulation({ preserveState: restoredFromSession, persist: false });
+    setPanelMode(AppState.panelMode, { persist: false });
+    updateUndoRedoUI();
+}
+
+function showInitializationError(error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const detail = `Initialization error: ${message}`;
+    const grid = document.getElementById('image-grid');
+    const info = document.getElementById('network-info');
+    const stats = document.getElementById('network-stats');
+    const evolveBtn = document.getElementById('evolve-btn');
+
+    if (grid) {
+        grid.innerHTML = `<p class="placeholder">${detail}</p>`;
+    }
+
+    if (info) {
+        info.innerHTML = `<p class="placeholder">${detail}</p>`;
+    }
+
+    if (stats) {
+        stats.innerHTML = '';
+    }
+
+    if (evolveBtn) {
+        evolveBtn.disabled = true;
+        evolveBtn.textContent = 'Init Failed';
+    }
+
+    console.error(error);
+}
+
+function safeInitApp() {
+    try {
+        if (!window.NEAT) throw new Error('NEAT failed to load.');
+        if (!window.CPPN) throw new Error('CPPN failed to load.');
+        Promise.resolve(initApp()).catch(showInitializationError);
+    } catch (error) {
+        showInitializationError(error);
+    }
+}
+
+function handleOutputModeButtonClick(event) {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const button = target.closest('button[data-output-mode]');
+    if (!button) return;
+
+    const manager = getOutputColorModeManager();
+    if (!manager) return;
+
+    manager.setMode(button.dataset.outputMode, { reason: 'display' });
+}
+
+function handleOutputModeChange() {
+    syncOutputModeUI();
+    if (!AppState.population) return;
+    renderPopulation({ preserveState: true, persist: false });
+}
+
+function setupMobileActionPlacement() {
+    const actionRow = document.querySelector('.network-panel .panel-footer-actions');
+    const controls = document.querySelector('.evolution-panel .controls');
+    const evolveBtn = document.getElementById('evolve-btn');
+    const evolutionPanel = document.querySelector('.evolution-panel');
+    const imageGrid = document.getElementById('image-grid');
+    if (!actionRow || !controls || !evolveBtn || !evolutionPanel || !imageGrid) return;
+
+    const actionOriginalParent = actionRow.parentElement;
+    const actionOriginalNextSibling = actionRow.nextElementSibling;
+    const evolveOriginalParent = evolveBtn.parentElement;
+    const evolveOriginalNextSibling = evolveBtn.nextElementSibling;
+
+    const placeActionRow = () => {
+        const isMobile = window.matchMedia(`(max-width: ${MOBILE_LAYOUT_BREAKPOINT}px)`).matches;
+
+        if (isMobile) {
+            if (actionRow.parentElement !== controls) {
+                controls.appendChild(actionRow);
+            }
+
+            if (evolveBtn.parentElement !== evolutionPanel || evolveBtn.previousElementSibling !== imageGrid) {
+                imageGrid.insertAdjacentElement('afterend', evolveBtn);
+            }
+            return;
+        }
+
+        if (actionRow.parentElement !== actionOriginalParent) {
+            if (actionOriginalNextSibling && actionOriginalNextSibling.parentElement === actionOriginalParent) {
+                actionOriginalParent.insertBefore(actionRow, actionOriginalNextSibling);
+            } else {
+                actionOriginalParent.appendChild(actionRow);
+            }
+        }
+
+        if (evolveBtn.parentElement !== evolveOriginalParent) {
+            if (evolveOriginalNextSibling && evolveOriginalNextSibling.parentElement === evolveOriginalParent) {
+                evolveOriginalParent.insertBefore(evolveBtn, evolveOriginalNextSibling);
+            } else {
+                evolveOriginalParent.appendChild(evolveBtn);
+            }
+        }
+    };
+
+    placeActionRow();
+    window.addEventListener('resize', placeActionRow);
+}
+
+function setupImageGrid() {
+    const grid = document.getElementById('image-grid');
+    grid.innerHTML = '';
+    AppState.cells = [];
+
+    for (let i = 0; i < GRID_SIZE; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'image-cell';
+        cell.dataset.index = i;
+
+        const canvas = document.createElement('canvas');
+        const gifResolution = window.CPPN && window.CPPN.GIF_CONFIG
+            ? window.CPPN.GIF_CONFIG.resolution
+            : 64;
+        canvas.width = gifResolution;
+        canvas.height = gifResolution;
+
+        const badge = document.createElement('div');
+        badge.className = 'select-badge';
+        badge.innerHTML = '✓';
+
+        cell.appendChild(canvas);
+        cell.appendChild(badge);
+
+        cell.addEventListener('click', (e) => handleCellClick(i, e));
+
+        grid.appendChild(cell);
+        AppState.cells.push({ cell, canvas });
+    }
+}
+
+function setupEventListeners() {
+    document.getElementById('evolve-btn').addEventListener('click', handleEvolve);
+    document.getElementById('reset-btn').addEventListener('click', handleReset);
+    document.getElementById('network-view-btn').addEventListener('click', () => setPanelMode('network'));
+    document.getElementById('phylogeny-view-btn').addEventListener('click', () => setPanelMode('phylogeny'));
+    document.getElementById('save-genome-btn').addEventListener('click', handleSaveGenome);
+    document.getElementById('upload-start-genome-input').addEventListener('change', handleStartFromUploadedGenome);
+    document.getElementById('undo-btn').addEventListener('click', handleUndo);
+    document.getElementById('redo-btn').addEventListener('click', handleRedo);
+    document.getElementById('phylo-zoom-in-btn').addEventListener('click', () => AppState.phylogenyVisualizer.zoomIn());
+    document.getElementById('phylo-zoom-out-btn').addEventListener('click', () => AppState.phylogenyVisualizer.zoomOut());
+    document.getElementById('phylo-up-btn').addEventListener('click', () => AppState.phylogenyVisualizer.pan(0, 60));
+    document.getElementById('phylo-down-btn').addEventListener('click', () => AppState.phylogenyVisualizer.pan(0, -60));
+    document.getElementById('phylo-reset-btn').addEventListener('click', () => AppState.phylogenyVisualizer.resetView());
+    document.querySelector('.inspector-actions').addEventListener('click', handleOutputModeButtonClick);
+    window.addEventListener('cppn-output-mode-change', handleOutputModeChange);
+
+    const labLink = document.querySelector('a[href="activation-lab.html"]');
+    if (labLink) {
+        labLink.addEventListener('click', () => {
+            seedActivationLabFromCurrentGenome();
+            saveAppStateToSession();
+        });
+    }
+
+    window.addEventListener('beforeunload', () => {
+        saveAppStateToSession();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z') {
+            e.preventDefault();
+            handleRedo();
+            return;
+        }
+        if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+            e.preventDefault();
+            handleUndo();
+            return;
+        }
+
+        if (e.key === 'Enter') handleEvolve();
+        if (e.key === 'Escape') clearSelection();
+
+        if (AppState.panelMode === 'phylogeny') {
+            if (e.key === '=' || e.key === '+') AppState.phylogenyVisualizer.zoomIn();
+            if (e.key === '-') AppState.phylogenyVisualizer.zoomOut();
+            if (e.key === 'ArrowUp') AppState.phylogenyVisualizer.pan(0, 40);
+            if (e.key === 'ArrowDown') AppState.phylogenyVisualizer.pan(0, -40);
+        }
+    });
+}
+
+function renderPopulation(options = {}) {
+    const preserveState = Boolean(options.preserveState);
+    const persist = options.persist !== false;
+    const genomes = AppState.population.getGenomes();
+
+    genomes.forEach((genome, index) => {
+        if (index < AppState.cells.length) {
+            const { canvas } = AppState.cells[index];
+            AppState.renderer.renderProgressive(genome, canvas);
+        }
+    });
+
+    document.getElementById('generation-count').textContent = AppState.population.generation;
+
+    if (!preserveState) {
+        AppState.viewingGenome = null;
+        clearSelection({ persist: false });
+        updateInspectorVisualization(null);
+    } else {
+        AppState.selectedGenomes = new Set(
+            Array.from(AppState.selectedGenomes).filter((genome) => genomes.includes(genome))
+        );
+        if (AppState.viewingGenome && !genomes.includes(AppState.viewingGenome)) {
+            AppState.viewingGenome = null;
+        }
+
+        updateCellClasses();
+        updateSelectionInfo();
+        updateInspectorVisualization(AppState.viewingGenome);
+    }
+
+    if (persist) saveAppStateToSession();
+}
+
+function setPanelMode(mode, options = {}) {
+    const persist = options.persist !== false;
+    const isNetwork = mode === 'network';
+
+    AppState.panelMode = isNetwork ? 'network' : 'phylogeny';
+
+    document.getElementById('inspector-title').textContent = isNetwork ? 'Network' : 'Phylogeny';
+    document.getElementById('network-view-btn').classList.toggle('is-active', isNetwork);
+    document.getElementById('phylogeny-view-btn').classList.toggle('is-active', !isNetwork);
+    document.getElementById('network-svg').classList.toggle('hidden', !isNetwork);
+    document.getElementById('phylogeny-svg').classList.toggle('hidden', isNetwork);
+    document.getElementById('phylogeny-controls').classList.toggle('hidden', isNetwork);
+
+    updateInspectorVisualization(AppState.viewingGenome);
+    if (persist) saveAppStateToSession();
+}
+
+function updateInspectorVisualization(genome) {
+    if (!genome) {
+        AppState.visualizer.clear();
+        AppState.phylogenyVisualizer.clear();
+        document.getElementById('network-info').innerHTML =
+            AppState.panelMode === 'network'
+                ? '<p class="placeholder">Click a GIF to view its CPPN</p>'
+                : '<p class="placeholder">Click a GIF to view its ancestor tree</p>';
+        document.getElementById('network-stats').innerHTML = '';
+        document.getElementById('save-genome-btn').disabled = true;
+        return;
+    }
+
+    document.getElementById('save-genome-btn').disabled = false;
+
+    if (AppState.panelMode === 'network') {
+        const stats = genome.getStats();
+        document.getElementById('network-info').innerHTML = `
+            <strong>${stats.hiddenNodes}</strong> hidden nodes,
+            <strong>${stats.enabledConnections}</strong> connections
+        `;
+
+        document.getElementById('network-stats').innerHTML = `
+            <div class="stat-item">
+                <div class="stat-value">${stats.inputNodes}</div>
+                <div class="stat-label">In</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.hiddenNodes}</div>
+                <div class="stat-label">Hidden</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.outputNodes}</div>
+                <div class="stat-label">Out</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.enabledConnections}</div>
+                <div class="stat-label">Conn</div>
+            </div>
+        `;
+
+        AppState.phylogenyVisualizer.clear();
+        AppState.visualizer.visualize(genome);
+        return;
+    }
+
+    const lineageStats = genome.getLineageStats();
+    const missingLineageText = lineageStats.missingRecordCount > 0
+        ? `, <strong>${lineageStats.missingRecordCount}</strong> missing archived record${lineageStats.missingRecordCount === 1 ? '' : 's'}`
+        : '';
+    document.getElementById('network-info').innerHTML = `
+        <strong>${lineageStats.ancestorCount}</strong> ancestors,
+        generations <strong>${lineageStats.minGeneration}</strong>-${lineageStats.maxGeneration}${missingLineageText}
+    `;
+
+    document.getElementById('network-stats').innerHTML = `
+        <div class="stat-item">
+            <div class="stat-value">${lineageStats.totalNodes}</div>
+            <div class="stat-label">Lineage Nodes</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">${lineageStats.totalEdges}</div>
+            <div class="stat-label">Links</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">${lineageStats.rootCount}</div>
+            <div class="stat-label">Roots</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">${lineageStats.depth}</div>
+            <div class="stat-label">Depth</div>
+        </div>
+    `;
+
+    AppState.visualizer.clear();
+    AppState.phylogenyVisualizer.visualize(genome);
+}
+
+function handleCellClick(index, event) {
+    const genomes = AppState.population.getGenomes();
+    const genome = genomes[index];
+    if (!genome) return;
+
+    AppState.viewingGenome = genome;
+    updateInspectorVisualization(genome);
+
+    if (AppState.selectedGenomes.has(genome)) {
+        AppState.selectedGenomes.delete(genome);
+    } else {
+        AppState.selectedGenomes.add(genome);
+    }
+
+    updateCellClasses();
+    updateSelectionInfo();
+    seedActivationLabFromCurrentGenome();
+    saveAppStateToSession();
+}
+
+function handleEvolve() {
+    if (AppState.selectedGenomes.size === 0) {
+        return;
+    }
+
+    pushUndo();
+    const parents = Array.from(AppState.selectedGenomes);
+    AppState.population.evolve(parents);
+    renderPopulation();
+}
+
+function handleReset() {
+    pushUndo();
+    initializeFreshPopulation();
+    renderPopulation({ preserveState: false, persist: false });
+}
+
+function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+        reader.onerror = () => reject(new Error(`Could not read ${file.name}`));
+        reader.readAsText(file);
+    });
+}
+
+async function handleStartFromUploadedGenome(event) {
+    const input = event.target;
+    const files = input && input.files ? Array.from(input.files) : [];
+    if (files.length === 0) return;
+
+    const maxUploadGenomes = GRID_SIZE - 1; // 19
+    const filesToRead = files.slice(0, maxUploadGenomes);
+
+    try {
+        if (window.NEAT && typeof window.NEAT.resetInnovationState === 'function') {
+            window.NEAT.resetInnovationState();
+        }
+
+        const genomes = [];
+        const errors = [];
+        for (const file of filesToRead) {
+            try {
+                const raw = await readFileAsText(file);
+                const parsed = JSON.parse(raw);
+                const genome = await hydrateGenomeLineageFromArchive(parseArchiveGenomePayload(parsed));
+                genome.id = Math.random().toString(36).substr(2, 9);
+                genome.updateLineageRecord();
+                genomes.push(genome);
+            } catch (error) {
+                errors.push(file.name);
+            }
+        }
+
+        if (genomes.length === 0) {
+            window.alert('Could not parse any of the uploaded genome files.');
+            return;
+        }
+
+        if (errors.length > 0) {
+            console.warn('Skipped files that could not be parsed:', errors);
+        }
+
+        pushUndo();
+
+        if (genomes.length === 1) {
+            // Single genome: seed a new population from it (original behavior).
+            AppState.population = createPopulationFromSeedGenome(genomes[0], GRID_SIZE);
+        } else {
+            // Multiple genomes: treat them as selected parents and evolve.
+            if (!AppState.population) {
+                AppState.population = new NEAT.Population(GRID_SIZE);
+                AppState.population.initialize();
+            }
+            AppState.population.evolve(genomes);
+        }
+
+        renderPopulation();
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Invalid JSON';
+        window.alert(`Could not load uploaded genome(s): ${message}`);
+    } finally {
+        input.value = '';
+    }
+}
+
+async function handleSaveGenome() {
+    if (!AppState.viewingGenome) return;
+
+    const genome = AppState.viewingGenome;
+    const exportData = genome.exportWithLineage();
+    const fileName = `genome-${genome.id}-lineage-${genome.historyId}.json`;
+    const payload = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([payload], { type: 'application/json' });
+    await saveBlobToVersionSubdirectory(blob, fileName, ARCHIVE_DIR);
+}
+
+function clearSelection(options = {}) {
+    const persist = options.persist !== false;
+    AppState.selectedGenomes.clear();
+    updateCellClasses();
+    updateSelectionInfo();
+    if (persist) saveAppStateToSession();
+}
+
+function updateSelectionInfo() {
+    const count = AppState.selectedGenomes.size;
+    document.getElementById('selected-count').textContent = count;
+
+    const btn = document.getElementById('evolve-btn');
+    btn.disabled = count === 0;
+    btn.textContent = count === 0 ? 'Select At Least One' : `Evolve (${count})`;
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', safeInitApp);
+} else {
+    safeInitApp();
+}

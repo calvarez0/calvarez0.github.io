@@ -25,7 +25,9 @@ const DRAWING_ARCHIVE_DIR = 'archive';
 const DRAWING_EXPRESSIONS_DIR = 'expressions';
 const DRAWING_WEIGHT_BOUNDS = { min: -8, max: 8 };
 const DRAWING_DOWNLOAD_GIF_RESOLUTION = 512;
-const DRAWING_GIF_EXPORT_WORKER_PATH = 'gif-export-worker.js';
+// Page-private worker copy: the site's shared gif-export-worker.js predates
+// distance-field support and would silently export without the drawing.
+const DRAWING_GIF_EXPORT_WORKER_PATH = 'drawing-gif-export-worker.js';
 const DRAWING_DOWNLOAD_RESOLUTION_OPTIONS = [64, 128, 512, 1024];
 const DRAWING_DISTANCE_PREVIEW_RESOLUTION = 256;
 // Brush widths are specified in 512-space so stroke thickness relative to
@@ -833,9 +835,13 @@ function renderPreviewImage() {
 function renderCPPNPreview(onComplete = null) {
     if (!DrawingState.renderer || !DrawingState.previewCanvas || !DrawingState.genome) return;
     const distanceField = getDistanceFieldForResolution(DRAWING_DISTANCE_PREVIEW_RESOLUTION);
+    // 'none': don't bake line pixels into the pattern — the difference-blend
+    // overlay canvas shows them as the live-inverted color instead. Baking
+    // them here too would double-invert wherever the overlay sits on top.
     DrawingState.renderer.renderProgressive(DrawingState.genome, DrawingState.previewCanvas, onComplete, {
         resolution: DRAWING_DISTANCE_PREVIEW_RESOLUTION,
-        distanceField
+        distanceField,
+        distanceLineRendering: 'none'
     });
 }
 
@@ -905,7 +911,8 @@ async function downloadPreviewImage(resolution = DRAWING_DOWNLOAD_GIF_RESOLUTION
                     frameCount,
                     frameDurationMs,
                     outputColorMode: outputModeManager ? outputModeManager.getMode() : 'hsv',
-                    distanceField
+                    distanceField,
+                    distanceLineRendering: 'invert'
                 },
                 (progress) => {
                     if (!button) return;
@@ -919,7 +926,8 @@ async function downloadPreviewImage(resolution = DRAWING_DOWNLOAD_GIF_RESOLUTION
         } catch (workerError) {
             blob = DrawingState.renderer.createGifBlob(DrawingState.genome, {
                 resolution: exportResolution,
-                distanceField: getDistanceFieldForResolution(exportResolution)
+                distanceField: getDistanceFieldForResolution(exportResolution),
+                distanceLineRendering: 'invert'
             });
         }
 

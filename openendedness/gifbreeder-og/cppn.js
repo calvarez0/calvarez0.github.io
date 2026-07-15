@@ -1,10 +1,12 @@
 
-/* The set of functions used within CPPNs in the original Picbreeder are 
-cosine, sine, Gaussian, identity, and sigmoid. */
+/* Faithful Picbreeder activation set (as in FER/picbreeder_og): identity,
+sin, cos, tanh, and bipolar sigmoid/gaussian producing values in [-1, 1].
+abs and relu are legacy-only: kept so archived GIFBreeder genomes bred under
+older versions keep rendering identically; new mutations never pick them. */
 const ActivationFunctions = {
-    sigmoid: (x) => 1 / (1 + Math.exp(-x)),
+    sigmoid: (x) => (2 / (1 + Math.exp(-x))) - 1,
     tanh: (x) => Math.tanh(x),
-    gaussian: (x) => Math.exp(-x * x),
+    gaussian: (x) => (2 * Math.exp(-x * x)) - 1,
     sin: (x) => Math.sin(x),
     cos: (x) => Math.cos(x),
     abs: (x) => Math.abs(x),
@@ -12,32 +14,47 @@ const ActivationFunctions = {
     identity: (x) => x
 };
 
-// Output modes (like PicBreeder)
-const OUTPUT_MODE = 0; // 0=sigmoid, 1=gaussian, 2=tanh+abs
 const GIF_FRAME_RATE = 15;
 const GIF_DURATION_SECONDS = 3;
 const GIF_FRAME_COUNT = GIF_FRAME_RATE * GIF_DURATION_SECONDS; // 45 frames (t = 0..44)
 const GIF_RESOLUTION = 64;
 const GIF_FRAME_DURATION_MS = 1000 / GIF_FRAME_RATE;
+const CPPN_DISTANCE_SCALE = 1.4;
 const CPPN_OUTPUT_COLOR_MODE_STORAGE_KEY = 'cppn-output-color-mode-v1';
-const CPPN_LEGACY_OUTPUT_LABEL_MAP = {
-    H: 'R',
-    S: 'G',
-    V: 'B'
+// Canonical faithful output labels are hue/saturation/brightness; legacy
+// genomes (and old lineage records) may still carry R/G/B or H/S/V.
+const CPPN_CANONICAL_OUTPUT_LABEL_MAP = {
+    R: 'hue', H: 'hue', hue: 'hue',
+    G: 'saturation', S: 'saturation', saturation: 'saturation',
+    B: 'brightness', V: 'brightness', brightness: 'brightness', ink: 'brightness'
 };
 const CPPN_OUTPUT_DISPLAY_LABEL_MAP = {
-    R: 'H',
-    G: 'S',
-    B: 'V'
+    hsv: { hue: 'H', saturation: 'S', brightness: 'V' },
+    rgb: { hue: 'R', saturation: 'G', brightness: 'B' }
 };
 
 function clampChannel01(value) {
     return Math.max(0, Math.min(1, value));
 }
 
+function wrapUnitInterval(value) {
+    if (!Number.isFinite(value)) return 0;
+    return ((value % 1) + 1) % 1;
+}
+
+function bipolarToChannel01(value) {
+    if (!Number.isFinite(value)) return 0;
+    return clampChannel01((value + 1) * 0.5);
+}
+
+function pixelCoordinate(pixelIndex, size) {
+    if (!Number.isFinite(size) || size <= 1) return 0;
+    return (pixelIndex / (size - 1)) * 2 - 1;
+}
+
 function normalizeCPPNOutputLabel(label) {
     if (typeof label !== 'string') return label;
-    return CPPN_LEGACY_OUTPUT_LABEL_MAP[label] || label;
+    return CPPN_CANONICAL_OUTPUT_LABEL_MAP[label] || label;
 }
 
 function normalizeOutputColorMode(mode) {
@@ -103,40 +120,38 @@ function getCPPNDisplayNodeLabel(node, mode = null) {
     }
 
     const resolvedMode = normalizeOutputColorMode(mode || OutputColorModeManager.getMode());
-    if (resolvedMode === 'rgb') return node.label;
-    return CPPN_OUTPUT_DISPLAY_LABEL_MAP[node.label] || node.label;
+    const canonical = normalizeCPPNOutputLabel(node.label);
+    return CPPN_OUTPUT_DISPLAY_LABEL_MAP[resolvedMode][canonical] || node.label;
 }
 
 function normalizeCPPNTimeInput(value) {
     if (!Number.isFinite(value)) return 0;
-    if (value > 0 && value < 1) return value;
+    if (value >= 0 && value <= 1) return value;
     return value / Math.max(GIF_FRAME_COUNT - 1, 1);
 }
 
-function hsvToDisplayRgb(h, s, v) {
-    const hue = ((clampChannel01(h) % 1) + 1) % 1;
-    const saturation = clampChannel01(s);
-    const value = clampChannel01(v);
+// Exact port of fer/src/color.py hsv2rgb (same as picbreeder_og).
+// h must be in [0, 1), s and v in [0, 1].
+function hsv2rgb(h, s, v) {
+    h = h * 360;
 
-    if (saturation === 0) {
-        return { r: value, g: value, b: value };
-    }
+    const c = v * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = v - c;
 
-    const scaledHue = hue * 6;
-    const sector = Math.floor(scaledHue);
-    const fraction = scaledHue - sector;
-    const p = value * (1 - saturation);
-    const q = value * (1 - fraction * saturation);
-    const t = value * (1 - (1 - fraction) * saturation);
+    let r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; }
+    else if (h < 120) { r = x; g = c; }
+    else if (h < 180) { g = c; b = x; }
+    else if (h < 240) { g = x; b = c; }
+    else if (h < 300) { r = x; b = c; }
+    else { r = c; b = x; }
 
-    switch (sector % 6) {
-        case 0: return { r: value, g: t, b: p };
-        case 1: return { r: q, g: value, b: p };
-        case 2: return { r: p, g: value, b: t };
-        case 3: return { r: p, g: q, b: value };
-        case 4: return { r: t, g: p, b: value };
-        default: return { r: value, g: p, b: q };
-    }
+    return {
+        r: Math.min(Math.max(r + m, 0), 1),
+        g: Math.min(Math.max(g + m, 0), 1),
+        b: Math.min(Math.max(b + m, 0), 1)
+    };
 }
 
 function buildGif332Palette() {
@@ -360,7 +375,10 @@ class CPPNNetwork {
     constructor(genome) {
         this.genome = genome;
         this.nodes = new Map();
-        this.sortedNodes = [];
+        this.inputIds = { x: null, y: null, d: null, t: null, bias: null };
+        this.outputIds = { h: null, s: null, v: null };
+        this.plan = [];
+        this.values = new Map();
         this.outputColorMode = OutputColorModeManager.getMode();
         this.buildNetwork();
     }
@@ -373,8 +391,7 @@ class CPPNNetwork {
                 activation: ActivationFunctions[nodeGene.activation] || ActivationFunctions.sigmoid,
                 activationName: nodeGene.activation,
                 label: nodeGene.label,
-                inputConnections: [],
-                value: 0
+                inputConnections: []
             });
         }
 
@@ -389,102 +406,98 @@ class CPPNNetwork {
             }
         }
 
-        this.sortedNodes = this.topologicalSort();
-    }
-
-    topologicalSort() {
-        const visited = new Set();
-        const result = [];
-
-        const visit = (nodeId) => {
-            if (visited.has(nodeId)) return;
-            visited.add(nodeId);
-
-            const node = this.nodes.get(nodeId);
-            if (!node) return;
-
-            for (const conn of node.inputConnections) {
-                visit(conn.fromId);
-            }
-
-            result.push(node);
-        };
-
-        for (const node of this.nodes.values()) {
-            if (node.type === 'output') {
-                visit(node.id);
-            }
-        }
-
-        return result;
-    }
-
-    activate(x, y, t = 0, distanceOverride = null) {
-        // GifBreeder inputs: x, y, distance, t, bias(=1)
-        const d = Number.isFinite(distanceOverride)
-            ? distanceOverride
-            : Math.sqrt(x * x + y * y);
-        const normalizedTime = normalizeCPPNTimeInput(t);
-
         for (const node of this.nodes.values()) {
             if (node.type === 'input') {
-                switch (node.label) {
-                    case 'x': node.value = x; break;
-                    case 'y': node.value = y; break;
-                    case 'd': node.value = d; break;
-                    case 't': node.value = normalizedTime; break;
-                    case 'bias': node.value = 1.0; break;
-                    default: node.value = 0.0; break;
+                if (node.label === 'x') this.inputIds.x = node.id;
+                else if (node.label === 'y') this.inputIds.y = node.id;
+                else if (node.label === 'd') this.inputIds.d = node.id;
+                else if (node.label === 't') this.inputIds.t = node.id;
+                else if (node.label === 'bias') this.inputIds.bias = node.id;
+            } else if (node.type === 'output') {
+                switch (normalizeCPPNOutputLabel(node.label)) {
+                    case 'hue': this.outputIds.h = node.id; break;
+                    case 'saturation': this.outputIds.s = node.id; break;
+                    case 'brightness': this.outputIds.v = node.id; break;
                 }
             }
         }
 
-        // Forward propagation
-        for (const node of this.sortedNodes) {
-            if (node.type === 'input') continue;
+        this.plan = this.buildEvaluationPlan();
+    }
 
-            let sum = 0;
-            for (const conn of node.inputConnections) {
-                const fromNode = this.nodes.get(conn.fromId);
-                if (fromNode) {
-                    sum += fromNode.value * conn.weight;
-                }
-            }
-
-            node.value = node.activation(sum);
-        }
-
-        // Interpret the three output channels as RGB or HSV using the existing R/G/B nodes.
-        let firstChannel = 0.5;
-        let secondChannel = 0.5;
-        let thirdChannel = 0.5;
+    // Mirrors fer's get_value_recur (same as picbreeder_og): depth-first
+    // evaluation from the output nodes, memoized, where any link that closes
+    // a cycle contributes zeros.
+    buildEvaluationPlan() {
+        const plan = [];
+        const computed = new Set();
+        const path = new Set();
 
         for (const node of this.nodes.values()) {
-            if (node.type === 'output') {
-                let val = node.value;
-
-                // Apply output activation (PicBreeder style)
-                if (OUTPUT_MODE === 0) {
-                    val = ActivationFunctions.sigmoid(val);
-                } else if (OUTPUT_MODE === 1) {
-                    val = ActivationFunctions.gaussian(val);
-                } else {
-                    val = Math.abs(ActivationFunctions.tanh(val));
-                }
-
-                switch (normalizeCPPNOutputLabel(node.label)) {
-                    case 'R': firstChannel = val; break;
-                    case 'G': secondChannel = val; break;
-                    case 'B': thirdChannel = val; break;
-                }
-            }
+            if (node.type === 'input') computed.add(node.id);
         }
+
+        const visit = (nodeId) => {
+            if (computed.has(nodeId)) return true;
+            if (path.has(nodeId)) return false; // cycle: contributes zeros
+
+            const node = this.nodes.get(nodeId);
+            if (!node) return false;
+
+            path.add(nodeId);
+            const inputs = [];
+            for (const conn of node.inputConnections) {
+                if (visit(conn.fromId)) inputs.push(conn);
+            }
+            path.delete(nodeId);
+
+            plan.push({ node, inputs });
+            computed.add(nodeId);
+            return true;
+        };
+
+        for (const outId of [this.outputIds.h, this.outputIds.s, this.outputIds.v]) {
+            if (outId !== null) visit(outId);
+        }
+
+        return plan;
+    }
+
+    activate(x, y, t = 0) {
+        const values = this.values;
+        // Faithful inputs: d = sqrt(x^2+y^2)*1.4, bias = 1; GIF adds t in [0, 1]
+        if (this.inputIds.x !== null) values.set(this.inputIds.x, x);
+        if (this.inputIds.y !== null) values.set(this.inputIds.y, y);
+        if (this.inputIds.d !== null) values.set(this.inputIds.d, Math.sqrt(x * x + y * y) * CPPN_DISTANCE_SCALE);
+        if (this.inputIds.t !== null) values.set(this.inputIds.t, normalizeCPPNTimeInput(t));
+        if (this.inputIds.bias !== null) values.set(this.inputIds.bias, 1.0);
+
+        for (const step of this.plan) {
+            let sum = 0;
+            for (const conn of step.inputs) {
+                sum += values.get(conn.fromId) * conn.weight;
+            }
+            values.set(step.node.id, step.node.activation(sum));
+        }
+
+        const hRaw = this.outputIds.h !== null ? values.get(this.outputIds.h) : 0;
+        const sRaw = this.outputIds.s !== null ? values.get(this.outputIds.s) : 0;
+        const vRaw = this.outputIds.v !== null ? values.get(this.outputIds.v) : 0;
 
         if (this.outputColorMode === 'hsv') {
-            return hsvToDisplayRgb(firstChannel, secondChannel, thirdChannel);
+            // Faithful pipeline: rgb = hsv2rgb((h+1)%1, s.clip(0,1), |v|.clip(0,1))
+            const h = ((hRaw % 1) + 1) % 1;
+            const s = Math.min(Math.max(sRaw, 0), 1);
+            const v = Math.min(Math.max(Math.abs(vRaw), 0), 1);
+            return hsv2rgb(h, s, v);
         }
 
-        return { r: firstChannel, g: secondChannel, b: thirdChannel };
+        // RGB mode: bipolar channel visualization for inspection (GIF-specific)
+        return {
+            r: bipolarToChannel01(hRaw),
+            g: bipolarToChannel01(sRaw),
+            b: bipolarToChannel01(vRaw)
+        };
     }
 }
 
@@ -509,60 +522,21 @@ class CPPNRenderer {
         }
     }
 
-    getDistanceFieldPixel(distanceField, px, py, width, height) {
-        if (!distanceField || !distanceField.values || !distanceField.width || !distanceField.height) {
-            return null;
-        }
-
-        const sx = distanceField.width === width
-            ? px
-            : Math.min(distanceField.width - 1, Math.floor((px / width) * distanceField.width));
-        const sy = distanceField.height === height
-            ? py
-            : Math.min(distanceField.height - 1, Math.floor((py / height) * distanceField.height));
-        const sourceIndex = sy * distanceField.width + sx;
-
-        return {
-            d: distanceField.values[sourceIndex],
-            isLine: distanceField.mask && distanceField.mask[sourceIndex] > 0
-        };
-    }
-
-    renderFrameToImageData(network, ctx, width, height, timestep, options = {}) {
+    renderFrameToImageData(network, ctx, width, height, timestep) {
         const imageData = ctx.createImageData(width, height);
         const data = imageData.data;
         const scale = 1.0;
-        const distanceField = options.distanceField || null;
-        // 'black': paint line pixels black. 'invert': paint them as the
-        // opposite of the pattern color (matches the preview's difference
-        // overlay, used for GIF export). 'none': render the pattern only and
-        // let an on-screen overlay show the lines.
-        const lineRendering = options.distanceLineRendering || 'black';
 
         for (let py = 0; py < height; py++) {
             for (let px = 0; px < width; px++) {
-                const x = (px / width - 0.5) * scale;
-                const y = (py / height - 0.5) * scale;
-                const fieldPixel = this.getDistanceFieldPixel(distanceField, px, py, width, height);
-                const rgb = network.activate(x, y, timestep, fieldPixel ? fieldPixel.d : null);
+                const x = pixelCoordinate(px, width) * scale;
+                const y = pixelCoordinate(py, height) * scale;
+                const rgb = network.activate(x, y, timestep);
 
                 const idx = (py * width + px) * 4;
-                const r = Math.round(clampChannel01(rgb.r) * 255);
-                const g = Math.round(clampChannel01(rgb.g) * 255);
-                const b = Math.round(clampChannel01(rgb.b) * 255);
-                if (fieldPixel && fieldPixel.isLine && lineRendering === 'black') {
-                    data[idx] = 0;
-                    data[idx + 1] = 0;
-                    data[idx + 2] = 0;
-                } else if (fieldPixel && fieldPixel.isLine && lineRendering === 'invert') {
-                    data[idx] = 255 - r;
-                    data[idx + 1] = 255 - g;
-                    data[idx + 2] = 255 - b;
-                } else {
-                    data[idx] = r;
-                    data[idx + 1] = g;
-                    data[idx + 2] = b;
-                }
+                data[idx] = Math.round(clampChannel01(rgb.r) * 255);
+                data[idx + 1] = Math.round(clampChannel01(rgb.g) * 255);
+                data[idx + 2] = Math.round(clampChannel01(rgb.b) * 255);
                 data[idx + 3] = 255;
             }
         }
@@ -577,18 +551,14 @@ class CPPNRenderer {
                 state.ctx,
                 state.width,
                 state.height,
-                frameIndex,
-                {
-                    distanceField: state.distanceField,
-                    distanceLineRendering: state.distanceLineRendering
-                }
+                frameIndex
             );
         }
 
         state.ctx.putImageData(state.cachedFrames[frameIndex], 0, 0);
     }
 
-    render(genome, canvas, resolution = GIF_RESOLUTION, timestep = 0, options = {}) {
+    render(genome, canvas, resolution = GIF_RESOLUTION, timestep = 0) {
         this.stopCanvasAnimation(canvas);
 
         const ctx = canvas.getContext('2d');
@@ -599,20 +569,18 @@ class CPPNRenderer {
         this.ensureCanvasSize(canvas, width, height);
         const network = new CPPNNetwork(genome);
         const boundedTimestep = Math.max(0, Math.min(GIF_FRAME_COUNT - 1, Math.floor(timestep)));
-        const imageData = this.renderFrameToImageData(network, ctx, width, height, boundedTimestep, options);
+        const imageData = this.renderFrameToImageData(network, ctx, width, height, boundedTimestep);
         ctx.putImageData(imageData, 0, 0);
     }
 
-    renderProgressive(genome, canvas, onComplete, options = {}) {
+    renderProgressive(genome, canvas, onComplete) {
         this.stopCanvasAnimation(canvas);
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const width = Number.isInteger(options.resolution) && options.resolution > 0
-            ? options.resolution
-            : GIF_RESOLUTION;
-        const height = width;
+        const width = GIF_RESOLUTION;
+        const height = GIF_RESOLUTION;
         this.ensureCanvasSize(canvas, width, height);
 
         const state = {
@@ -621,8 +589,6 @@ class CPPNRenderer {
             network: new CPPNNetwork(genome),
             width,
             height,
-            distanceField: options.distanceField || null,
-            distanceLineRendering: options.distanceLineRendering || 'black',
             cachedFrames: new Array(GIF_FRAME_COUNT),
             lastFrameIndex: -1,
             startTime: performance.now(),
@@ -674,10 +640,7 @@ class CPPNRenderer {
         const indexedFrames = [];
 
         for (let frameIndex = 0; frameIndex < frameCount; frameIndex++) {
-            const imageData = this.renderFrameToImageData(network, ctx, width, height, frameIndex, {
-                distanceField: options.distanceField || null,
-                distanceLineRendering: options.distanceLineRendering || 'black'
-            });
+            const imageData = this.renderFrameToImageData(network, ctx, width, height, frameIndex);
             indexedFrames.push(imageDataToGif332Indices(imageData));
         }
 
@@ -1325,8 +1288,8 @@ class PhylogenyVisualizer {
 
             for (let py = 0; py < size; py++) {
                 for (let px = 0; px < size; px++) {
-                    const x = (px / size - 0.5) * scale;
-                    const y = (py / size - 0.5) * scale;
+                    const x = pixelCoordinate(px, size) * scale;
+                    const y = pixelCoordinate(py, size) * scale;
                     const rgb = network.activate(x, y);
                     const idx = (py * size + px) * 4;
 
