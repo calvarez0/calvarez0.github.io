@@ -141,6 +141,757 @@ a:hover {
   text-decoration-thickness: 2px;
 }
 
+/* Orientation-energy process */
+.process-intro {
+  margin: 2.75rem 0 1.25rem;
+}
+
+.process-intro h3 {
+  margin-bottom: .55rem;
+}
+
+.process-intro p {
+  margin: 0;
+  color: rgba(26, 26, 26, .7);
+}
+
+.process-shell {
+  --process-accent: #ff5b35;
+  border: 1px solid rgba(26, 26, 26, .14);
+  border-radius: 22px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, .28);
+  box-shadow: 0 22px 60px rgba(67, 48, 14, .08);
+}
+
+.process-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid rgba(26, 26, 26, .12);
+}
+
+.process-tab {
+  position: relative;
+  min-height: 76px;
+  padding: 14px 18px;
+  border: 0;
+  border-right: 1px solid rgba(26, 26, 26, .1);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+
+.process-tab:last-child {
+  border-right: 0;
+}
+
+.process-tab::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 3px;
+  background: var(--process-accent);
+  transform: scaleX(0);
+  transition: transform .2s ease;
+}
+
+.process-tab:hover,
+.process-tab[aria-selected="true"] {
+  background: rgba(255, 255, 255, .48);
+}
+
+.process-tab[aria-selected="true"]::after {
+  transform: scaleX(1);
+}
+
+.process-tab-number,
+.process-tab-name {
+  display: block;
+}
+
+.process-tab-number {
+  margin-bottom: 2px;
+  font-size: .7rem;
+  letter-spacing: .12em;
+  opacity: .5;
+}
+
+.process-tab-name {
+  font-size: .88rem;
+  font-weight: 700;
+}
+
+.process-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(290px, .88fr);
+  min-height: 535px;
+}
+
+.process-visual {
+  position: relative;
+  min-height: 535px;
+  overflow: hidden;
+  background: #090806;
+}
+
+.process-hero,
+.process-orientations {
+  width: 100%;
+  height: 100%;
+}
+
+.process-hero {
+  display: block;
+  object-fit: cover;
+  animation: process-fade .35s ease;
+}
+
+.process-orientations {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 1px;
+  background: rgba(255, 255, 255, .18);
+  animation: process-fade .35s ease;
+}
+
+.process-orientations[hidden],
+.process-hero[hidden] {
+  display: none;
+}
+
+.process-orientation {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  background: #050403;
+}
+
+.process-orientation img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.process-orientation figcaption {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .62);
+  color: white;
+  font-size: .65rem;
+  line-height: 1.35;
+  backdrop-filter: blur(5px);
+}
+
+.orientation-mark {
+  width: 16px;
+  height: 2px;
+  display: inline-block;
+  background: var(--process-accent);
+  transform: rotate(var(--angle));
+  transform-origin: center;
+}
+
+.process-visual-label {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  padding: 7px 11px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .68);
+  color: white;
+  font-size: .72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  backdrop-filter: blur(7px);
+}
+
+.process-scan {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  display: none;
+  background: rgba(255, 255, 255, .85);
+  box-shadow: 0 0 22px 7px rgba(255, 91, 53, .48);
+  animation: process-scan 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.process-visual[data-stage="dog"] .process-scan,
+.process-visual[data-stage="orientations"] .process-scan {
+  display: block;
+}
+
+.process-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(26px, 4vw, 50px);
+  border-left: 1px solid rgba(26, 26, 26, .12);
+}
+
+.process-copy-kicker {
+  margin: 0 0 14px;
+  color: var(--process-accent);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.process-copy h4 {
+  margin: 0 0 12px;
+  font-family: "Literata", Georgia, serif;
+  font-size: clamp(1.45rem, 2.5vw, 2.25rem);
+  line-height: 1.12;
+}
+
+.process-description {
+  min-height: 7.2em;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(26, 26, 26, .75);
+}
+
+.process-equation {
+  min-height: 58px;
+  margin: 20px 0 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(26, 26, 26, .11);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .48);
+  font-family: "Literata", Georgia, serif;
+  font-size: .95rem;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+.process-detail {
+  min-height: 3.2em;
+  margin: 0 0 22px;
+  font-size: .78rem;
+  line-height: 1.55;
+  color: rgba(26, 26, 26, .53);
+}
+
+.process-next {
+  align-self: flex-start;
+  padding: 10px 15px;
+  border: 1px solid rgba(26, 26, 26, .72);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: 600 .8rem/1.2 "Spline Sans", sans-serif;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.process-next:hover {
+  background: #1a1a1a;
+  color: #fff8e7;
+  transform: translateY(-1px);
+}
+
+.process-path {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 15px 20px;
+  border-top: 1px solid rgba(26, 26, 26, .12);
+  background: rgba(255, 255, 255, .3);
+}
+
+.process-path-step {
+  position: relative;
+  padding-left: 28px;
+  font-size: .68rem;
+  line-height: 1.35;
+  color: rgba(26, 26, 26, .45);
+}
+
+.process-path-step::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 7px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: var(--bg);
+  z-index: 1;
+}
+
+.process-path-step::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  right: calc(100% - 7px);
+  width: calc(100% - 14px);
+  height: 1px;
+  background: rgba(26, 26, 26, .18);
+}
+
+.process-path-step:first-child::after {
+  display: none;
+}
+
+.process-path-step.is-complete,
+.process-path-step.is-active {
+  color: #1a1a1a;
+}
+
+.process-path-step.is-complete::before,
+.process-path-step.is-active::before {
+  border-color: var(--process-accent);
+  background: var(--process-accent);
+}
+
+.threshold-intro {
+  margin: 3.25rem 0 1.25rem;
+}
+
+.threshold-intro h3 {
+  margin-bottom: .5rem;
+}
+
+.threshold-intro p {
+  margin: 0;
+  color: rgba(26, 26, 26, .7);
+}
+
+@keyframes process-fade {
+  from { opacity: .3; transform: scale(1.01); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes process-scan {
+  0%, 12% { left: 0; opacity: 0; }
+  24%, 76% { opacity: .9; }
+  88%, 100% { left: 100%; opacity: 0; }
+}
+
+/* Sequential scroll story */
+.scroll-story {
+  --story-accent: #2d8ef4;
+  --story-blue: #2d8ef4;
+  --story-red: #8b2635;
+  margin-top: 3rem;
+}
+
+.story-intro {
+  max-width: 820px;
+  margin-bottom: 2rem;
+}
+
+.story-intro h3,
+.story-section-heading h3 {
+  margin: 0 0 .65rem;
+}
+
+.story-intro p,
+.story-section-heading p {
+  margin: 0;
+  color: rgba(26, 26, 26, .68);
+}
+
+.story-chapter {
+  display: grid;
+  grid-template-columns: minmax(260px, .82fr) minmax(0, 1.18fr);
+  gap: clamp(28px, 6vw, 76px);
+  align-items: center;
+  margin: clamp(54px, 9vw, 112px) 0;
+}
+
+.story-chapter.is-reversed {
+  grid-template-columns: minmax(0, 1.18fr) minmax(260px, .82fr);
+}
+
+.story-copy {
+  max-width: 460px;
+}
+
+.story-index {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--story-accent);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.story-copy h4,
+.combine-heading h4,
+.merge-heading h4 {
+  margin: 0 0 12px;
+  font-family: "Spline Sans", system-ui, sans-serif;
+  font-size: clamp(1.55rem, 3vw, 2.65rem);
+  font-weight: 600;
+  line-height: 1.08;
+}
+
+.story-copy p,
+.combine-heading p,
+.merge-heading p {
+  margin: 0;
+  color: rgba(26, 26, 26, .7);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.story-equation {
+  margin-top: 20px;
+  padding: 13px 15px;
+  border: 1px solid rgba(26, 26, 26, .12);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .03);
+  font-family: "Spline Sans", system-ui, sans-serif;
+  font-size: .9rem;
+  overflow-x: auto;
+}
+
+.story-figure {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(26, 26, 26, .13);
+  border-radius: 10px;
+  background: #070604;
+}
+
+.story-figure img {
+  width: 100%;
+  display: block;
+}
+
+.story-figure figcaption,
+.signal-node figcaption {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .68);
+  color: white;
+  font-size: .67rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+
+.energy-combine {
+  position: relative;
+  height: 230vh;
+  margin: 5rem calc(50% - 50vw) 0;
+}
+
+.energy-combine-sticky,
+.histogram-merge-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 640px;
+  display: grid;
+  grid-template-columns: minmax(260px, .72fr) minmax(0, 1.28fr);
+  gap: clamp(28px, 5vw, 70px);
+  align-items: center;
+  padding: clamp(28px, 5vw, 70px) max(var(--pad), calc((100vw - var(--max-w)) / 2 + var(--pad)));
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.combine-heading {
+  max-width: 390px;
+}
+
+.combine-heading p,
+.merge-heading p {
+  color: rgba(26, 26, 26, .68);
+}
+
+.combine-heading .story-index,
+.merge-heading .story-index {
+  color: var(--story-blue);
+}
+
+.combine-stage {
+  position: relative;
+  width: min(68vh, 660px, 100%);
+  aspect-ratio: 1;
+  justify-self: center;
+}
+
+.combine-map,
+.combined-energy {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(26, 26, 26, .1);
+  border-radius: 10px;
+  background: #050403;
+  will-change: transform, opacity;
+}
+
+.combine-map img,
+.combined-energy img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.combine-map figcaption {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .7);
+  color: #fff;
+  font-size: .62rem;
+  line-height: 1.3;
+}
+
+.combined-energy {
+  opacity: 0;
+  transform: scale(.92);
+  z-index: 20;
+}
+
+.combine-status,
+.merge-status {
+  margin-top: 24px;
+  color: rgba(26, 26, 26, .48);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.scroll-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  color: rgba(26, 26, 26, .5);
+  font-size: .72rem;
+}
+
+.scroll-cue::before {
+  content: "";
+  width: 1px;
+  height: 30px;
+  background: currentColor;
+}
+
+.story-section {
+  margin: clamp(76px, 12vw, 150px) 0;
+}
+
+.story-section-heading {
+  max-width: 780px;
+  margin-bottom: 34px;
+}
+
+.signal-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1.18fr);
+  gap: clamp(10px, 2vw, 24px);
+  align-items: center;
+}
+
+.signal-node {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+}
+
+.signal-frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(26, 26, 26, .13);
+  border-radius: 10px;
+  aspect-ratio: 1;
+  background: #090806;
+}
+
+.signal-frame img,
+.signal-frame canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.signal-node-label {
+  margin: 10px 0 0;
+  font-size: .74rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.signal-node-detail {
+  display: block;
+  margin-top: 3px;
+  color: rgba(26, 26, 26, .5);
+  font-weight: 400;
+}
+
+.flow-arrow {
+  min-width: 62px;
+  color: rgba(26, 26, 26, .48);
+  font: 600 .66rem/1.35 "Spline Sans", sans-serif;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.flow-arrow::after {
+  content: "\2192";
+  display: block;
+  margin-top: 4px;
+  color: var(--story-accent);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.filter-bank-mark {
+  display: grid;
+  grid-template-columns: repeat(3, 12px);
+  gap: 5px;
+  justify-content: center;
+  margin: 0 auto 6px;
+}
+
+.filter-bank-mark i {
+  width: 12px;
+  height: 2px;
+  display: block;
+  background: var(--story-accent);
+  transform: rotate(var(--angle));
+}
+
+.noise-note {
+  max-width: 760px;
+  margin: 28px 0 0;
+  color: rgba(26, 26, 26, .58);
+  font-size: .82rem;
+  line-height: 1.6;
+}
+
+.histogram-merge {
+  position: relative;
+  height: 245vh;
+  margin: 0 calc(50% - 50vw);
+}
+
+.histogram-merge-sticky {
+  grid-template-columns: minmax(250px, .65fr) minmax(0, 1.35fr);
+  background: var(--bg);
+}
+
+.merge-heading {
+  max-width: 370px;
+}
+
+.merge-stage {
+  position: relative;
+  width: min(72vw, 760px, 100%);
+  height: min(58vh, 500px);
+  min-height: 390px;
+  justify-self: center;
+}
+
+.merge-chart-card,
+.final-comparison-canvas {
+  position: absolute;
+  top: 50%;
+  width: 46%;
+  margin: 0;
+  transform: translateY(-50%);
+  will-change: transform, opacity;
+}
+
+.merge-chart-card:first-of-type {
+  left: 0;
+}
+
+.merge-chart-card:nth-of-type(2) {
+  right: 0;
+}
+
+.merge-chart-card canvas,
+.final-comparison-canvas {
+  display: block;
+  border: 1px solid rgba(26, 26, 26, .1);
+  border-radius: 10px;
+  background: #fff8e7;
+}
+
+.merge-chart-card canvas {
+  width: 100%;
+  aspect-ratio: 1.18;
+}
+
+.merge-chart-card figcaption {
+  margin-top: 9px;
+  color: rgba(26, 26, 26, .65);
+  font-size: .72rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.final-comparison-canvas {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 1.5;
+  opacity: 0;
+  transform: translateY(-50%) scale(.96);
+  z-index: 10;
+}
+
+.merge-axis-mode {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 5px 9px;
+  border: 1px solid rgba(45, 142, 244, .28);
+  border-radius: 999px;
+  background: rgba(45, 142, 244, .06);
+  color: #226dbd;
+  font-size: .68rem;
+  font-weight: 600;
+}
+
 /* Saliency Visualization Styles */
 .saliency-viz select {
   padding: 8px 14px;
@@ -306,8 +1057,140 @@ a:hover {
 }
 
 @media (max-width: 700px) {
+  .story-chapter,
+  .story-chapter.is-reversed {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .story-chapter.is-reversed .story-copy {
+    order: -1;
+  }
+
+  .energy-combine,
+  .histogram-merge {
+    height: 205vh;
+  }
+
+  .energy-combine-sticky,
+  .histogram-merge-sticky {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 18px;
+    min-height: 560px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+
+  .combine-heading,
+  .merge-heading {
+    max-width: none;
+  }
+
+  .combine-heading h4,
+  .merge-heading h4 {
+    font-size: 1.45rem;
+  }
+
+  .combine-heading p,
+  .merge-heading p,
+  .scroll-cue {
+    display: none;
+  }
+
+  .combine-status,
+  .merge-status {
+    margin-top: 8px;
+  }
+
+  .combine-stage {
+    width: min(58vh, 100%);
+  }
+
+  .signal-flow {
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+  }
+
+  .signal-flow .signal-node:last-child {
+    grid-column: 1 / -1;
+    width: min(100%, 340px);
+    justify-self: center;
+  }
+
+  .signal-flow .flow-arrow.is-second {
+    display: none;
+  }
+
+  .flow-arrow {
+    min-width: 0;
+    font-size: .58rem;
+  }
+
+  .merge-stage {
+    width: 100%;
+    height: min(52vh, 430px);
+    min-height: 320px;
+  }
+
+  .process-tabs {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .process-tab:nth-child(2) {
+    border-right: 0;
+  }
+
+  .process-tab:nth-child(-n+2) {
+    border-bottom: 1px solid rgba(26, 26, 26, .1);
+  }
+
+  .process-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .process-visual {
+    min-height: auto;
+    aspect-ratio: 1;
+  }
+
+  .process-copy {
+    border-top: 1px solid rgba(26, 26, 26, .12);
+    border-left: 0;
+  }
+
+  .process-description,
+  .process-detail {
+    min-height: 0;
+  }
+
+  .process-path {
+    display: none;
+  }
+
   .saliency-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .energy-combine,
+  .histogram-merge {
+    height: auto;
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+  }
+
+  .energy-combine-sticky,
+  .histogram-merge-sticky {
+    position: relative;
+    height: auto;
+    min-height: 720px;
+  }
+
+  .process-hero,
+  .process-orientations,
+  .process-scan {
+    animation: none;
   }
 }
 </style>
@@ -321,8 +1204,174 @@ a:hover {
     <p class="lede">
       Alex Alvarez*, Jin Hyun Park*, and Yoonsuck Choe
     </p>
-    <div class="saliency-viz" style="margin-top: 1rem;">
-      <!-- <h3>Interactive Demo</h3> -->
+
+    <section class="scroll-story" aria-labelledby="processTitle">
+      <header class="story-intro">
+        <div class="eyebrow">Inside the visual response</div>
+        <h3 id="processTitle">From natural image to neural threshold</h3>
+        <p>Following <a href="https://doi.org/10.1109/IJCNN.2003.1223343">Lee and Choe's orientation-energy model</a>, this sequence follows the filtering method formalized in <a href="assets/lambert/saliency_thresholds.pdf#page=7">Appendix A.1</a>.</p>
+      </header>
+
+      <section class="story-chapter" aria-labelledby="storyInputTitle">
+        <div class="story-copy">
+          <span class="story-index">01 / Natural stimulus</span>
+          <h4 id="storyInputTitle">Begin with the scene</h4>
+          <p>The model reads the wolf photograph as luminance. Nothing is marked salient yet; every pixel is simply part of the incoming visual field.</p>
+          <div class="story-equation">I(x, y) &rarr; grayscale luminance</div>
+        </div>
+        <figure class="story-figure">
+          <img src="assets/wolf/before.jpeg" alt="Natural photograph of a wolf standing in brush">
+          <figcaption>Input stimulus I</figcaption>
+        </figure>
+      </section>
+
+      <section class="story-chapter is-reversed" aria-labelledby="storyDogTitle">
+        <figure class="story-figure">
+          <img src="assets/wolf/wolf_dog.png" alt="Signed Difference-of-Gaussians response of the wolf photograph">
+          <figcaption>Signed local contrast ID</figcaption>
+        </figure>
+        <div class="story-copy">
+          <span class="story-index">02 / Center-surround</span>
+          <h4 id="storyDogTitle">Remove the illumination, keep the transitions</h4>
+          <p>A Difference-of-Gaussians compares each point with a broader neighborhood. Smooth lighting falls away; orange and blue show opposite polarities of local contrast.</p>
+          <div class="story-equation">I<sub>D</sub> = I * (N<sub>&sigma;/2</sub> - N<sub>&sigma;</sub>)</div>
+        </div>
+      </section>
+
+      <section class="energy-combine" id="energyCombine" aria-labelledby="combineTitle">
+        <div class="energy-combine-sticky">
+          <div class="combine-heading">
+            <span class="story-index">03 / Six orientation channels</span>
+            <h4 id="combineTitle">Six filters become one energy map</h4>
+            <p>Each angle combines even and odd Gabor phases. As you scroll, the six phase-invariant responses align and add pixel by pixel.</p>
+            <div class="story-equation">E = &Sigma;<sub>k=0</sub><sup>5</sup> [(G<sub>&theta;k,0</sub> * I<sub>D</sub>)<sup>2</sup> + (G<sub>&theta;k,&pi;/2</sub> * I<sub>D</sub>)<sup>2</sup>]</div>
+            <div class="combine-status" id="combineStatus">Six separate responses</div>
+            <span class="scroll-cue" id="combineCue">Scroll to sum the channels</span>
+          </div>
+
+          <div class="combine-stage" id="combineStage" aria-label="Six orientation maps converging into the final energy map">
+            <figure class="combine-map" data-x="-34" data-y="-32">
+              <img src="assets/wolf/wolf_gabor_000.png" alt="0 degree orientation-energy response">
+              <figcaption><span class="orientation-mark" style="--angle: 0deg"></span>0&deg;</figcaption>
+            </figure>
+            <figure class="combine-map" data-x="0" data-y="-32">
+              <img src="assets/wolf/wolf_gabor_030.png" alt="30 degree orientation-energy response">
+              <figcaption><span class="orientation-mark" style="--angle: 30deg"></span>30&deg;</figcaption>
+            </figure>
+            <figure class="combine-map" data-x="34" data-y="-32">
+              <img src="assets/wolf/wolf_gabor_060.png" alt="60 degree orientation-energy response">
+              <figcaption><span class="orientation-mark" style="--angle: 60deg"></span>60&deg;</figcaption>
+            </figure>
+            <figure class="combine-map" data-x="-34" data-y="32">
+              <img src="assets/wolf/wolf_gabor_090.png" alt="90 degree orientation-energy response">
+              <figcaption><span class="orientation-mark" style="--angle: 90deg"></span>90&deg;</figcaption>
+            </figure>
+            <figure class="combine-map" data-x="0" data-y="32">
+              <img src="assets/wolf/wolf_gabor_120.png" alt="120 degree orientation-energy response">
+              <figcaption><span class="orientation-mark" style="--angle: 120deg"></span>120&deg;</figcaption>
+            </figure>
+            <figure class="combine-map" data-x="34" data-y="32">
+              <img src="assets/wolf/wolf_gabor_150.png" alt="150 degree orientation-energy response">
+              <figcaption><span class="orientation-mark" style="--angle: 150deg"></span>150&deg;</figcaption>
+            </figure>
+            <figure class="combined-energy" id="combinedEnergy">
+              <img src="assets/wolf/After.png" alt="Final summed orientation-energy map of the wolf">
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="story-section" aria-labelledby="wolfHistogramTitle">
+        <header class="story-section-heading">
+          <span class="story-index">04 / From map to distribution</span>
+          <h3 id="wolfHistogramTitle">Gather the energies, then count them</h3>
+          <p>Energy is already a scalar. The hot colors are only a display palette; removing that palette exposes one grayscale magnitude per pixel. Binning those magnitudes produces the response histogram h(E).</p>
+        </header>
+        <div class="signal-flow">
+          <figure class="signal-node">
+            <div class="signal-frame"><img src="assets/wolf/After.png" alt="Hot-color wolf orientation-energy map"></div>
+            <p class="signal-node-label">Summed response <span class="signal-node-detail">Six E&theta; channels</span></p>
+          </figure>
+          <div class="flow-arrow">Read magnitude</div>
+          <figure class="signal-node">
+            <div class="signal-frame"><img src="assets/wolf/wolf_energy_grayscale.png" alt="Grayscale scalar energy magnitudes for the wolf"></div>
+            <p class="signal-node-label">Scalar energy E <span class="signal-node-detail">One value per pixel</span></p>
+          </figure>
+          <div class="flow-arrow is-second">Bin values</div>
+          <figure class="signal-node">
+            <div class="signal-frame"><canvas id="wolfLinearHistogram" aria-label="Linear histogram of wolf energy responses"></canvas></div>
+            <p class="signal-node-label">Natural-image h(E) <span class="signal-node-detail">Heavy response tail</span></p>
+          </figure>
+        </div>
+      </section>
+
+      <section class="story-section" aria-labelledby="noiseHistogramTitle">
+        <header class="story-section-heading">
+          <span class="story-index">05 / White-noise control</span>
+          <h3 id="noiseHistogramTitle">Now give the same filters no contours</h3>
+          <p>A seeded white-noise image goes through the identical center-surround and six-angle filter bank. Its response has no coherent wolf, grass, or edge structure to preserve.</p>
+        </header>
+        <div class="signal-flow">
+          <figure class="signal-node">
+            <div class="signal-frame"><img src="assets/wolf/white_noise.png" alt="Seeded grayscale white-noise input"></div>
+            <p class="signal-node-label">White noise <span class="signal-node-detail">Independent pixel intensities</span></p>
+          </figure>
+          <div class="flow-arrow">
+            <span class="filter-bank-mark" aria-hidden="true"><i style="--angle:0deg"></i><i style="--angle:30deg"></i><i style="--angle:60deg"></i><i style="--angle:90deg"></i><i style="--angle:120deg"></i><i style="--angle:150deg"></i></span>
+            Same filters
+          </div>
+          <figure class="signal-node">
+            <div class="signal-frame"><img id="whiteNoiseEnergyImage" src="assets/wolf/white_noise_energy.png" alt="Orientation-energy response to white noise"></div>
+            <p class="signal-node-label">Noise response <span class="signal-node-detail">No coherent contours</span></p>
+          </figure>
+          <div class="flow-arrow is-second">Bin values</div>
+          <figure class="signal-node">
+            <div class="signal-frame"><canvas id="noiseLinearHistogram" aria-label="Linear histogram of white-noise energy responses"></canvas></div>
+            <p class="signal-node-label">Noise response <span class="signal-node-detail">Empirical control</span></p>
+          </figure>
+        </div>
+        <p class="noise-note">The empirical noise response motivates the matched Gaussian baseline g(E) used in the paper. The red curve below is that smooth matched baseline, not a literal copy of this one finite noise sample.</p>
+      </section>
+
+      <section class="story-section" aria-labelledby="mergeTitle">
+        <header class="story-section-heading">
+          <span class="story-index">06 / Put the tails on equal footing</span>
+          <h3 id="mergeTitle">Log both axes, then bring the distributions together</h3>
+          <p>The log-log view makes rare, high-energy responses visible. Scroll through the transformation: the separate natural-image and control distributions become the comparison used to locate L2.</p>
+        </header>
+        <div class="histogram-merge" id="histogramMerge">
+          <div class="histogram-merge-sticky">
+            <div class="merge-heading">
+              <span class="story-index">Distribution comparison</span>
+              <h4>From counts to crossover</h4>
+              <p>Natural scenes keep a heavier tail than the matched Gaussian baseline. Their second intersection is the candidate saliency threshold.</p>
+              <span class="merge-axis-mode" id="mergeAxisMode">Linear axes</span>
+              <div class="merge-status" id="mergeStatus">Two separate histograms</div>
+              <span class="scroll-cue" id="mergeCue">Scroll to transform and overlay</span>
+            </div>
+            <div class="merge-stage" id="mergeStage">
+              <figure class="merge-chart-card" id="wolfMergeCard">
+                <canvas id="wolfMergeCanvas" aria-label="Natural-image response histogram transforming to log-log axes"></canvas>
+                <figcaption>Natural image h(E)</figcaption>
+              </figure>
+              <figure class="merge-chart-card" id="noiseMergeCard">
+                <canvas id="noiseMergeCanvas" aria-label="White-noise response histogram transforming to log-log axes"></canvas>
+                <figcaption>White-noise control &rarr; matched g(E)</figcaption>
+              </figure>
+              <canvas class="final-comparison-canvas" id="finalComparisonCanvas" aria-label="Log-log comparison of natural-image and Gaussian response distributions"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="threshold-intro" aria-labelledby="thresholdTitle">
+      <div class="eyebrow">Find the saliency threshold</div>
+      <h3 id="thresholdTitle">Now decide how much response is enough</h3>
+      <p>The full response has a heavy-tailed energy distribution. Drag the threshold from rare, high-energy contours toward the lower-energy background.</p>
+    </section>
+
+    <div class="saliency-viz">
 
       <div class="saliency-grid">
         <div>
@@ -375,8 +1424,8 @@ a:hover {
     </div>
 
     <p style="opacity: 0.8">
-        <b><i>How many pixels are needed to make out what I'm looking at?</i></b>&nbsp I perceive the saliency threshold conceptually as the point where marginal information gain per pixel begins to diminish sharply.</i></b> 
-      </p>
+      <strong><em>How many pixels are needed to make out what I'm looking at?</em></strong>&nbsp; I perceive the saliency threshold conceptually as the point where marginal information gain per pixel begins to diminish sharply.
+    </p>
 
     <p>
       We explore a theoretical juncture where the power law, Gaussian, and Lambert W converge to compute saliency thresholds in neural code.
@@ -399,6 +1448,507 @@ a:hover {
 
 <script src="portfolio/assets/saliency/viz_data.js"></script>
 <script>
+(function() {
+  const stages = ['image', 'dog', 'orientations', 'energy'];
+  const stageContent = {
+    image: {
+      kicker: 'Stage 1 - Retina / stimulus',
+      heading: 'Begin with the scene',
+      description: 'The model first discards color and reads the photograph as a field of luminance values. At this point every pixel belongs to the stimulus; nothing has yet been labeled salient.',
+      equation: 'I(x, y) &rarr; grayscale luminance',
+      detail: 'The visual system model operates on a grayscale image, matching the orientation-energy method in Appendix A.1.',
+      label: 'Stimulus I',
+      src: 'assets/wolf/before.jpeg',
+      alt: 'Natural photograph of a wolf in brush',
+      next: 'Next: center-surround &rarr;'
+    },
+    dog: {
+      kicker: 'Stage 2 - LGN / center-surround',
+      heading: 'Keep local contrast, release the scene',
+      description: 'A Difference-of-Gaussians filter compares each point with a broader neighborhood. Smooth illumination falls away while signed light-dark transitions remain. Orange and blue show opposite response polarities.',
+      equation: 'I<sub>D</sub> = I * D &nbsp;&nbsp; where &nbsp;&nbsp; D = N<sub>&sigma;/2</sub> - N<sub>&sigma;</sub>',
+      detail: 'This center-surround operation models the lateral geniculate nucleus (LGN). The signed response is normalized here only for display.',
+      label: 'DoG response ID',
+      src: 'assets/wolf/wolf_dog.png',
+      alt: 'Signed Difference-of-Gaussians response of the wolf image',
+      next: 'Next: orientation bank &rarr;'
+    },
+    orientations: {
+      kicker: 'Stage 3 - V1 / oriented filters',
+      heading: 'Ask six directions the same question',
+      description: 'The contrast response passes through Gabor filters spaced every 30 degrees. At each angle, an even and an odd phase form a quadrature pair; squaring and adding them makes the response less dependent on the exact position of an edge.',
+      equation: 'E<sub>&theta;</sub> = (G<sub>&theta;,0</sub> * I<sub>D</sub>)<sup>2</sup> + (G<sub>&theta;,&pi;/2</sub> * I<sub>D</sub>)<sup>2</sup>',
+      detail: 'Each tile is independently normalized so all six orientation channels can be inspected. Bright regions are strong responses for that angle.',
+      label: '6 angles x 2 phases',
+      next: 'Next: sum the responses &rarr;'
+    },
+    energy: {
+      kicker: 'Stage 4 - Orientation energy',
+      heading: 'Add the channels into one response map',
+      description: 'The six phase-invariant channels are summed pixel by pixel. The result is not an outline drawn by hand: bright values are locations where the modeled cortical filters respond strongly across the image.',
+      equation: 'E = &Sigma;<sub>k=0</sub><sup>5</sup> E<sub>&theta;<i>k</i></sub> &nbsp;&nbsp; where &nbsp;&nbsp; &theta;<sub>k</sub> = k&pi;/6',
+      detail: 'This is the supplied wolf energy output used below. Its response histogram has the heavy tail analyzed in the paper.',
+      label: 'Final energy E',
+      src: 'assets/wolf/After.png',
+      alt: 'Final summed orientation-energy map of the wolf',
+      next: 'Continue to the threshold &darr;'
+    }
+  };
+
+  function initProcessViz() {
+    const tabs = Array.from(document.querySelectorAll('[data-process-stage]'));
+    if (!tabs.length) return;
+    const panel = document.getElementById('processPanel');
+    const visual = document.getElementById('processVisual');
+    const hero = document.getElementById('processHero');
+    const orientations = document.getElementById('processOrientations');
+    const next = document.getElementById('processNext');
+    let currentStage = 'image';
+
+    function showStage(stage, moveFocus) {
+      const index = stages.indexOf(stage);
+      const content = stageContent[stage];
+      if (index < 0 || !content) return;
+      currentStage = stage;
+
+      tabs.forEach(tab => {
+        const active = tab.dataset.processStage === stage;
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active) {
+          panel.setAttribute('aria-labelledby', tab.id);
+          if (moveFocus) tab.focus();
+        }
+      });
+
+      visual.dataset.stage = stage;
+      const showOrientations = stage === 'orientations';
+      orientations.hidden = !showOrientations;
+      hero.hidden = showOrientations;
+      if (!showOrientations) {
+        hero.src = content.src;
+        hero.alt = content.alt;
+      }
+
+      document.getElementById('processKicker').textContent = content.kicker;
+      document.getElementById('processHeading').textContent = content.heading;
+      document.getElementById('processDescription').textContent = content.description;
+      document.getElementById('processEquation').innerHTML = content.equation;
+      document.getElementById('processDetail').textContent = content.detail;
+      document.getElementById('processVisualLabel').textContent = content.label;
+      next.innerHTML = content.next;
+
+      document.querySelectorAll('[data-process-path]').forEach((step, stepIndex) => {
+        step.classList.toggle('is-active', stepIndex === index);
+        step.classList.toggle('is-complete', stepIndex < index);
+      });
+    }
+
+    tabs.forEach((tab, tabIndex) => {
+      tab.addEventListener('click', () => showStage(tab.dataset.processStage, false));
+      tab.addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = tabIndex;
+        if (event.key === 'ArrowLeft') nextIndex = (tabIndex + stages.length - 1) % stages.length;
+        if (event.key === 'ArrowRight') nextIndex = (tabIndex + 1) % stages.length;
+        if (event.key === 'Home') nextIndex = 0;
+        if (event.key === 'End') nextIndex = stages.length - 1;
+        showStage(stages[nextIndex], true);
+      });
+    });
+
+    next.addEventListener('click', () => {
+      const index = stages.indexOf(currentStage);
+      if (index < stages.length - 1) {
+        showStage(stages[index + 1], false);
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        document.getElementById('thresholdTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.setTimeout(() => document.getElementById('saliencySlider').focus({ preventScroll: true }), 450);
+      }
+    });
+
+    ['assets/wolf/wolf_dog.png', 'assets/wolf/After.png'].forEach(src => {
+      const preload = new Image();
+      preload.src = src;
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProcessViz);
+  } else {
+    initProcessViz();
+  }
+})();
+
+(function() {
+  const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
+  const mix = (from, to, amount) => from + (to - from) * amount;
+  const smoothstep = (from, to, value) => {
+    const t = clamp((value - from) / (to - from));
+    return t * t * (3 - 2 * t);
+  };
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let noiseHistogram = null;
+  let scrollFrame = null;
+
+  function sizeCanvas(canvas, reset = true) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(1, rect.width);
+    const height = Math.max(1, rect.height);
+    if (reset) {
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+    }
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, width, height };
+  }
+
+  function alphaColor(hex, alpha) {
+    const value = hex.replace('#', '');
+    const number = parseInt(value, 16);
+    return `rgba(${(number >> 16) & 255}, ${(number >> 8) & 255}, ${number & 255}, ${alpha})`;
+  }
+
+  function drawHistogram(canvas, series, color, logBlend, options = {}) {
+    const { ctx, width, height } = sizeCanvas(canvas, options.clear !== false);
+    const padding = { left: 34, right: 14, top: 16, bottom: 30 };
+    const plotW = width - padding.left - padding.right;
+    const plotH = height - padding.top - padding.bottom;
+    const points = series.x.map((x, index) => ({ x, y: series.y[index] }))
+      .filter(point => point.x > 0 && point.y > 0);
+    if (!points.length) return;
+
+    const xMin = Math.min(...points.map(point => point.x));
+    const xMax = Math.max(...points.map(point => point.x));
+    const yMin = Math.min(...points.map(point => point.y));
+    const yMax = Math.max(...points.map(point => point.y));
+    const logXMin = Math.log10(xMin);
+    const logXMax = Math.log10(xMax);
+    const logYMin = Math.log10(yMin);
+    const logYMax = Math.log10(yMax);
+
+    if (options.clear !== false) {
+      ctx.fillStyle = '#fff8e7';
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = 'rgba(26,26,26,.1)';
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 4; i++) {
+        const y = padding.top + (plotH * i) / 4;
+        ctx.beginPath(); ctx.moveTo(padding.left, y); ctx.lineTo(padding.left + plotW, y); ctx.stroke();
+      }
+    }
+
+    const mapped = points.map(point => {
+      const linearX = (point.x - xMin) / Math.max(xMax - xMin, 1e-12);
+      const linearY = 1 - point.y / Math.max(yMax, 1e-12);
+      const logX = 1 - (Math.log10(point.x) - logXMin) / Math.max(logXMax - logXMin, 1e-12);
+      const logY = 1 - (Math.log10(point.y) - logYMin) / Math.max(logYMax - logYMin, 1e-12);
+      return {
+        x: padding.left + mix(linearX, logX, logBlend) * plotW,
+        y: padding.top + mix(linearY, logY, logBlend) * plotH
+      };
+    });
+
+    ctx.beginPath();
+    mapped.forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
+    ctx.strokeStyle = color;
+    ctx.lineWidth = options.lineWidth || 2;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    if (options.fill !== false) {
+      ctx.lineTo(mapped[mapped.length - 1].x, padding.top + plotH);
+      ctx.lineTo(mapped[0].x, padding.top + plotH);
+      ctx.closePath();
+      ctx.fillStyle = options.fillColor || alphaColor(color.slice(0, 7), .11);
+      ctx.fill();
+    }
+
+    if (options.axes !== false) {
+      ctx.strokeStyle = 'rgba(26,26,26,.65)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padding.left, padding.top);
+      ctx.lineTo(padding.left, padding.top + plotH);
+      ctx.lineTo(padding.left + plotW, padding.top + plotH);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(26,26,26,.55)';
+      ctx.font = '9px "Spline Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(logBlend > .55 ? 'log Energy (high to low)' : 'Energy', padding.left + plotW / 2, height - 8);
+      ctx.save();
+      ctx.translate(10, padding.top + plotH / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText(logBlend > .55 ? 'log probability' : 'probability', 0, 0);
+      ctx.restore();
+    }
+  }
+
+  function histogramFromHotImage(image, binCount = 72) {
+    const canvas = document.createElement('canvas');
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(image, 0, 0);
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const counts = new Array(binCount).fill(0);
+    for (let i = 0; i < data.length; i += 4) {
+      const scalar = (data[i] + data[i + 1] + data[i + 2]) / 765;
+      counts[Math.min(binCount - 1, Math.floor(scalar * binCount))]++;
+    }
+    const total = canvas.width * canvas.height;
+    return {
+      x: counts.map((_, index) => (index + .5) / binCount),
+      y: counts.map(count => count / total)
+    };
+  }
+
+  function drawComparisonChart(canvas, hist) {
+    const { ctx, width, height } = sizeCanvas(canvas);
+    const padding = { left: 50, right: 22, top: 30, bottom: 42 };
+    const plotW = width - padding.left - padding.right;
+    const plotH = height - padding.top - padding.bottom;
+    const valid = [];
+    for (let i = 0; i < hist.binCenters.length; i++) {
+      if (hist.binCenters[i] > 0 && hist.hPmf[i] > 0) {
+        valid.push({
+          e: hist.binCenters[i],
+          h: hist.hPmf[i],
+          g: hist.gPmf[i] > 1e-10 ? hist.gPmf[i] : null
+        });
+      }
+    }
+    if (!valid.length) return;
+
+    const eMin = Math.log10(Math.min(...valid.map(point => point.e)));
+    const eMax = Math.log10(Math.max(...valid.map(point => point.e)));
+    const probabilities = [
+      ...valid.map(point => point.h),
+      ...valid.filter(point => point.g).map(point => point.g)
+    ];
+    const pMin = Math.log10(Math.min(...probabilities));
+    const pMax = Math.log10(Math.max(...probabilities));
+    const xScale = energy => padding.left + plotW * (1 - (Math.log10(energy) - eMin) / (eMax - eMin));
+    const yScale = probability => padding.top + plotH * (1 - (Math.log10(probability) - pMin) / (pMax - pMin));
+
+    ctx.fillStyle = '#fff8e7';
+    ctx.fillRect(0, 0, width, height);
+    ctx.strokeStyle = 'rgba(26,26,26,.08)';
+    ctx.lineWidth = 1;
+    for (let i = 1; i < 5; i++) {
+      const x = padding.left + (plotW * i) / 5;
+      const y = padding.top + (plotH * i) / 5;
+      ctx.beginPath(); ctx.moveTo(x, padding.top); ctx.lineTo(x, padding.top + plotH); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(padding.left, y); ctx.lineTo(padding.left + plotW, y); ctx.stroke();
+    }
+
+    function strokeSeries(key, color) {
+      ctx.beginPath();
+      let started = false;
+      valid.forEach(point => {
+        if (!point[key]) return;
+        const x = xScale(point.e);
+        const y = yScale(point[key]);
+        started ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        started = true;
+      });
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+
+    strokeSeries('h', '#2d8ef4');
+    strokeSeries('g', '#8b2635');
+
+    const l2X = xScale(hist.L2);
+    ctx.strokeStyle = '#4CAF50';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(l2X, padding.top); ctx.lineTo(l2X, padding.top + plotH); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#4CAF50';
+    ctx.font = 'bold 10px "Spline Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('L2', l2X, padding.top - 8);
+
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, padding.top);
+    ctx.lineTo(padding.left, padding.top + plotH);
+    ctx.lineTo(padding.left + plotW, padding.top + plotH);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(26,26,26,.6)';
+    ctx.font = '10px "Spline Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('log Energy (high to low)', padding.left + plotW / 2, height - 8);
+    ctx.save();
+    ctx.translate(12, padding.top + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('log probability', 0, 0);
+    ctx.restore();
+
+    ctx.font = 'bold 10px "Spline Sans", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#2d8ef4';
+    ctx.fillText('h(E) natural image', padding.left + 8, padding.top + 14);
+    ctx.fillStyle = '#8b2635';
+    ctx.fillText('g(E) matched Gaussian', padding.left + 8, padding.top + 29);
+  }
+
+  function sectionProgress(section) {
+    const rect = section.getBoundingClientRect();
+    const distance = Math.max(1, rect.height - window.innerHeight);
+    return clamp(-rect.top / distance);
+  }
+
+  function updateCombine() {
+    const section = document.getElementById('energyCombine');
+    if (!section) return;
+    const progress = reducedMotion.matches ? 1 : sectionProgress(section);
+    const join = smoothstep(.08, .72, progress);
+    const reveal = smoothstep(.58, .92, progress);
+    document.querySelectorAll('.combine-map').forEach((map, index) => {
+      const x = parseFloat(map.dataset.x || 0) * (1 - join);
+      const y = parseFloat(map.dataset.y || 0) * (1 - join);
+      const scale = mix(.3, 1, join);
+      map.style.transform = `translate(${x}%, ${y}%) scale(${scale})`;
+      map.style.opacity = String(1 - reveal * .86);
+      map.style.zIndex = String(index + 1);
+    });
+    const finalMap = document.getElementById('combinedEnergy');
+    finalMap.style.opacity = String(reveal);
+    finalMap.style.transform = `scale(${mix(.92, 1, reveal)})`;
+    const status = document.getElementById('combineStatus');
+    status.textContent = progress < .35
+      ? 'Six separate responses'
+      : progress < .72
+        ? 'Aligning and summing E_theta'
+        : 'Final orientation energy E';
+    document.getElementById('combineCue').textContent = progress < .72
+      ? 'Scroll to sum the channels'
+      : 'Six channels summed';
+  }
+
+  function updateMerge(hist) {
+    const section = document.getElementById('histogramMerge');
+    if (!section || !noiseHistogram) return;
+    const bounds = section.getBoundingClientRect();
+    if (!reducedMotion.matches && (bounds.bottom < 0 || bounds.top > window.innerHeight)) return;
+    const progress = reducedMotion.matches ? 1 : sectionProgress(section);
+    const logBlend = smoothstep(.06, .42, progress);
+    const join = smoothstep(.43, .76, progress);
+    const finalBlend = smoothstep(.7, .94, progress);
+    const baselineBlend = smoothstep(.45, .68, progress);
+    const wolfSeries = { x: hist.binCenters, y: hist.hPmf };
+    const gaussianSeries = { x: hist.binCenters, y: hist.gPmf };
+
+    drawHistogram(
+      document.getElementById('wolfMergeCanvas'),
+      wolfSeries,
+      '#2d8ef4',
+      logBlend
+    );
+    drawHistogram(
+      document.getElementById('noiseMergeCanvas'),
+      noiseHistogram,
+      alphaColor('#8b2635', 1 - baselineBlend),
+      logBlend,
+      { fillColor: alphaColor('#8b2635', .1 * (1 - baselineBlend)) }
+    );
+    if (baselineBlend > 0) {
+      drawHistogram(
+        document.getElementById('noiseMergeCanvas'),
+        gaussianSeries,
+        alphaColor('#8b2635', baselineBlend),
+        logBlend,
+        { clear: false, axes: false, fill: false }
+      );
+    }
+
+    const wolfCard = document.getElementById('wolfMergeCard');
+    const noiseCard = document.getElementById('noiseMergeCard');
+    wolfCard.style.transform = `translate(${58 * join}%, -50%) scale(${mix(1, .94, join)})`;
+    noiseCard.style.transform = `translate(${-58 * join}%, -50%) scale(${mix(1, .94, join)})`;
+    wolfCard.style.opacity = String(1 - finalBlend);
+    noiseCard.style.opacity = String(1 - finalBlend);
+
+    const finalCanvas = document.getElementById('finalComparisonCanvas');
+    finalCanvas.style.opacity = String(finalBlend);
+    finalCanvas.style.transform = `translateY(-50%) scale(${mix(.96, 1, finalBlend)})`;
+
+    document.getElementById('mergeAxisMode').textContent = logBlend < .5
+      ? 'Linear axes'
+      : 'Log-log axes / high energy at left';
+    document.getElementById('mergeStatus').textContent = progress < .34
+      ? 'Two separate histograms'
+      : progress < .62
+        ? 'Exposing the response tails'
+        : progress < .84
+          ? 'Replacing the control with matched g(E)'
+          : 'One comparison / crossover at L2';
+    document.getElementById('mergeCue').textContent = progress < .84
+      ? 'Scroll to transform and overlay'
+      : 'Continue below to test the threshold';
+  }
+
+  function drawStaticCharts(hist) {
+    const wolfSeries = { x: hist.binCenters, y: hist.hPmf };
+    drawHistogram(document.getElementById('wolfLinearHistogram'), wolfSeries, '#2d8ef4', 0);
+    if (noiseHistogram) {
+      drawHistogram(document.getElementById('noiseLinearHistogram'), noiseHistogram, '#8b2635', 0);
+    }
+    drawComparisonChart(document.getElementById('finalComparisonCanvas'), hist);
+  }
+
+  function scheduleUpdate(hist) {
+    if (scrollFrame) return;
+    scrollFrame = window.requestAnimationFrame(() => {
+      scrollFrame = null;
+      updateCombine();
+      updateMerge(hist);
+    });
+  }
+
+  async function initScrollStory() {
+    const data = SALIENCY_DATA.wolf_after_release_1000_odfw;
+    const noiseImage = document.getElementById('whiteNoiseEnergyImage');
+    if (!noiseImage.complete) {
+      await new Promise(resolve => {
+        noiseImage.addEventListener('load', resolve, { once: true });
+        noiseImage.addEventListener('error', resolve, { once: true });
+      });
+    }
+    if (noiseImage.naturalWidth) noiseHistogram = histogramFromHotImage(noiseImage);
+    drawStaticCharts(data.histogram);
+    updateCombine();
+    updateMerge(data.histogram);
+
+    window.addEventListener('scroll', () => scheduleUpdate(data.histogram), { passive: true });
+    window.addEventListener('resize', () => {
+      drawStaticCharts(data.histogram);
+      scheduleUpdate(data.histogram);
+    });
+    const motionChange = () => scheduleUpdate(data.histogram);
+    if (reducedMotion.addEventListener) {
+      reducedMotion.addEventListener('change', motionChange);
+    } else {
+      reducedMotion.addListener(motionChange);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScrollStory);
+  } else {
+    initScrollStory();
+  }
+})();
+
 (function() {
   let currentImage = null;
   let sortedPixels = [];
