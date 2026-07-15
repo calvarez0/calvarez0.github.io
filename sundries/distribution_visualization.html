@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribution Explorer</title>
+    <link rel="icon" type="image/x-icon" href="assets/icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.3.0/math.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --background: #ffffff;
+            --accent: #0071e3;
+        }
+ 
+        .dark {
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --background: #000000;
+            --accent: #0071e3;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--accent);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .theme-switch {
+            width: 50px;
+            height: 26px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--text-secondary);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--background);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Mobile menu styles */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background);
+            z-index: 40;
+            padding-top: 5rem;
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-menu-button {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .desktop-menu {
+                display: none;
+            }
+
+            .mobile-menu .nav-link {
+                display: block;
+                padding: 1rem;
+                text-align: center;
+                font-size: 1.25rem;
+            }
+        }
+
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px;
+        }
+
+        .distribution-row {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .distribution-card {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dark .distribution-card {
+            background: #1a1a1a;
+        }
+
+        .controls {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .dark .controls {
+            background: #1a1a1a;
+        }
+
+        .control-item {
+            margin-bottom: 12px;
+        }
+
+        .graph {
+            width: 100%;
+            height: 300px;
+        }
+
+        /* D3.js styling */
+        .line {
+            fill: none;
+            stroke: #6366f1;
+            stroke-width: 2;
+        }
+
+        .point {
+            fill: #6366f1;
+        }
+
+        .axis {
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+
+        .dark .axis text {
+            fill: #f5f5f7;
+        }
+
+        .dark .axis path,
+        .dark .axis line {
+            stroke: #666;
+        }
+
+        .axis path,
+        .axis line {
+            stroke: #ccc;
+        }
+        .stats-display {
+            background-color: var(--background);
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .dark .stats-display {
+            border-color: #444;
+        }
+
+        .axis-label {
+            font-size: 12px;
+            fill: var(--text-primary);
+        }
+
+        .dark .axis-label {
+            fill: #f5f5f7;
+        }
+
+        .regression-line path {
+            stroke-dasharray: 4,2;
+        }
+
+        .select-control {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: var(--background);
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .dark .select-control {
+            border-color: #444;
+        }
+
+        .stats-display {
+            background-color: var(--background);
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .dark .stats-display {
+            border-color: #444;
+        }
+
+        .axis-label {
+            font-size: 12px;
+            fill: var(--text-primary);
+        }
+
+        .dark .axis-label {
+            fill: #f5f5f7;
+        }
+
+        .regression-line path {
+            stroke-dasharray: 4,2;
+        }
+    
+    </style>
+</head>
+<body>
+    <nav class="fixed w-full backdrop-blur-md bg-opacity-70 z-50 border-b border-gray-800">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="#" class="text-2xl font-semibold">AA</a>
+                <div class="desktop-menu hidden md:flex space-x-8">
+                    <a href="/index.html" class="nav-link">Home</a>
+                    <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
+                    <a href="../demographic_iq/" class="nav-link">Demographic IQ</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <button class="mobile-menu-button md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="space-y-4">
+            <a href="/index.html" class="nav-link">Home</a>
+            <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
+            <a href="../demographic_iq/" class="nav-link">Demographic IQ</a>
+        </div>
+    </div>
+    
+    <div class="content-container">
+        <!-- Gaussian Distribution Row -->
+        <div class="distribution-row">
+            <div class="distribution-card">
+                <h2>Gaussian Distribution</h2>
+                <div id="gaussian-plot" class="graph"></div>
+            </div>
+            <div class="controls">
+                <h3>Gaussian Parameters</h3>
+                <div class="control-item">
+                    <label for="mean">Mean (1st moment)</label>
+                    <input type="range" id="mean" min="-3" max="3" step="0.1" value="0">
+                    <div class="value-display">Value: <span id="mean-value">0</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="variance">Variance (2nd moment)</label>
+                    <input type="range" id="variance" min="0.1" max="5" step="0.1" value="1">
+                    <div class="value-display">Value: <span id="variance-value">1</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="skewness">Skewness (3rd moment)</label>
+                    <input type="range" id="skewness" min="-2" max="2" step="0.1" value="0">
+                    <div class="value-display">Value: <span id="skewness-value">0</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="kurtosis">Kurtosis (4th moment)</label>
+                    <input type="range" id="kurtosis" min="-3" max="10" step="0.1" value="3">
+                    <div class="value-display">Value: <span id="kurtosis-value">3</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Correlation (r and r²) Row -->
+        <div class="distribution-row">
+            <div class="distribution-card">
+                <h2>Correlation Visualization</h2>
+                <div id="correlation-plot" class="graph"></div>
+            </div>
+            <div class="controls">
+                <h3>Correlation Parameters</h3>
+                <div class="control-item">
+                    <label for="correlation-mode">Visualization Mode:</label>
+                    <select id="correlation-mode" class="select-control">
+                        <option value="r">Change Correlation (r)</option>
+                        <option value="r2">Change Determination (r²)</option>
+                    </select>
+                </div>
+                <div class="control-item" id="r-control">
+                    <label for="correlation">Correlation coefficient (r)</label>
+                    <input type="range" id="correlation" min="-1" max="1" step="0.05" value="0.7">
+                    <div class="value-display">Value: <span id="correlation-value">0.7</span></div>
+                </div>
+                <div class="control-item" id="r2-control" style="display: none;">
+                    <label for="r-squared-input">Coefficient of determination (r²)</label>
+                    <input type="range" id="r-squared-input" min="0" max="1" step="0.01" value="0.49">
+                    <div class="value-display">Value: <span id="r-squared-input-value">0.49</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="numPoints">Number of Points</label>
+                    <input type="range" id="numPoints" min="20" max="200" step="10" value="100">
+                    <div class="value-display">Value: <span id="numPoints-value">100</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="randomSeed">Random Seed</label>
+                    <input type="range" id="randomSeed" min="1" max="100" step="1" value="42">
+                    <div class="value-display">Value: <span id="randomSeed-value">42</span></div>
+                </div>
+                <div class="control-item">
+                    <div class="stats-display">
+                        <p>r: <span id="actual-r">0.7</span></p>
+                        <p>r²: <span id="r-squared">0.49</span></p>
+                        <p>Explained variance: <span id="explained-variance">49%</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bernoulli Distribution Row -->
+        <div class="distribution-row">
+            <div class="distribution-card">
+                <h2>Bernoulli Distribution</h2>
+                <div id="bernoulli-plot" class="graph"></div>
+            </div>
+            <div class="controls">
+                <h3>Bernoulli Parameter</h3>
+                <div class="control-item">
+                    <label for="probability">Probability</label>
+                    <input type="range" id="probability" min="0" max="1" step="0.01" value="0.5">
+                    <div class="value-display">Value: <span id="probability-value">0.5</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Poisson Distribution Row -->
+        <div class="distribution-row">
+            <div class="distribution-card">
+                <h2>Poisson Distribution</h2>
+                <div id="poisson-plot" class="graph"></div>
+            </div>
+            <div class="controls">
+                <h3>Poisson Parameter</h3>
+                <div class="control-item">
+                    <label for="lambda">Lambda (λ)</label>
+                    <input type="range" id="lambda" min="0.1" max="10" step="0.1" value="2">
+                    <div class="value-display">Value: <span id="lambda-value">2</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elliptical Distribution Row -->
+        <div class="distribution-row">
+            <div class="distribution-card">
+                <h2>Elliptical Distribution</h2>
+                <div class="flex">
+                    <div class="w-1/2">
+                        <h3 class="text-center mb-2">Top View</h3>
+                        <div id="elliptical-top-plot" class="graph"></div>
+                    </div>
+                    <div class="w-1/2">
+                        <h3 class="text-center mb-2">Side View</h3>
+                        <div id="elliptical-side-plot" class="graph"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <h3>Elliptical Parameters</h3>
+                <div class="control-item">
+                    <label for="majorAxis">Major Axis</label>
+                    <input type="range" id="majorAxis" min="0.5" max="3" step="0.1" value="2">
+                    <div class="value-display">Value: <span id="majorAxis-value">2</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="minorAxis">Minor Axis</label>
+                    <input type="range" id="minorAxis" min="0.5" max="3" step="0.1" value="1">
+                    <div class="value-display">Value: <span id="minorAxis-value">1</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="rotation">Rotation (degrees)</label>
+                    <input type="range" id="rotation" min="0" max="180" step="5" value="0">
+                    <div class="value-display">Value: <span id="rotation-value">0</span></div>
+                </div>
+                <div class="control-item">
+                    <label for="concentration">Concentration</label>
+                    <input type="range" id="concentration" min="0.5" max="2" step="0.1" value="1">
+                    <div class="value-display">Value: <span id="concentration-value">1</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-4 px-6 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto text-center text-secondary">
+            <p>&copy; 2025 Alex Alvarez. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.classList.toggle('dark', savedTheme === 'dark');
+        themeToggle.checked = savedTheme === 'light';
+
+        themeToggle.addEventListener('change', () => {
+            body.classList.toggle('dark');
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+            // Redraw plots when theme changes
+            updateGaussianPlot();
+            updateBernoulliPlot();
+            updatePoissonPlot();
+        });
+
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        let isMenuOpen = false;
+
+        mobileMenuButton.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            mobileMenu.classList.toggle('active');
+            mobileMenuButton.innerHTML = isMenuOpen ? 
+                '<i class="fas fa-times"></i>' : 
+                '<i class="fas fa-bars"></i>';
+        });
+
+        document.querySelectorAll('.mobile-menu .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                isMenuOpen = false;
+                mobileMenuButton.innerHTML = '<i class="fas fa-bars"></i>';
+            });
+        });
+
+        // Utility functions
+        function generateGaussianPoints(mean, variance, skewness, kurtosis) {
+            const points = [];
+            for (let x = -4; x <= 4; x += 0.1) {
+                const z = (x - mean) / Math.sqrt(variance);
+                let y = (1 / Math.sqrt(2 * Math.PI * variance)) * 
+                        Math.exp(-(z * z) / 2) * 
+                        (1 + (skewness * (z * z - 1)) / 6 + 
+                        ((kurtosis - 3) * (z * z * z * z - 6 * z * z + 3)) / 24);
+                points.push({ x, y: Math.max(0, y) });
+            }
+            return points;
+        }
+
+        function generateBernoulliPoints(p) {
+            return [
+                { x: 0, y: 1 - p },
+                { x: 1, y: p }
+            ];
+        }
+
+        function generatePoissonPoints(lambda) {
+            const points = [];
+            for (let k = 0; k <= Math.max(10, 2 * lambda); k++) {
+                const p = (Math.pow(lambda, k) * Math.exp(-lambda)) / math.factorial(k);
+                points.push({ x: k, y: p });
+            }
+            return points;
+        }
+
+        // Set up D3 plots
+        function setupGaussianPlot() {
+            const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+            const width = document.getElementById('gaussian-plot').clientWidth - margin.left - margin.right;
+            const height = document.getElementById('gaussian-plot').clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select('#gaussian-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleLinear().range([0, width]);
+            const y = d3.scaleLinear().range([height, 0]);
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(y));
+
+            const line = d3.line()
+                .x(d => x(d.x))
+                .y(d => y(d.y));
+
+            const path = svg.append('path')
+                .attr('class', 'line');
+
+            return { svg, x, y, line, path };
+        }
+
+        function setupBernoulliPlot() {
+            const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+            const width = document.getElementById('bernoulli-plot').clientWidth - margin.left - margin.right;
+            const height = document.getElementById('bernoulli-plot').clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select('#bernoulli-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleLinear()
+                .domain([-0.5, 1.5])
+                .range([0, width]);
+
+            const y = d3.scaleLinear()
+                .domain([0, 1])
+                .range([height, 0]);
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(y));
+
+            return { svg, x, y };
+        }
+
+        function setupPoissonPlot() {
+            const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+            const width = document.getElementById('poisson-plot').clientWidth - margin.left - margin.right;
+            const height = document.getElementById('poisson-plot').clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select('#poisson-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleLinear().range([0, width]);
+            const y = d3.scaleLinear().range([height, 0]);
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(y));
+
+            return { svg, x, y };
+        }
+
+        // Initialize plots
+        const gaussianPlot = setupGaussianPlot();
+        const bernoulliPlot = setupBernoulliPlot();
+        const poissonPlot = setupPoissonPlot();
+
+        // Update functions
+        function updateGaussianPlot() {
+            const mean = parseFloat(document.getElementById('mean').value);
+            const variance = parseFloat(document.getElementById('variance').value);
+            const skewness = parseFloat(document.getElementById('skewness').value);
+            const kurtosis = parseFloat(document.getElementById('kurtosis').value);
+
+            const data = generateGaussianPoints(mean, variance, skewness, kurtosis);
+            
+            gaussianPlot.x.domain([d3.min(data, d => d.x), d3.max(data, d => d.x)]);
+            gaussianPlot.y.domain([0, d3.max(data, d => d.y)]);
+            
+            gaussianPlot.svg.selectAll('.axis')
+                .transition()
+                .duration(200)
+                .call(d3.axisBottom(gaussianPlot.x))
+                .call(d3.axisLeft(gaussianPlot.y));
+
+            gaussianPlot.path
+                .datum(data)
+                .transition()
+                .duration(200)
+                .attr('d', gaussianPlot.line);
+        }
+
+        function updateBernoulliPlot() {
+            const probability = parseFloat(document.getElementById('probability').value);
+            const data = generateBernoulliPoints(probability);
+
+            bernoulliPlot.svg.selectAll('circle').remove();
+            
+            bernoulliPlot.svg.selectAll('circle')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('class', 'point')
+                .attr('cx', d => bernoulliPlot.x(d.x))
+                .attr('cy', d => bernoulliPlot.y(d.y))
+                .attr('r', 5);
+        }
+
+        function updatePoissonPlot() {
+            const lambda = parseFloat(document.getElementById('lambda').value);
+            const data = generatePoissonPoints(lambda);
+
+            poissonPlot.x.domain([0, d3.max(data, d => d.x)]);
+            poissonPlot.y.domain([0, d3.max(data, d => d.y)]);
+
+            poissonPlot.svg.selectAll('.axis')
+                .transition()
+                .duration(200)
+                .call(d3.axisBottom(poissonPlot.x))
+                .call(d3.axisLeft(poissonPlot.y));
+
+            poissonPlot.svg.selectAll('circle').remove();
+            
+            poissonPlot.svg.selectAll('circle')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('class', 'point')
+                .attr('cx', d => poissonPlot.x(d.x))
+                .attr('cy', d => poissonPlot.y(d.y))
+                .attr('r', 5);
+        }
+
+        // Setup event listeners
+        const inputs = ['mean', 'variance', 'skewness', 'kurtosis', 'probability', 'lambda'];
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            const display = document.getElementById(`${id}-value`);
+            
+            input.addEventListener('input', (e) => {
+                display.textContent = e.target.value;
+                if (id === 'mean' || id === 'variance' || id === 'skewness' || id === 'kurtosis') {
+                    updateGaussianPlot();
+                } else if (id === 'probability') {
+                    updateBernoulliPlot();
+                } else if (id === 'lambda') {
+                    updatePoissonPlot();
+                }
+            });
+        });
+
+        // Elliptical distribution functions
+        function generateEllipticalPoints(majorAxis, minorAxis, rotation, n = 1000) {
+            const points = [];
+            for (let i = 0; i < n; i++) {
+                // Generate random angle and radius
+                const theta = Math.random() * 2 * Math.PI;
+                const r = Math.sqrt(-2 * Math.log(Math.random())); // Box-Muller transform
+                
+                // Calculate x and y before rotation
+                const x = r * Math.cos(theta) * majorAxis;
+                const y = r * Math.sin(theta) * minorAxis;
+                
+                // Apply rotation
+                const rotRad = (rotation * Math.PI) / 180;
+                const xRot = x * Math.cos(rotRad) - y * Math.sin(rotRad);
+                const yRot = x * Math.sin(rotRad) + y * Math.cos(rotRad);
+                
+                points.push([xRot, yRot]);
+            }
+            return points;
+        }
+
+        function generateSideViewPoints(majorAxis, concentration) {
+            const points = [];
+            for (let x = -4; x <= 4; x += 0.1) {
+                const y = (1 / (majorAxis * Math.sqrt(2 * Math.PI))) * 
+                        Math.exp(-(x * x) / (2 * majorAxis * majorAxis)) * concentration;
+                points.push([x, y]);
+            }
+            return points;
+        }
+
+        function setupEllipticalPlots() {
+            const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+            const width = document.getElementById('elliptical-top-plot').clientWidth - margin.left - margin.right;
+            const height = document.getElementById('elliptical-top-plot').clientHeight - margin.top - margin.bottom;
+
+            // Setup top view
+            const topSvg = d3.select('#elliptical-top-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Setup side view
+            const sideSvg = d3.select('#elliptical-side-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Setup scales for top view
+            const xScaleTop = d3.scaleLinear()
+                .domain([-4, 4])
+                .range([0, width]);
+
+            const yScaleTop = d3.scaleLinear()
+                .domain([-4, 4])
+                .range([height, 0]);
+
+            // Setup scales for side view
+            const xScaleSide = d3.scaleLinear()
+                .domain([-4, 4])
+                .range([0, width]);
+
+            const yScaleSide = d3.scaleLinear()
+                .domain([0, 0.5])  // Adjusted for typical normal distribution height
+                .range([height, 0]);
+
+            // Add axes to top view
+            topSvg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height/2})`)
+                .call(d3.axisBottom(xScaleTop));
+
+            topSvg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(${width/2},0)`)
+                .call(d3.axisLeft(yScaleTop));
+
+            // Add axes to side view
+            sideSvg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(xScaleSide));
+
+            sideSvg.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(yScaleSide));
+
+            return {
+                topSvg,
+                sideSvg,
+                xScaleTop,
+                yScaleTop,
+                xScaleSide,
+                yScaleSide,
+                width,
+                height
+            };
+        }
+
+        function updateEllipticalPlots() {
+            const majorAxis = parseFloat(document.getElementById('majorAxis').value);
+            const minorAxis = parseFloat(document.getElementById('minorAxis').value);
+            const rotation = parseFloat(document.getElementById('rotation').value);
+            const concentration = parseFloat(document.getElementById('concentration').value);
+
+            const topPoints = generateEllipticalPoints(majorAxis, minorAxis, rotation);
+            const sidePoints = generateSideViewPoints(majorAxis, concentration);
+
+            // Update top view
+            ellipticalPlots.topSvg.selectAll('circle').remove();
+            ellipticalPlots.topSvg.selectAll('circle')
+                .data(topPoints)
+                .enter()
+                .append('circle')
+                .attr('cx', d => ellipticalPlots.xScaleTop(d[0]))
+                .attr('cy', d => ellipticalPlots.yScaleTop(d[1]))
+                .attr('r', 1.5)
+                .attr('fill', '#6366f1')
+                .attr('opacity', 0.3);
+
+            // Update side view
+            const line = d3.line()
+                .x(d => ellipticalPlots.xScaleSide(d[0]))
+                .y(d => ellipticalPlots.yScaleSide(d[1]));
+
+            ellipticalPlots.sideSvg.selectAll('.line').remove();
+            ellipticalPlots.sideSvg.append('path')
+                .datum(sidePoints)
+                .attr('class', 'line')
+                .attr('d', line);
+        }
+
+        // Initialize elliptical plots
+        const ellipticalPlots = setupEllipticalPlots();
+
+        // Add event listeners for elliptical distribution controls
+        ['majorAxis', 'minorAxis', 'rotation', 'concentration'].forEach(id => {
+            const input = document.getElementById(id);
+            const display = document.getElementById(`${id}-value`);
+            
+            input.addEventListener('input', (e) => {
+                display.textContent = e.target.value;
+                updateEllipticalPlots();
+            });
+        });
+
+        // Correlation visualization functions
+        function generateCorrelatedPoints(r, variance_explained, mode, numPoints, seed) {
+            // Set random seed
+            Math.seedrandom(seed);
+            
+            const points = [];
+            const mean = 0;
+            
+            // Base correlation
+            const baseR = mode === 'r' ? r : 0.7; // Use fixed correlation for r² mode
+            
+            // Calculate noise scale (unexplained variance)
+            // When mode is 'r2', this reduces unexplained variance while keeping correlation constant
+            const noiseScale = mode === 'r2' 
+                ? Math.sqrt(1 - variance_explained) / Math.sqrt(1 - baseR * baseR)
+                : 1;
+            
+            for (let i = 0; i < numPoints; i++) {
+                // Generate independent standard normal variables using Box-Muller transform
+                const u1 = Math.random();
+                const u2 = Math.random();
+                
+                const z1 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+                const z2 = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2);
+                
+                // Apply correlation
+                const x = z1;
+                let y;
+                
+                if (mode === 'r') {
+                    // Standard correlation formula
+                    y = r * z1 + Math.sqrt(1 - r * r) * z2;
+                } else {
+                    // For r² mode: fixed correlation but adjusted noise level
+                    y = baseR * z1 + noiseScale * Math.sqrt(1 - baseR * baseR) * z2;
+                }
+                
+                points.push([x, y]);
+            }
+            
+            return points;
+        }
+
+        function calculateActualCorrelation(points) {
+            const n = points.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+            
+            for (let i = 0; i < n; i++) {
+                const x = points[i][0];
+                const y = points[i][1];
+                
+                sumX += x;
+                sumY += y;
+                sumXY += x * y;
+                sumX2 += x * x;
+                sumY2 += y * y;
+            }
+            
+            const numerator = n * sumXY - sumX * sumY;
+            const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+            
+            return denominator === 0 ? 0 : numerator / denominator;
+        }
+
+        function setupCorrelationPlot() {
+            const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+            const width = document.getElementById('correlation-plot').clientWidth - margin.left - margin.right;
+            const height = document.getElementById('correlation-plot').clientHeight - margin.top - margin.bottom;
+
+            const svg = d3.select('#correlation-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Setup scales
+            const xScale = d3.scaleLinear()
+                .domain([-3, 3])
+                .range([0, width]);
+
+            const yScale = d3.scaleLinear()
+                .domain([-3, 3])
+                .range([height, 0]);
+
+            // Add axes
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height/2})`)
+                .call(d3.axisBottom(xScale));
+
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(${width/2},0)`)
+                .call(d3.axisLeft(yScale));
+
+            // Add axis labels
+            svg.append('text')
+                .attr('class', 'axis-label')
+                .attr('text-anchor', 'middle')
+                .attr('x', width / 2)
+                .attr('y', height + margin.bottom - 10)
+                .text('X Variable');
+
+            svg.append('text')
+                .attr('class', 'axis-label')
+                .attr('text-anchor', 'middle')
+                .attr('transform', `translate(${-margin.left + 15},${height/2}) rotate(-90)`)
+                .text('Y Variable');
+
+            // Add regression line group
+            svg.append('g')
+                .attr('class', 'regression-line');
+                
+            // Add r² visualization elements
+            const explainedVarianceGroup = svg.append('g')
+                .attr('class', 'explained-variance');
+                
+            return {
+                svg,
+                xScale,
+                yScale,
+                width,
+                height,
+                explainedVarianceGroup
+            };
+        }
+
+        function updateCorrelationPlot() {
+            const mode = document.getElementById('correlation-mode').value;
+            let r_value, r2_value;
+            
+            if (mode === 'r') {
+                r_value = parseFloat(document.getElementById('correlation').value);
+                r2_value = r_value * r_value;
+            } else {
+                r2_value = parseFloat(document.getElementById('r-squared-input').value);
+                r_value = Math.sqrt(r2_value);
+                // Use the sign from the correlation input to determine direction
+                if (document.getElementById('correlation').value < 0) {
+                    r_value = -r_value;
+                }
+            }
+            
+            const numPoints = parseInt(document.getElementById('numPoints').value);
+            const randomSeed = parseInt(document.getElementById('randomSeed').value);
+            
+            // Generate correlated data points
+            const points = generateCorrelatedPoints(r_value, r2_value, mode, numPoints, randomSeed);
+            
+            // Calculate actual correlation
+            const actualR = calculateActualCorrelation(points);
+            const rSquared = actualR * actualR;
+            
+            // Update statistics display
+            document.getElementById('actual-r').textContent = actualR.toFixed(3);
+            document.getElementById('r-squared').textContent = rSquared.toFixed(3);
+            document.getElementById('explained-variance').textContent = (rSquared * 100).toFixed(1) + '%';
+            
+            // Update plot
+            correlationPlot.svg.selectAll('circle').remove();
+            
+            // Calculate regression
+            const xValues = points.map(d => d[0]);
+            const yValues = points.map(d => d[1]);
+            
+            // Simple linear regression
+            const xMean = d3.mean(xValues);
+            const yMean = d3.mean(yValues);
+            const numerator = d3.sum(points.map((d, i) => (d[0] - xMean) * (d[1] - yMean)));
+            const denominator = d3.sum(xValues.map(x => Math.pow(x - xMean, 2)));
+            
+            const slope = denominator === 0 ? 0 : numerator / denominator;
+            const intercept = yMean - slope * xMean;
+
+            // Calculate predicted values and residuals
+            const predictions = [];
+            const residuals = [];
+            
+            points.forEach(point => {
+                const x = point[0];
+                const y = point[1];
+                const predicted = slope * x + intercept;
+                predictions.push([x, predicted]);
+                residuals.push([x, y, predicted]);
+            });
+            
+            // Plot points
+            correlationPlot.svg.selectAll('circle')
+                .data(points)
+                .enter()
+                .append('circle')
+                .attr('cx', d => correlationPlot.xScale(d[0]))
+                .attr('cy', d => correlationPlot.yScale(d[1]))
+                .attr('r', 3)
+                .attr('fill', '#6366f1')
+                .attr('opacity', 0.7);
+            
+            // Domain boundaries
+            const xMin = correlationPlot.xScale.domain()[0];
+            const xMax = correlationPlot.xScale.domain()[1];
+            
+            // Regression line points
+            const lineData = [
+                [xMin, slope * xMin + intercept],
+                [xMax, slope * xMax + intercept]
+            ];
+            
+            const line = d3.line()
+                .x(d => correlationPlot.xScale(d[0]))
+                .y(d => correlationPlot.yScale(d[1]));
+            
+            // Draw regression line
+            correlationPlot.svg.select('.regression-line').selectAll('*').remove();
+            correlationPlot.svg.select('.regression-line')
+                .append('path')
+                .datum(lineData)
+                .attr('d', line)
+                .attr('stroke', '#6366f1')
+                .attr('stroke-width', 2)
+                .attr('fill', 'none');
+                
+            // Visualize explained/unexplained variance
+            correlationPlot.explainedVarianceGroup.selectAll('*').remove();
+            
+            // Draw residual lines when in r² mode
+            if (mode === 'r2' || (mode === 'r' && Math.abs(r_value) > 0.3)) {
+                // Draw residual lines
+                residuals.forEach(residual => {
+                    const [x, actual, predicted] = residual;
+                    correlationPlot.explainedVarianceGroup.append('line')
+                        .attr('x1', correlationPlot.xScale(x))
+                        .attr('y1', correlationPlot.yScale(actual))
+                        .attr('x2', correlationPlot.xScale(x))
+                        .attr('y2', correlationPlot.yScale(predicted))
+                        .attr('stroke', '#ff6b6b')
+                        .attr('stroke-width', 1)
+                        .attr('stroke-dasharray', '2,2')
+                        .attr('opacity', 0.5);
+                });
+            }
+        }
+
+        // Add to the beginning of your script (after existing utility functions)
+        // Add seedrandom library 
+        function seedRandom(seed) {
+            // A simple seeded random function
+            let state = seed;
+            return function() {
+                state = (state * 9301 + 49297) % 233280;
+                return state / 233280;
+            };
+        }
+
+        // Make seedrandom available
+        Math.seedrandom = function(seed) {
+            const generator = seedRandom(seed);
+            Math.random = generator;
+            return generator;
+        };
+
+        // Initialize correlation plot
+        const correlationPlot = setupCorrelationPlot();
+
+        // Setup event handler for mode selector
+        document.getElementById('correlation-mode').addEventListener('change', function() {
+            if (this.value === 'r') {
+                document.getElementById('r-control').style.display = 'block';
+                document.getElementById('r2-control').style.display = 'none';
+            } else {
+                document.getElementById('r-control').style.display = 'none';
+                document.getElementById('r2-control').style.display = 'block';
+                
+                // Set r-squared-input to match current r² value
+                const currentR = parseFloat(document.getElementById('correlation').value);
+                const currentRSquared = currentR * currentR;
+                document.getElementById('r-squared-input').value = currentRSquared.toFixed(2);
+                document.getElementById('r-squared-input-value').textContent = currentRSquared.toFixed(2);
+            }
+            updateCorrelationPlot();
+        });
+
+        // Add event listeners for correlation controls
+        ['correlation', 'numPoints', 'randomSeed', 'r-squared-input'].forEach(id => {
+            const input = document.getElementById(id);
+            const display = document.getElementById(`${id}-value`);
+            
+            input.addEventListener('input', (e) => {
+                display.textContent = e.target.value;
+                updateCorrelationPlot();
+            });
+        });
+
+        
+                
+        // Initial update
+        updateEllipticalPlots();
+        updateCorrelationPlot();
+        updateGaussianPlot();
+        updateBernoulliPlot();
+        updatePoissonPlot();
+    </script>
+</body>
+</html>

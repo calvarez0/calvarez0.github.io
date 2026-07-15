@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIFBreeder - Alex Alvarez</title>
+    <link rel="icon" type="image/x-icon" href="/assets/icon.png">
+    <link rel="stylesheet" href="/writing/blog/writing-theme.css">
+</head>
+<body>
+    <header class="post-topbar">
+        <nav class="post-nav" aria-label="Primary">
+            <a href="/">AA</a>
+            <a href="/writing/">Writing</a>
+            <a href="/openendedness/gifbreeder/index.html">GIFBreeder App</a>
+        </nav>
+        <button class="theme-btn" type="button" data-theme-toggle>Invert</button>
+    </header>
+
+    <main class="post-layout">
+        <aside class="post-aside">
+            <p class="post-aside-title">Draft Map</p>
+            <div class="post-aside-list">
+                <a class="chip" href="#abstract">Abstract</a>
+                <a class="chip" href="#motivation">Motivation</a>
+                <a class="chip" href="#system">System</a>
+                <a class="chip" href="#representation">Representation</a>
+                <a class="chip" href="#results">Results</a>
+                <a class="chip" href="#references">References</a>
+            </div>
+        </aside>
+
+        <div class="article-wrap">
+            <article class="article-content">
+                <div class="article-kicker">Web Paper Skeleton</div>
+                <h1>GIFBreeder</h1>
+
+                <div class="article-meta">
+                    Alex Alvarez<br>
+                    Draft - Open-endedness and interactive evolution
+                </div>
+
+                <div class="hero-media">
+                    <div class="post-thumb-grid">
+                        <img src="/assets/gifbreeder/activation-lab-output-trwerhx67.gif" alt="GIFBreeder output 1">
+                        <img src="/assets/gifbreeder/activation-lab-output-09fy1uuyk.gif" alt="GIFBreeder output 2">
+                        <img src="/assets/gifbreeder/activation-lab-output-n30hi1h8h.gif" alt="GIFBreeder output 3">
+                        <img src="/assets/gifbreeder/activation-lab-output-kqv0p6vk5%20copy.gif" alt="GIFBreeder output 4">
+                        <img src="/assets/gifbreeder/activation-lab-output-qeoe3k9y6.gif" alt="GIFBreeder output 5">
+                        <img src="/assets/gifbreeder/activation-lab-output-fkg40fwea.gif" alt="GIFBreeder output 6">
+                    </div>
+                </div>
+                <p class="caption">A six-output panel for the eventual paper hero or results section.</p>
+
+                <div class="article-actions">
+                    <a class="chip" href="/openendedness/gifbreeder/index.html">Open App</a>
+                    <a class="chip" href="/assets/paper_figures/gifbreeder_six_gifs_figure.pdf">Figure PDF</a>
+                    <a class="chip" href="/writing/">All Writing</a>
+                </div>
+
+                <div id="abstract" class="abstract">
+                    <strong>Abstract placeholder:</strong> Describe GIFBreeder as an interactive evolutionary system for discovering animated visual artifacts, extending the Picbreeder lineage by adding time as an explicit generative dimension.
+                </div>
+
+                <h2 id="motivation">1. Motivation</h2>
+
+                <div class="draft-block">
+                    Explain why animated artifacts are a useful testbed for open-ended search. Suggested anchors: Picbreeder, CPPNs, user-guided selection, novelty, and the difference between optimizing a target and exploring a space.
+                </div>
+
+                <p>
+                    GIFBreeder asks what changes when the object of interactive evolution is no longer a static image but a small temporal world. Adding time gives users a new axis of surprise: motion, rhythm, phase, flicker, and transformation.
+                </p>
+
+                <h2 id="system">2. System</h2>
+
+                <div class="draft-block">
+                    Add the platform description here: population size, mutation flow, selection controls, archive behavior, export flow, and any implementation details that matter for reproducibility.
+                </div>
+
+                <p>
+                    The current app lives at <a class="text-link" href="/openendedness/gifbreeder/index.html">openendedness/gifbreeder</a> and already has archived genomes, export tooling, and a visual interface for breeding animated outputs.
+                </p>
+
+                <h2 id="representation">3. Representation</h2>
+
+                <div class="draft-block">
+                    Fill in the CPPN or genotype section here. Useful subsections: inputs, activation functions, temporal coordinate, color mapping, mutation operators, and how lineage depth is tracked.
+                </div>
+
+                <p>
+                    A concise representation section will make this page useful as a web paper rather than only as a project note: readers should be able to understand what gets inherited, what gets perturbed, and why the resulting search space remains expressive.
+                </p>
+
+                <h2 id="results">4. Results and Observations</h2>
+
+                <div class="draft-block">
+                    Add qualitative results, selected lineages, failure modes, and examples of motifs discovered by users. The six-panel figure above can become the first results figure.
+                </div>
+
+                <p>
+                    Possible framing: users do not simply pick prettier GIFs; they steer a latent dynamical system by repeatedly noticing partial structure and preserving it long enough for new structure to attach.
+                </p>
+
+                <h2>5. Discussion</h2>
+
+                <div class="draft-block">
+                    Use this section for the bigger claim: what GIFBreeder suggests about open-endedness, subjective selection, serendipity, and tools that help people search spaces they cannot name in advance.
+                </div>
+
+                <h2 id="references">References</h2>
+
+                <div class="reference-list">
+                    <p>Secretan, J., Beato, N., D'Ambrosio, D. B., Rodriguez, A., Campbell, A., & Stanley, K. O. (2011). Picbreeder: A case study in collaborative evolutionary exploration of design space. <em>Evolutionary Computation</em>, 19(3), 373-403.</p>
+                    <p>Stanley, K. O. (2007). Compositional pattern producing networks: A novel abstraction of development. <em>Genetic Programming and Evolvable Machines</em>, 8, 131-162.</p>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <footer class="footer-note">
+        I never saved anything for the swim back.
+    </footer>
+
+    <script src="/writing/blog/writing-theme.js"></script>
+</body>
+</html>

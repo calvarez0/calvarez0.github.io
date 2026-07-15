@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>From Simplicity, Complexity</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --background: #ffffff;
+            --accent: #0071e3;
+        }
+ 
+        .dark {
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --background: #000000;
+            --accent: #0071e3;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .section-title {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+            line-height: 1.1;
+        }
+
+        .simulation-container {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-switch {
+            width: 50px;
+            height: 26px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--text-secondary);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--background);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        canvas {
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--accent);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        #controls {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed w-full backdrop-blur-md bg-opacity-70 z-50 border-b border-gray-800">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="#" class="text-2xl font-semibold">AA</a>
+                <div class="flex space-x-8">
+                    <a href="/index.html" class="nav-link">Home</a>
+                    <a href="https://medium.com/@0xalexrez" class="nav-link">Blog</a>
+                    <a href="../demographic_iq/" class="nav-link">Demographic IQ</a>
+                </div>
+                <label class="theme-switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-24">
+        <div class="container mx-auto px-6">
+            <h1 class="section-title mb-8">From Simplicity, Complexity</h1>
+            
+            <!-- Boids Section -->
+            <section class="mb-16">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="simulation-container p-4 rounded-lg">
+                        <canvas id="boidsCanvas" width="600" height="400"></canvas>
+                    </div>
+                    <div class="space-y-4">
+                        <h2 class="text-2xl font-semibold">Boids: Starling Murmuration Simulation</h2>
+                        <p class="text-lg text-secondary">Three simple rules give rise to complex, lifelike flocking behavior:</p>
+                        <ul class="list-disc list-inside space-y-2 text-secondary">
+                            <li>Separation: Avoid crowding neighbors</li>
+                            <li>Alignment: Match velocity with neighbors</li>
+                            <li>Cohesion: Move toward the center of nearby flockmates</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Braitenberg Vehicles Section -->
+            <section class="mb-16">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="simulation-container p-4 rounded-lg">
+                        <canvas id="braitenbergCanvas" width="600" height="400"></canvas>
+                        <div id="controls"></div>
+                    </div>
+                    <div class="space-y-4">
+                        <h2 class="text-2xl font-semibold">Braitenberg Vehicles: Synthetic Psychology</h2>
+                        <p class="text-lg text-secondary">These simple "vehicles" demonstrate how basic sensor-motor connections can create behaviors that appear surprisingly intelligent:</p>
+                        <ul class="list-disc list-inside space-y-2 text-secondary">
+                            <li>Direct connections between light sensors and wheels (green vehicles)</li>
+                            <li>Crossed connections between sensors and wheels (red vehicles)</li>
+                            <li>Press 'T' to toggle trajectory visualization</li>
+                            <li>Press 'L' to toggle vehicle lights</li>
+                            <li>Use arrow keys to move the light sources</li>
+                        </ul>
+                        <p class="text-lg text-secondary">Valentino Braitenberg showed how the simplest of mechanisms can create behavior that we might describe as fear, aggression, love, or exploration - a powerful lesson in the relationship between mechanism and meaning.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-16">
+                <h2 class="text-2xl font-semibold mb-4">The Power of Simple Rules</h2>
+                <p class="text-lg text-secondary">These simulations demonstrate a profound truth about complex systems: sophisticated, lifelike behavior doesn't require sophisticated rules. From the murmurations of starlings to the patterns of human crowds, complexity often emerges from the interaction of simple components following simple rules.</p>
+            </section>
+        </div>
+    </main>
+
+    <footer class="py-4 px-6 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto text-center text-secondary">
+            <p>&copy; 2025 Alex Alvarez. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.classList.toggle('dark', savedTheme === 'dark');
+        themeToggle.checked = savedTheme === 'dark';
+        
+        themeToggle.addEventListener('change', () => {
+            body.classList.toggle('dark');
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        class Boid {
+            constructor(x, y, dx, dy) {
+                this.x = x;
+                this.y = y;
+                this.dx = dx;
+                this.dy = dy;
+            }
+        }
+
+        class BoidsSimulation {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.width = canvas.width;
+                this.height = canvas.height;
+                
+                this.boids = [];
+                this.numBoids = 500;
+                this.visualRange = 75;
+                this.separationDistance = 25;
+                this.cohesionStrength = 0.02;
+                this.alignmentStrength = 0.08;
+                this.separationStrength = 0.15;
+                
+                for (let i = 0; i < this.numBoids; i++) {
+                    this.boids.push(new Boid(
+                        Math.random() * this.width,
+                        Math.random() * this.height,
+                        Math.random() * 10 - 5,
+                        Math.random() * 10 - 5
+                    ));
+                }
+            }
+            
+            distance(boid1, boid2) {
+                return Math.sqrt(
+                    (boid1.x - boid2.x) * (boid1.x - boid2.x) +
+                    (boid1.y - boid2.y) * (boid1.y - boid2.y)
+                );
+            }
+            
+            keepWithinBounds(boid) {
+                const margin = 50;
+                const turnFactor = 0.5;
+                
+                if (boid.x < margin) boid.dx += turnFactor;
+                if (boid.x > this.width - margin) boid.dx -= turnFactor;
+                if (boid.y < margin) boid.dy += turnFactor;
+                if (boid.y > this.height - margin) boid.dy -= turnFactor;
+            }
+            
+            flyTowardsCenter(boid) {
+                let centerX = 0;
+                let centerY = 0;
+                let numNeighbors = 0;
+                
+                for (let other of this.boids) {
+                    if (other !== boid && this.distance(boid, other) < this.visualRange) {
+                        centerX += other.x;
+                        centerY += other.y;
+                        numNeighbors++;
+                    }
+                }
+                
+                if (numNeighbors) {
+                    centerX = centerX / numNeighbors;
+                    centerY = centerY / numNeighbors;
+                    
+                    boid.dx += (centerX - boid.x) * this.cohesionStrength;
+                    boid.dy += (centerY - boid.y) * this.cohesionStrength;
+                }
+            }
+            
+            avoidOthers(boid) {
+                let moveX = 0;
+                let moveY = 0;
+                
+                for (let other of this.boids) {
+                    if (other !== boid) {
+                        const distance = this.distance(boid, other);
+                        if (distance < this.separationDistance) {
+                            const factor = (this.separationDistance - distance) / this.separationDistance;
+                            moveX += (boid.x - other.x) * factor;
+                            moveY += (boid.y - other.y) * factor;
+                        }
+                    }
+                }
+                
+                boid.dx += moveX * this.separationStrength;
+                boid.dy += moveY * this.separationStrength;
+            }
+            
+            matchVelocity(boid) {
+                let avgDX = 0;
+                let avgDY = 0;
+                let numNeighbors = 0;
+                
+                for (let other of this.boids) {
+                    if (other !== boid && this.distance(boid, other) < this.visualRange) {
+                        avgDX += other.dx;
+                        avgDY += other.dy;
+                        numNeighbors++;
+                    }
+                }
+                
+                if (numNeighbors) {
+                    avgDX = avgDX / numNeighbors;
+                    avgDY = avgDY / numNeighbors;
+                    
+                    boid.dx += (avgDX - boid.dx) * this.alignmentStrength;
+                    boid.dy += (avgDY - boid.dy) * this.alignmentStrength;
+                }
+            }
+            
+            limitSpeed(boid) {
+                const speedLimit = 5;
+                const speed = Math.sqrt(boid.dx * boid.dx + boid.dy * boid.dy);
+                
+                if (speed > speedLimit) {
+                    boid.dx = (boid.dx / speed) * speedLimit;
+                    boid.dy = (boid.dy / speed) * speedLimit;
+                }
+            }
+            
+            update() {
+                for (let boid of this.boids) {
+                    this.flyTowardsCenter(boid);
+                    this.avoidOthers(boid);
+                    this.matchVelocity(boid);
+                    this.limitSpeed(boid);
+                    this.keepWithinBounds(boid);
+                    
+                    boid.x += boid.dx;
+                    boid.y += boid.dy;
+                    
+                    boid.x = (boid.x + this.width) % this.width;
+                    boid.y = (boid.y + this.height) % this.height;
+                }
+            }
+            
+            draw() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                
+                for (let boid of this.boids) {
+                    const angle = Math.atan2(boid.dy, boid.dx);
+                    const size = 5;
+                    
+                    this.ctx.fillStyle = '#85BFD1';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(
+                        boid.x + Math.cos(angle) * size * 2,
+                        boid.y + Math.sin(angle) * size * 2
+                    );
+                    this.ctx.lineTo(
+                        boid.x + Math.cos(angle + 2.5) * size,
+                        boid.y + Math.sin(angle + 2.5) * size
+                    );
+                    this.ctx.lineTo(
+                        boid.x + Math.cos(angle - 2.5) * size,
+                        boid.y + Math.sin(angle - 2.5) * size
+                    );
+                    this.ctx.fill();
+                }
+            }
+        }
+        
+
+        // Updated Braitenberg Vehicle Simulation
+        class Vehicle {
+            constructor(x, y, angle, connections, hasLight = false) {
+                this.x = x;
+                this.y = y;
+                this.angle = angle;
+                this.leftSensor = 0;
+                this.rightSensor = 0;
+                this.speed = 2.0;
+                this.size = 20;
+                this.connections = connections;
+                this.hasLight = hasLight;
+                this.trajectory = [];
+                this.vtype = connections[0][0] === 'ls' && connections[0][1] === 'lw' ? true : false;
+            }
+        }
+
+        class Light {
+            constructor(x, y, intensity = 1000) {
+                this.x = x;
+                this.y = y;
+                this.intensity = intensity;
+            }
+
+            mod(dx, dy) {
+                this.x += dx;
+                this.y += dy;
+            }
+        }
+
+        class BraitenbergSimulation {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.width = canvas.width;
+                this.height = canvas.height;
+                this.vehicles = [];
+                this.lights = [];
+                this.showTrajectory = false;
+
+                // Add 5 random lights
+                for (let i = 0; i < 5; i++) {
+                    this.addLight(
+                        Math.random() * this.width,
+                        Math.random() * this.height
+                    );
+                }
+
+                // Add vehicles with configurations from example
+                const configs = [
+                    // First 7 attractive vehicles (ls-lw:rs-rw)
+                    'ls-lw:rs-rw', 'ls-lw:rs-rw', 'ls-lw:rs-rw', 'ls-lw:rs-rw',
+                    'ls-lw:rs-rw', 'ls-lw:rs-rw', 'ls-lw:rs-rw',
+                    // Next 7 repulsive vehicles (ls-rw:rs-lw)
+                    'ls-rw:rs-lw', 'ls-rw:rs-lw', 'ls-rw:rs-lw', 'ls-rw:rs-lw',
+                    'ls-rw:rs-lw', 'ls-rw:rs-lw', 'ls-rw:rs-lw'
+                ];
+
+                // Add vehicles with light
+                for (const config of configs) {
+                    this.addVehicle(
+                        Math.random() * this.width,
+                        Math.random() * this.height,
+                        config,
+                        true
+                    );
+                }
+
+                // Add keyboard controls
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case 't':
+                        case 'T':
+                            this.showTrajectory = !this.showTrajectory;
+                            if (!this.showTrajectory) {
+                                this.vehicles.forEach(v => v.trajectory = []);
+                            }
+                            break;
+                        case 'l':
+                        case 'L':
+                            this.vehicles.forEach(v => v.hasLight = !v.hasLight);
+                            break;
+                        case 'ArrowLeft':
+                            this.lights.forEach(l => l.mod(-10, 0));
+                            break;
+                        case 'ArrowRight':
+                            this.lights.forEach(l => l.mod(10, 0));
+                            break;
+                        case 'ArrowUp':
+                            this.lights.forEach(l => l.mod(0, -10));
+                            break;
+                        case 'ArrowDown':
+                            this.lights.forEach(l => l.mod(0, 10));
+                            break;
+                    }
+                    this.updateStatus();
+                });
+
+                this.updateStatus();
+            }
+
+            updateStatus() {
+                const controls = document.getElementById('controls');
+                const vhasLight = this.vehicles.some(v => v.hasLight);
+                const trajectoryStatus = this.showTrajectory ? "ON" : "OFF";
+                const vlightStatus = vhasLight ? "ON" : "OFF";
+                controls.textContent = `Trajectory: ${trajectoryStatus} (Toggle: T); Vehicle Light: ${vlightStatus} (Toggle: l); Move lights: Arrow keys`;
+            }
+
+            // [Rest of your updated Braitenberg implementation]
+            // ... [Copy all the methods from your working version]
+
+            calculateSensorResponse(distance, intensity) {
+                const maxDistance = 400;
+                const minDistance = 20;
+                
+                if (distance < minDistance) distance = minDistance;
+                if (distance > maxDistance) return 0;
+                
+                const normalizedDist = (maxDistance - distance) / (maxDistance - minDistance);
+                return intensity * (normalizedDist ** 2) * Math.exp(normalizedDist - 1);
+            }
+
+            calculateSensorValues(vehicle) {
+                let leftValue = 0;
+                let rightValue = 0;
+                
+                const sensorOffset = vehicle.size / 2;
+                const leftSensorX = vehicle.x + Math.cos(vehicle.angle - Math.PI/4) * sensorOffset;
+                const leftSensorY = vehicle.y + Math.sin(vehicle.angle - Math.PI/4) * sensorOffset;
+                const rightSensorX = vehicle.x + Math.cos(vehicle.angle + Math.PI/4) * sensorOffset;
+                const rightSensorY = vehicle.y + Math.sin(vehicle.angle + Math.PI/4) * sensorOffset;
+                
+                for (const light of this.lights) {
+                    const leftDist = Math.sqrt((leftSensorX - light.x)**2 + (leftSensorY - light.y)**2);
+                    const rightDist = Math.sqrt((rightSensorX - light.x)**2 + (rightSensorY - light.y)**2);
+                    
+                    leftValue += this.calculateSensorResponse(leftDist, light.intensity);
+                    rightValue += this.calculateSensorResponse(rightDist, light.intensity);
+                }
+
+                // Consider lights from other vehicles
+                for (const otherVehicle of this.vehicles) {
+                    if (otherVehicle.hasLight && otherVehicle !== vehicle) {
+                        const leftDist = Math.sqrt((leftSensorX - otherVehicle.x)**2 + (leftSensorY - otherVehicle.y)**2);
+                        const rightDist = Math.sqrt((rightSensorX - otherVehicle.x)**2 + (rightSensorY - otherVehicle.y)**2);
+                        
+                        const vehicleIntensity = 500;
+                        leftValue += this.calculateSensorResponse(leftDist, vehicleIntensity);
+                        rightValue += this.calculateSensorResponse(rightDist, vehicleIntensity);
+                    }
+                }
+                
+                return [leftValue, rightValue];
+            }
+
+            updateVehicle(vehicle) {
+                const [leftValue, rightValue] = this.calculateSensorValues(vehicle);
+                vehicle.leftSensor = leftValue;
+                vehicle.rightSensor = rightValue;
+
+                let leftWheel = 0;
+                let rightWheel = 0;
+
+                for (const [sensor, wheel] of vehicle.connections) {
+                    const sensorValue = sensor === 'ls' ? leftValue : rightValue;
+                    if (wheel === 'lw') {
+                        leftWheel += sensorValue;
+                    } else {
+                        rightWheel += sensorValue;
+                    }
+                }
+
+                // Normalize wheel speeds
+                const maxWheelSpeed = Math.max(Math.abs(leftWheel), Math.abs(rightWheel), 1);
+                leftWheel /= maxWheelSpeed;
+                rightWheel /= maxWheelSpeed;
+
+                // Update position and angle
+                const averageSpeed = (leftWheel + rightWheel) * vehicle.speed / 2;
+                const angularVelocity = (rightWheel - leftWheel) * vehicle.speed / vehicle.size * 50;
+
+                vehicle.angle += angularVelocity * 0.15;
+                const newX = vehicle.x + Math.cos(vehicle.angle) * averageSpeed;
+                const newY = vehicle.y + Math.sin(vehicle.angle) * averageSpeed;
+
+                // Store trajectory point
+                if (this.showTrajectory) {
+                    vehicle.trajectory.push([vehicle.x, vehicle.y]);
+                    if (vehicle.trajectory.length > 200) {
+                        vehicle.trajectory.shift();
+                    }
+                }
+
+                // Update position with wrapping
+                const oldX = vehicle.x;
+                const oldY = vehicle.y;
+                vehicle.x = ((newX % this.width) + this.width) % this.width;
+                vehicle.y = ((newY % this.height) + this.height) % this.height;
+
+                // Clear trajectory if wrapped
+                if (Math.abs(oldX - vehicle.x) > (this.width - 10) || 
+                    Math.abs(oldY - vehicle.y) > (this.height - 10)) {
+                    vehicle.trajectory = [];
+                }
+            }
+
+            draw() {
+                this.ctx.fillStyle = 'black';
+                this.ctx.fillRect(0, 0, this.width, this.height);
+
+                // Draw trajectories
+                if (this.showTrajectory) {
+                    for (const vehicle of this.vehicles) {
+                        if (vehicle.trajectory.length > 1) {
+                            this.ctx.beginPath();
+                            this.ctx.strokeStyle = vehicle.vtype ? 'rgb(0,100,0)' : 'rgb(100,0,0)';
+                            this.ctx.moveTo(vehicle.trajectory[0][0], vehicle.trajectory[0][1]);
+                            for (let i = 1; i < vehicle.trajectory.length; i++) {
+                                this.ctx.lineTo(vehicle.trajectory[i][0], vehicle.trajectory[i][1]);
+                            }
+                            this.ctx.stroke();
+                        }
+                    }
+                }
+
+                // Draw lights
+                for (const light of this.lights) {
+                    this.ctx.fillStyle = 'yellow';
+                    this.ctx.beginPath();
+                    this.ctx.arc(light.x, light.y, 10, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+
+                // Draw vehicles
+                for (const vehicle of this.vehicles) {
+                    // Skip if too close to boundary
+                    if (vehicle.x < 10 || vehicle.x > this.width - 10 || 
+                        vehicle.y < 10 || vehicle.y > this.height - 10) {
+                        continue;
+                    }
+
+                    // Draw vehicle body
+                    const points = [
+                        [
+                            vehicle.x + Math.cos(vehicle.angle) * vehicle.size,
+                            vehicle.y + Math.sin(vehicle.angle) * vehicle.size
+                        ],
+                        [
+                            vehicle.x + Math.cos(vehicle.angle + 2.4) * vehicle.size / 2,
+                            vehicle.y + Math.sin(vehicle.angle + 2.4) * vehicle.size / 2
+                        ],
+                        [
+                            vehicle.x + Math.cos(vehicle.angle - 2.4) * vehicle.size / 2,
+                            vehicle.y + Math.sin(vehicle.angle - 2.4) * vehicle.size / 2
+                        ]
+                    ];
+
+                    this.ctx.fillStyle = vehicle.vtype ? 'rgb(0,255,0)' : 'rgb(255,0,0)';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(points[0][0], points[0][1]);
+                    this.ctx.lineTo(points[1][0], points[1][1]);
+                    this.ctx.lineTo(points[2][0], points[2][1]);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+
+                    // Draw sensors
+                    const sensorOffset = vehicle.size / 2;
+                    const leftSensorPos = [
+                        vehicle.x + Math.cos(vehicle.angle - Math.PI/4) * sensorOffset,
+                        vehicle.y + Math.sin(vehicle.angle - Math.PI/4) * sensorOffset
+                    ];
+                    const rightSensorPos = [
+                        vehicle.x + Math.cos(vehicle.angle + Math.PI/4) * sensorOffset,
+                        vehicle.y + Math.sin(vehicle.angle + Math.PI/4) * sensorOffset
+                    ];
+
+                    const leftIntensity = Math.min(255, vehicle.leftSensor);
+                    const rightIntensity = Math.min(255, vehicle.rightSensor);
+
+                    this.ctx.fillStyle = `rgb(255,${leftIntensity},${leftIntensity})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(leftSensorPos[0], leftSensorPos[1], 4, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    this.ctx.fillStyle = `rgb(255,${rightIntensity},${rightIntensity})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(rightSensorPos[0], rightSensorPos[1], 4, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Draw vehicle light if enabled
+                    if (vehicle.hasLight) {
+                        this.ctx.fillStyle = 'yellow';
+                        this.ctx.beginPath();
+                        this.ctx.arc(vehicle.x, vehicle.y, 6, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                }
+
+                this.updateStatus();
+            }
+
+            addVehicle(x, y, configStr, hasLight = false) {
+                const connections = [];
+                for (const conn of configStr.split(':')) {
+                    const [sensor, wheel] = conn.split('-');
+                    connections.push([sensor, wheel]);
+                }
+                
+                const vehicle = new Vehicle(
+                    x, y,
+                    Math.random() * 2 * Math.PI,
+                    connections,
+                    hasLight
+                );
+                this.vehicles.push(vehicle);
+            }
+
+            addLight(x, y) {
+                this.lights.push(new Light(x, y));
+            }
+
+            update() {
+                for (const vehicle of this.vehicles) {
+                    this.updateVehicle(vehicle);
+                }
+            }
+        }
+
+        // Initialize simulations
+        const boidsCanvas = document.getElementById('boidsCanvas');
+        const braitenbergCanvas = document.getElementById('braitenbergCanvas');
+        
+        const boidsSimulation = new BoidsSimulation(boidsCanvas);
+        const braitenbergSimulation = new BraitenbergSimulation(braitenbergCanvas);
+        
+        function animate() {
+            boidsSimulation.update();
+            boidsSimulation.draw();
+            
+            braitenbergSimulation.update();
+            braitenbergSimulation.draw();
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>

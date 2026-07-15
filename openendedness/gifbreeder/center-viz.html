@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Distance Center Debugger</title>
+<style>
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        background: #101014;
+        color: #e8e8ee;
+        font-family: system-ui, sans-serif;
+    }
+    h1 { font-size: 1rem; font-weight: 600; letter-spacing: 0.05em; margin: 0; }
+    .controls { display: flex; align-items: center; gap: 14px; font-size: 0.85rem; }
+    button {
+        background: #2a2a33;
+        color: #e8e8ee;
+        border: 1px solid #44444f;
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    button:hover { background: #35353f; }
+    .stage { position: relative; width: 512px; height: 512px; }
+    .stage canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+    }
+    #draw-canvas { cursor: crosshair; touch-action: none; }
+    .legend { font-size: 0.78rem; color: #9a9aa8; display: flex; gap: 18px; }
+    .legend b { color: #ff5252; font-weight: 600; }
+    .legend i { color: #fff; font-style: normal; }
+    #status { font-size: 0.78rem; color: #9a9aa8; min-height: 1em; }
+</style>
+</head>
+<body>
+    <h1>Distance Center Visualizer</h1>
+    <div class="controls">
+        <button id="clear-btn" type="button">Clear</button>
+        <label>Brush <input id="brush-slider" type="range" min="2" max="36" step="1" value="8"></label>
+    </div>
+    <div class="stage">
+        <canvas id="field-canvas" width="512" height="512"></canvas>
+        <canvas id="draw-canvas" width="512" height="512"></canvas>
+    </div>
+    <div class="legend">
+        <span><b>red</b> = computed centers (d = 0)</span>
+        <span>gray rings = iso-distance bands</span>
+        <span><i>black</i> = walls</span>
+    </div>
+    <div id="status"></div>
+
+<script>
+// --- same field algorithm as activation-lab.js ---
+
+function computeWallClearanceField(mask, width, height) {
+    const clearance = new Float64Array(width * height).fill(Infinity);
+
+    for (let index = 0; index < clearance.length; index++) {
+        if (mask[index]) {
+            clearance[index] = 0;
+            continue;
+        }
+        const px = index % width;
+        const py = (index / width) | 0;
+        if (px === 0 || py === 0 || px === width - 1 || py === height - 1) {
+            clearance[index] = 0.5;
+        }
+    }
+
+    runGridDijkstra(clearance, mask, width, height, false);
+    return clearance;
+}
+
+function isClearancePeak(clearance, mask, width, height, index) {
+    const epsilon = 1e-4;
+    const px = index % width;
+    const py = (index / width) | 0;
+    const value = clearance[index];
+
+    for (let dy = -1; dy <= 1; dy++) {
+        const ny = py + dy;
+        if (ny < 0 || ny >= height) continue;
+        for (let dx = -1; dx <= 1; dx++) {
+            if (dx === 0 && dy === 0) continue;
+            const nx = px + dx;
+            if (nx < 0 || nx >= width) continue;
+            if (clearance[ny * width + nx] > value + epsilon) return false;
+        }
+    }
+
+    return true;
+}
+
+function isSimplePoint(remaining, width, height, index) {
+    const px = index % width;
+    const py = (index / width) | 0;
+    const at = (dx, dy) => {
+        const nx = px + dx;
+        const ny = py + dy;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) return 0;
+        return remaining[ny * width + nx] ? 1 : 0;
+    };
+    // ring order: E, NE, N, NW, W, SW, S, SE
+    const ring = [
+        at(1, 0), at(1, -1), at(0, -1), at(-1, -1),
+        at(-1, 0), at(-1, 1), at(0, 1), at(1, 1)
+    ];
+
+    // Yokoi connectivity number for (8,4): removal keeps topology iff C === 1
+    let connectivity = 0;
+    for (const k of [0, 2, 4, 6]) {
+        const a = 1 - ring[k];
+        const b = 1 - ring[(k + 1) % 8];
+        const c = 1 - ring[(k + 2) % 8];
+        connectivity += a - a * b * c;
+    }
+    return connectivity === 1;
+}
+
+// Thin the free space down to a connected center ridge: clearance peaks are
+// anchors, everything else is eroded (lowest clearance first) unless removal
+// would break connectivity. Result: one continuous center per walled-off region.
+function extractConnectedCenterRidge(clearance, mask, width, height) {
+    const pixelCount = width * height;
+    const remaining = new Uint8Array(pixelCount);
+    const anchor = new Uint8Array(pixelCount);
+
+    for (let index = 0; index < pixelCount; index++) {
+        if (mask[index]) continue;
+        remaining[index] = 1;
+        if (isClearancePeak(clearance, mask, width, height, index)) {
+            anchor[index] = 1;
+        }
+    }
+
+    const heapIndices = [];
+    const heapValues = [];
+
+    const heapPush = (index, value) => {
+        let i = heapIndices.length;
+        heapIndices.push(index);
+        heapValues.push(value);
+        while (i > 0) {
+            const parent = (i - 1) >> 1;
+            if (heapValues[parent] <= heapValues[i]) break;
+            [heapValues[parent], heapValues[i]] = [heapValues[i], heapValues[parent]];
+            [heapIndices[parent], heapIndices[i]] = [heapIndices[i], heapIndices[parent]];
+            i = parent;
+        }
+    };
+
+    const heapPop = () => {
+        const topIndex = heapIndices[0];
+        const lastIndex = heapIndices.pop();
+        const lastValue = heapValues.pop();
+        if (heapIndices.length) {
+            heapIndices[0] = lastIndex;
+            heapValues[0] = lastValue;
+            let i = 0;
+            for (;;) {
+                const left = 2 * i + 1;
+                const right = left + 1;
+                let smallest = i;
+                if (left < heapValues.length && heapValues[left] < heapValues[smallest]) smallest = left;
+                if (right < heapValues.length && heapValues[right] < heapValues[smallest]) smallest = right;
+                if (smallest === i) break;
+                [heapValues[smallest], heapValues[i]] = [heapValues[i], heapValues[smallest]];
+                [heapIndices[smallest], heapIndices[i]] = [heapIndices[i], heapIndices[smallest]];
+                i = smallest;
+            }
+        }
+        return topIndex;
+    };
+
+    for (let index = 0; index < pixelCount; index++) {
+        if (remaining[index] && !anchor[index]) heapPush(index, clearance[index]);
+    }
+
+    while (heapIndices.length) {
+        const index = heapPop();
+        if (!remaining[index] || anchor[index]) continue;
+        if (!isSimplePoint(remaining, width, height, index)) continue;
+
+        remaining[index] = 0;
+
+        const px = index % width;
+        const py = (index / width) | 0;
+        for (let dy = -1; dy <= 1; dy++) {
+            const ny = py + dy;
+            if (ny < 0 || ny >= height) continue;
+            for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = px + dx;
+                if (nx < 0 || nx >= width) continue;
+                const neighborIndex = ny * width + nx;
+                if (remaining[neighborIndex] && !anchor[neighborIndex]) {
+                    heapPush(neighborIndex, clearance[neighborIndex]);
+                }
+            }
+        }
+    }
+
+    return remaining;
+}
+
+function runGridDijkstra(distances, mask, width, height, wallsBlock) {
+    const heapIndices = [];
+    const heapValues = [];
+
+    const heapPush = (index, value) => {
+        let i = heapIndices.length;
+        heapIndices.push(index);
+        heapValues.push(value);
+        while (i > 0) {
+            const parent = (i - 1) >> 1;
+            if (heapValues[parent] <= heapValues[i]) break;
+            [heapValues[parent], heapValues[i]] = [heapValues[i], heapValues[parent]];
+            [heapIndices[parent], heapIndices[i]] = [heapIndices[i], heapIndices[parent]];
+            i = parent;
+        }
+    };
+
+    const heapPop = () => {
+        const topIndex = heapIndices[0];
+        const topValue = heapValues[0];
+        const lastIndex = heapIndices.pop();
+        const lastValue = heapValues.pop();
+        if (heapIndices.length) {
+            heapIndices[0] = lastIndex;
+            heapValues[0] = lastValue;
+            let i = 0;
+            for (;;) {
+                const left = 2 * i + 1;
+                const right = left + 1;
+                let smallest = i;
+                if (left < heapValues.length && heapValues[left] < heapValues[smallest]) smallest = left;
+                if (right < heapValues.length && heapValues[right] < heapValues[smallest]) smallest = right;
+                if (smallest === i) break;
+                [heapValues[smallest], heapValues[i]] = [heapValues[i], heapValues[smallest]];
+                [heapIndices[smallest], heapIndices[i]] = [heapIndices[i], heapIndices[smallest]];
+                i = smallest;
+            }
+        }
+        return { index: topIndex, value: topValue };
+    };
+
+    for (let index = 0; index < distances.length; index++) {
+        if (Number.isFinite(distances[index])) heapPush(index, distances[index]);
+    }
+
+    while (heapIndices.length) {
+        const { index, value } = heapPop();
+        if (value > distances[index] + 1e-9) continue;
+
+        const px = index % width;
+        const py = (index / width) | 0;
+
+        for (let dy = -1; dy <= 1; dy++) {
+            const ny = py + dy;
+            if (ny < 0 || ny >= height) continue;
+            for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = px + dx;
+                if (nx < 0 || nx >= width) continue;
+
+                const neighborIndex = ny * width + nx;
+                if (wallsBlock && mask[neighborIndex]) continue;
+                if (dx !== 0 && dy !== 0) {
+                    if (wallsBlock && mask[py * width + nx] && mask[ny * width + px]) continue;
+                }
+
+                const stepCost = (dx !== 0 && dy !== 0) ? Math.SQRT2 : 1;
+                const nextValue = value + stepCost;
+                if (nextValue < distances[neighborIndex] - 1e-9) {
+                    distances[neighborIndex] = nextValue;
+                    heapPush(neighborIndex, nextValue);
+                }
+            }
+        }
+    }
+}
+
+// --- drawing + visualization ---
+
+const REFERENCE_RESOLUTION = 512;
+const FULL_RESOLUTION = 512;
+const DRAFT_RESOLUTION = 128;
+const ALPHA_THRESHOLD = 8;
+
+const drawCanvas = document.getElementById('draw-canvas');
+const drawCtx = drawCanvas.getContext('2d');
+const fieldCanvas = document.getElementById('field-canvas');
+const fieldCtx = fieldCanvas.getContext('2d');
+const statusEl = document.getElementById('status');
+
+const state = {
+    strokes: [],
+    activeStroke: null,
+    brushWidth: 8
+};
+
+document.getElementById('brush-slider').addEventListener('input', (event) => {
+    const next = Number.parseFloat(event.target.value);
+    if (Number.isFinite(next)) state.brushWidth = Math.max(1, next);
+});
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+    state.strokes = [];
+    state.activeStroke = null;
+    redrawStrokes();
+    recomputeField(FULL_RESOLUTION);
+});
+
+function canvasPoint(event) {
+    const rect = drawCanvas.getBoundingClientRect();
+    return {
+        x: Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)),
+        y: Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height))
+    };
+}
+
+drawCanvas.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    try { drawCanvas.setPointerCapture(event.pointerId); } catch (e) {}
+    state.activeStroke = { width: state.brushWidth, points: [canvasPoint(event)] };
+    state.strokes.push(state.activeStroke);
+    redrawStrokes();
+    recomputeField(DRAFT_RESOLUTION);
+});
+
+drawCanvas.addEventListener('pointermove', (event) => {
+    if (!state.activeStroke) return;
+    event.preventDefault();
+    const point = canvasPoint(event);
+    const points = state.activeStroke.points;
+    const previous = points[points.length - 1];
+    const dx = point.x - previous.x;
+    const dy = point.y - previous.y;
+    if ((dx * dx + dy * dy) < 0.000002) return;
+    points.push(point);
+    redrawStrokes();
+    recomputeField(DRAFT_RESOLUTION);
+});
+
+function endStroke(event) {
+    if (!state.activeStroke) return;
+    event.preventDefault();
+    const stroke = state.activeStroke;
+    if (stroke.points.length === 1) {
+        const point = stroke.points[0];
+        stroke.points.push({ x: point.x + 0.0001, y: point.y + 0.0001 });
+    }
+    state.activeStroke = null;
+    redrawStrokes();
+    recomputeField(FULL_RESOLUTION);
+}
+
+drawCanvas.addEventListener('pointerup', endStroke);
+drawCanvas.addEventListener('pointercancel', endStroke);
+
+function strokeInto(ctx, width, height) {
+    ctx.clearRect(0, 0, width, height);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#000';
+    for (const stroke of state.strokes) {
+        if (!stroke.points.length) continue;
+        ctx.beginPath();
+        stroke.points.forEach((point, index) => {
+            const x = point.x * width;
+            const y = point.y * height;
+            if (index === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.lineWidth = Math.max(1, stroke.width * (width / REFERENCE_RESOLUTION));
+        ctx.stroke();
+    }
+}
+
+function redrawStrokes() {
+    drawCtx.save();
+    strokeInto(drawCtx, drawCanvas.width, drawCanvas.height);
+    drawCtx.restore();
+}
+
+function buildMask(size) {
+    const maskCanvas = document.createElement('canvas');
+    maskCanvas.width = size;
+    maskCanvas.height = size;
+    const maskCtx = maskCanvas.getContext('2d', { willReadFrequently: true });
+    strokeInto(maskCtx, size, size);
+    const alpha = maskCtx.getImageData(0, 0, size, size).data;
+    const mask = new Uint8Array(size * size);
+    for (let i = 0; i < mask.length; i++) {
+        mask[i] = alpha[i * 4 + 3] > ALPHA_THRESHOLD ? 1 : 0;
+    }
+    return mask;
+}
+
+function recomputeField(size) {
+    const started = performance.now();
+    const mask = buildMask(size);
+
+    const clearance = computeWallClearanceField(mask, size, size);
+    const centers = extractConnectedCenterRidge(clearance, mask, size, size);
+    const distances = new Float64Array(size * size).fill(Infinity);
+    const centerIndices = [];
+    for (let i = 0; i < mask.length; i++) {
+        if (centers[i]) {
+            distances[i] = 0;
+            centerIndices.push(i);
+        }
+    }
+    runGridDijkstra(distances, mask, size, size, true);
+
+    // paint: iso-distance gray bands, walls black, centers red
+    const image = fieldCtx.createImageData(size, size);
+    const data = image.data;
+    const ringPeriod = size / 14;
+    for (let i = 0; i < mask.length; i++) {
+        const idx = i * 4;
+        if (mask[i]) {
+            data[idx] = 0; data[idx + 1] = 0; data[idx + 2] = 0;
+        } else {
+            const d = Number.isFinite(distances[i]) ? distances[i] : 0;
+            const band = 0.5 + 0.5 * Math.cos((d / ringPeriod) * Math.PI * 2);
+            const shade = Math.round(60 + band * 150);
+            data[idx] = shade; data[idx + 1] = shade; data[idx + 2] = shade;
+        }
+        data[idx + 3] = 255;
+    }
+    // Scale center dilation with resolution so the full-res pass doesn't
+    // render visibly thinner than the draft pass.
+    const centerRadius = Math.max(1, Math.round(3 * size / FULL_RESOLUTION));
+    for (const centerIndex of centerIndices) {
+        const px = centerIndex % size;
+        const py = (centerIndex / size) | 0;
+        for (let dy = -centerRadius; dy <= centerRadius; dy++) {
+            for (let dx = -centerRadius; dx <= centerRadius; dx++) {
+                const nx = px + dx;
+                const ny = py + dy;
+                if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
+                const idx = (ny * size + nx) * 4;
+                data[idx] = 255; data[idx + 1] = 60; data[idx + 2] = 60;
+            }
+        }
+    }
+
+    fieldCanvas.width = size;
+    fieldCanvas.height = size;
+    fieldCtx.putImageData(image, 0, 0);
+
+    const elapsed = Math.round(performance.now() - started);
+    statusEl.textContent = size + 'x' + size + ' field: ' + elapsed + 'ms, ' + centerIndices.length + ' center pixel(s)';
+}
+
+recomputeField(FULL_RESOLUTION);
+</script>
+</body>
+</html>
