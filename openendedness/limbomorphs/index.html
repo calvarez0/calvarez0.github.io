@@ -33,6 +33,29 @@
         }
         .affiliations p { margin: 0; }
 
+        .paper-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0 0 2rem;
+        }
+        .paper-actions a {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            color: var(--fg);
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            transition: background 0.1s, color 0.1s;
+        }
+        .paper-actions a:hover {
+            background: var(--fg);
+            color: var(--bg);
+        }
+
         .figure {
             border: 1px solid var(--border);
             margin: 2.5rem 0 0.75rem;
@@ -288,6 +311,13 @@
                     <p><sup>&#8727;</sup> Corresponding author: alexrez@mit.edu</p>
                 </div>
 
+                <nav class="paper-actions" aria-label="Paper resources">
+                    <a href="Limbomorphs.pdf" target="_blank" rel="noopener">PDF</a>
+                    <a href="https://arxiv.org/abs/2607.23842" target="_blank" rel="noopener">arXiv</a>
+                    <a href="/openendedness/gifbreeder/index.html" target="_blank" rel="noopener">GIFBreeder</a>
+                    <a href="/openendedness/gifbreeder/drawing.html" target="_blank" rel="noopener">Drawing App</a>
+                </nav>
+
                 <div class="hero-wrap">
                     <div class="hero-grid">
                         <img src="/assets/gifbreeder/activation-lab-output-trwerhx67.gif" alt="Gifbreeder output 1">
@@ -344,7 +374,7 @@
                         <div class="family-cell"><span class="label">h</span><img src="figures/family/activation-lab-output-enqnro76u_h.gif" alt="Limbomorph species h"></div>
                         <div class="family-cell"><span class="label">i</span><img src="figures/family/activation-lab-output-u3cgt1jm4_I.gif" alt="Limbomorph species i"></div>
                     </div>
-                    <p class="figure-caption"><b>Figure 1.</b>Nine limbomorphs of increasing morphological complexity. They begin as a large undifferentiated mass (4ab) before becoming thinner (4c), developing a forked tail (4d-e), a secondary bifurcation (4f-g), and eventually fine, filamentous (flagella-like) appendages (4h-i). More species can be found in the <a class="text-link" href="/openendedness/gifbreeder/drawing.html">drawing app</a>.</p>
+                    <p class="figure-caption"><b>Figure 1.</b>Nine limbomorphs of increasing morphological complexity. They begin as a large undifferentiated mass (4a-b) before becoming thinner (4c), developing a forked tail (4d-e), a secondary bifurcation (4f-g), and eventually fine, filamentous (flagella-like) appendages (4h-i). More species can be found in the <a class="text-link" href="/openendedness/gifbreeder/drawing.html">drawing app</a>.</p>
                 </figure>
 
                 <h2 id="perturbations">Reactions to perturbations</h2>
