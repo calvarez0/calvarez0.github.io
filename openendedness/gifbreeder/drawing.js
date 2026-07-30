@@ -37,6 +37,8 @@ const DRAWING_DISTANCE_LINE_ALPHA_THRESHOLD = 8;
 const DRAWING_GALLERY_DIR = 'limbomorphs';
 const DRAWING_GALLERY_MANIFEST_PATH = `${DRAWING_GALLERY_DIR}/manifest.json`;
 const DRAWING_GALLERY_TILE_RESOLUTION = 32;
+const DRAWING_STATE_STORAGE_KEY = 'cppn-drawing-state-v1';
+const LAB_SEED_STORAGE_KEY = 'cppn-activation-seed-v1';
 let DrawingProjectSaveRootHandle = null;
 
 function getCurrentVersionDirectoryName() {
@@ -135,7 +137,8 @@ function initDrawingPage() {
         outputModeManager.setMode('hsv', { reason: 'startup' });
     }
     setDrawingActionsEnabled(false);
-    initGalleryPanel();
+    const restoredFromSession = restoreDrawingStateFromSession();
+    initGalleryPanel({ skipAutoSelect: restoredFromSession });
 }
 
 // The preview surface is a square of absolutely-positioned canvases; CSS
@@ -182,6 +185,18 @@ function setupDrawingPageEvents() {
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') closeDownloadResolutionMenu();
     });
+
+    const labLink = document.querySelector('a[href="activation-lab.html"]');
+    if (labLink) {
+        labLink.addEventListener('click', () => {
+            seedActivationLabFromDrawing();
+            saveDrawingStateToSession();
+        });
+    }
+
+    window.addEventListener('beforeunload', () => {
+        saveDrawingStateToSession();
+    });
 }
 
 function setupDistanceDrawingEvents() {
@@ -197,6 +212,7 @@ function setupDistanceDrawingEvents() {
             DrawingState.isDistanceDrawEnabled = !DrawingState.isDistanceDrawEnabled;
             toggleButton.classList.toggle('is-active', DrawingState.isDistanceDrawEnabled);
             lineCanvas.style.pointerEvents = DrawingState.isDistanceDrawEnabled ? 'auto' : 'none';
+            saveDrawingStateToSession();
         });
     }
 
@@ -207,6 +223,7 @@ function setupDistanceDrawingEvents() {
             markDistanceFieldDirty();
             redrawDistanceLines();
             runDistanceFieldUpdate();
+            saveDrawingStateToSession();
         });
     }
 
@@ -215,6 +232,7 @@ function setupDistanceDrawingEvents() {
             const nextWidth = Number.parseFloat(event.target.value);
             if (Number.isFinite(nextWidth)) {
                 DrawingState.brushWidth = Math.max(1, nextWidth);
+                saveDrawingStateToSession();
             }
         });
     }
@@ -289,6 +307,7 @@ function handleDistancePointerUp(event) {
     markDistanceFieldDirty();
     redrawDistanceLines();
     runDistanceFieldUpdate();
+    saveDrawingStateToSession();
 }
 
 function syncDistanceDrawingCanvasSize() {
@@ -652,12 +671,97 @@ function runGridDijkstra(distances, mask, width, height, wallsBlock) {
     }
 }
 
-function applyLoadedGenome(genome, label) {
+function applyLoadedGenome(genome, label, options = {}) {
     DrawingState.genome = genome;
     DrawingState.loadedGenomeName = label || `Genome ${genome.id}`;
     setDrawingActionsEnabled(true);
     refreshPreviewStatus();
     queuePreviewRender();
+    if (options.persist !== false) saveDrawingStateToSession();
+}
+
+function saveDrawingStateToSession() {
+    if (!DrawingState.genome || typeof DrawingState.genome.serialize !== 'function') return;
+
+    try {
+        const payload = {
+            format: 'cppn-drawing-state-v1',
+            savedAt: new Date().toISOString(),
+            label: DrawingState.loadedGenomeName,
+            innovationState: window.NEAT && typeof window.NEAT.exportInnovationState === 'function'
+                ? window.NEAT.exportInnovationState()
+                : null,
+            genome: DrawingState.genome.serialize(),
+            strokes: DrawingState.lineStrokes,
+            brushWidth: DrawingState.brushWidth,
+            isDistanceDrawEnabled: DrawingState.isDistanceDrawEnabled
+        };
+        sessionStorage.setItem(DRAWING_STATE_STORAGE_KEY, JSON.stringify(payload));
+    } catch (error) {
+        // Ignore session persistence issues (private mode/quota, etc.).
+    }
+}
+
+function restoreDrawingStateFromSession() {
+    try {
+        const raw = sessionStorage.getItem(DRAWING_STATE_STORAGE_KEY);
+        if (!raw) return false;
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.genome) return false;
+
+        if (window.NEAT && typeof window.NEAT.resetInnovationState === 'function') {
+            window.NEAT.resetInnovationState();
+        }
+        if (parsed.innovationState
+            && window.NEAT
+            && typeof window.NEAT.importInnovationState === 'function') {
+            window.NEAT.importInnovationState(parsed.innovationState);
+        }
+
+        const genome = NEAT.Genome.deserialize(parsed.genome);
+
+        DrawingState.lineStrokes = Array.isArray(parsed.strokes) ? parsed.strokes : [];
+        DrawingState.activeLineStroke = null;
+        if (Number.isFinite(parsed.brushWidth)) {
+            DrawingState.brushWidth = Math.max(1, parsed.brushWidth);
+            const slider = document.getElementById('distance-brush-slider');
+            if (slider) slider.value = String(DrawingState.brushWidth);
+        }
+        if (typeof parsed.isDistanceDrawEnabled === 'boolean') {
+            DrawingState.isDistanceDrawEnabled = parsed.isDistanceDrawEnabled;
+            const toggle = document.getElementById('distance-draw-toggle-btn');
+            if (toggle) toggle.classList.toggle('is-active', DrawingState.isDistanceDrawEnabled);
+            if (DrawingState.lineCanvas) {
+                DrawingState.lineCanvas.style.pointerEvents = DrawingState.isDistanceDrawEnabled ? 'auto' : 'none';
+            }
+        }
+        markDistanceFieldDirty();
+        applyLoadedGenome(genome, parsed.label || `Genome ${genome.id}`, { persist: false });
+        redrawDistanceLines();
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function seedActivationLabFromDrawing() {
+    if (!DrawingState.genome || typeof DrawingState.genome.serialize !== 'function') return;
+
+    try {
+        const payload = {
+            format: 'cppn-activation-seed-v1',
+            savedAt: new Date().toISOString(),
+            label: DrawingState.loadedGenomeName || `Genome ${DrawingState.genome.id}`,
+            innovationState: window.NEAT && typeof window.NEAT.exportInnovationState === 'function'
+                ? window.NEAT.exportInnovationState()
+                : null,
+            genome: DrawingState.genome.serialize()
+        };
+        sessionStorage.setItem(LAB_SEED_STORAGE_KEY, JSON.stringify(payload));
+    } catch (error) {
+        // Ignore session persistence issues.
+    }
 }
 
 function setDrawingActionsEnabled(hasGenome) {
@@ -1154,7 +1258,8 @@ async function loadGalleryFilesFromDirectoryListing() {
     }
 }
 
-async function initGalleryPanel() {
+async function initGalleryPanel(options = {}) {
+    const skipAutoSelect = Boolean(options.skipAutoSelect);
     const grid = document.getElementById('gallery-grid');
     if (!grid) return;
 
@@ -1163,13 +1268,15 @@ async function initGalleryPanel() {
 
     if (!files.length) {
         setGalleryStatus(`No genome JSON found in ${DRAWING_GALLERY_DIR}/`);
-        setPreviewStatus('No gallery genomes found | upload a genome JSON to start');
+        if (!skipAutoSelect) {
+            setPreviewStatus('No gallery genomes found | upload a genome JSON to start');
+        }
         return;
     }
 
     grid.innerHTML = '';
     let loadedCount = 0;
-    let hasSelectedFirst = false;
+    let hasSelectedFirst = skipAutoSelect;
 
     // Genomes load sequentially: the first loadable one is shown immediately
     // in the main preview, the rest fill in behind it. Each tile keeps its
@@ -1215,7 +1322,7 @@ async function initGalleryPanel() {
         ? `${loadedCount} genome${loadedCount === 1 ? '' : 's'} | click to load at ${DRAWING_DISTANCE_PREVIEW_RESOLUTION}`
         : `No loadable genomes in ${DRAWING_GALLERY_DIR}/`);
 
-    if (!loadedCount) {
+    if (!loadedCount && !skipAutoSelect) {
         setPreviewStatus('No gallery genomes found | upload a genome JSON to start');
     }
 }

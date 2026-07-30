@@ -637,6 +637,31 @@ body {
     width: 100%;
 }
 
+.connection-reset-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.connection-reset-buttons .secondary-btn {
+    flex: 1;
+}
+
+.reset-all-btn {
+    background: var(--fg);
+    color: var(--bg);
+    border-color: var(--fg);
+}
+
+.reset-all-btn:hover {
+    background: transparent;
+    color: var(--fg);
+}
+
+.reset-all-btn:disabled:hover {
+    background: var(--fg);
+    color: var(--bg);
+}
+
 .lab-preview-panel {
     gap: 12px;
 }

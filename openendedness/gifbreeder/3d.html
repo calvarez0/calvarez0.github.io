@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limbomorph 3D</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body.drawing-page {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawing-page .site-nav {
+            flex: none;
+        }
+
+        .drawing-page .container {
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 12px 20px;
+        }
+
+        .drawing-page .lab-header {
+            flex: none;
+            margin-bottom: 12px;
+        }
+
+        .drawing-main {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 300px;
+            gap: 16px;
+        }
+
+        .drawing-main > .network-panel {
+            height: auto;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .volume-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .volume-panel .controls {
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .volume-stage {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            border: 1px solid var(--border);
+            background: var(--panel-bg, #111);
+        }
+
+        .volume-stage canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .volume-loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .volume-loading[hidden] { display: none; }
+
+        .volume-hint {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 6px;
+        }
+
+        .parts-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .parts-panel h2 {
+            margin: 0 0 4px 0;
+        }
+
+        .parts-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
+        .parts-controls label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+        }
+
+        .parts-controls input[type=range],
+        .parts-controls select {
+            font-family: inherit;
+        }
+
+        .parts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .part-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 6px;
+            border: 1px solid var(--border);
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .part-row.is-hidden {
+            opacity: 0.45;
+        }
+
+        .part-swatch {
+            width: 22px;
+            height: 22px;
+            border: 1px solid var(--border);
+            flex: none;
+        }
+
+        .part-meta {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .gallery-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gallery-grid {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            align-content: start;
+            padding-right: 4px;
+        }
+
+        .gallery-tile {
+            border: 1px solid var(--border);
+            background: none;
+            padding: 0;
+            cursor: pointer;
+            aspect-ratio: 1 / 1;
+            display: block;
+        }
+
+        .gallery-tile canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .gallery-tile.is-active {
+            outline: 2px solid var(--fg);
+            outline-offset: -1px;
+        }
+
+        .gallery-tile.drawing-transfer-tile {
+            outline: 1px dashed var(--accent, #40A2E3);
+            outline-offset: -1px;
+        }
+
+        .gallery-tile.drawing-transfer-tile.is-active {
+            outline: 2px solid var(--accent, #40A2E3);
+        }
+
+        .side-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 0;
+        }
+
+        .side-column > * {
+            min-height: 0;
+        }
+
+        .side-column > .parts-panel {
+            flex: 0 1 auto;
+            max-height: 45%;
+        }
+
+        .side-column > .gallery-panel {
+            flex: 1 1 auto;
+        }
+    </style>
+</head>
+<body class="activation-lab-page drawing-page">
+    <nav class="site-nav">
+        <div class="site-nav-inner">
+            <a href="../../index.html" class="site-brand">AA</a>
+            <div class="site-nav-actions">
+                <a href="../../index.html" class="nav-link font-mono-tech">Home</a>
+                <button id="theme-toggle" class="theme-btn font-mono-tech">Invert</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="lab-header">
+            <nav class="page-tabs" aria-label="Gifbreeder pages">
+                <a href="index.html" class="page-tab">GIFBreeder</a>
+                <a href="activation-lab.html" class="page-tab">Activation Lab</a>
+                <a href="drawing.html" class="page-tab">Drawing</a>
+                <a href="3d.html" class="page-tab is-active">3D</a>
+            </nav>
+        </div>
+
+        <div class="drawing-main">
+            <section class="network-panel volume-panel">
+                <div class="controls" aria-label="3D controls">
+                    <label class="font-mono-tech">
+                        Shape
+                        <select id="volume-shape">
+                            <option value="cube" selected>Cube</option>
+                            <option value="torus">Torus</option>
+                        </select>
+                    </label>
+                    <label class="font-mono-tech">
+                        Resolution
+                        <select id="volume-resolution">
+                            <option value="64">64³ (fast)</option>
+                            <option value="128" selected>128³</option>
+                            <option value="256">256³ (slow)</option>
+                            <option value="512">512³ (very slow)</option>
+                        </select>
+                    </label>
+                    <label class="font-mono-tech">
+                        Parts
+                        <select id="volume-k">
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4" selected>4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                        </select>
+                    </label>
+                    <label class="font-mono-tech">
+                        Axes
+                        <select id="volume-axis-perm"></select>
+                    </label>
+                    <button id="volume-autorotate" class="secondary-btn is-active" type="button">Auto-rotate</button>
+                    <button id="volume-reset-view" class="secondary-btn" type="button">Reset view</button>
+                    <label class="font-mono-tech">
+                        BG
+                        <input id="volume-bg-color" type="color" value="#808080">
+                    </label>
+                    <label class="secondary-btn file-upload-btn">
+                        Upload Genome JSON
+                        <input id="genome-upload-input" type="file" accept=".json,application/json">
+                    </label>
+                </div>
+
+                <div class="network-info" id="preview-status">
+                    <p class="placeholder">Loading first gallery genome&hellip;</p>
+                </div>
+
+                <div class="volume-stage" id="volume-stage">
+                    <div class="volume-loading" id="volume-loading" hidden>
+                        <span id="volume-loading-text">Sampling volume&hellip;</span>
+                    </div>
+                </div>
+                <div class="volume-hint" id="shape-hint">Drag to rotate. Scroll to zoom. Right-drag to pan. z axis = the same t input that drives the 2D GIF frames.</div>
+                <div class="volume-hint" id="bg-status"></div>
+            </section>
+
+            <aside class="side-column">
+                <section class="network-panel parts-panel">
+                    <h2>Parts</h2>
+                    <div class="parts-controls">
+                        <label><input type="checkbox" id="parts-toggle-all" checked> Show all</label>
+                        <label id="strokes-toggle-wrap" hidden><input type="checkbox" id="strokes-toggle" checked> Show perturbation</label>
+                    </div>
+                    <div class="parts-list" id="parts-list"></div>
+                </section>
+
+                <aside class="network-panel gallery-panel">
+                    <h2>Limbomorphs</h2>
+                    <div class="network-info" id="gallery-status">
+                        <p class="placeholder">Loading gallery&hellip;</p>
+                    </div>
+                    <div id="gallery-grid" class="gallery-grid"></div>
+                </aside>
+            </aside>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/lines/LineSegmentsGeometry.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/lines/LineMaterial.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/lines/LineSegments2.js"></script>
+    <script src="neat.js"></script>
+    <script src="cppn.js"></script>
+    <script src="3d.js"></script>
+    <script>
+        const toggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'dark') body.classList.add('dark');
+
+        toggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
+        });
+    </script>
+</body>
+</html>

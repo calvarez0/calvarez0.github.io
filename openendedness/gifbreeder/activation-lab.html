@@ -25,6 +25,8 @@
             <nav class="page-tabs" aria-label="Gifbreeder pages">
                 <a href="index.html" class="page-tab">GIFBreeder</a>
                 <a href="activation-lab.html" class="page-tab is-active">Activation Lab</a>
+                <a href="drawing.html" class="page-tab">Drawing</a>
+                <!-- <a href="3d.html" class="page-tab">3D</a> -->
             </nav>
         </div>
 
@@ -88,9 +90,14 @@
                             <button class="secondary-btn" data-delta="0.1">+0.10</button>
                             <button class="secondary-btn" data-delta="0.25">+0.25</button>
                         </div>
-                        <button id="reset-connection-btn" class="secondary-btn connection-wide-btn" disabled>
-                            Reset Activation Value
-                        </button>
+                        <div class="connection-reset-buttons">
+                            <button id="reset-connection-btn" class="secondary-btn" disabled>
+                                Reset Selected
+                            </button>
+                            <button id="reset-all-connections-btn" class="secondary-btn reset-all-btn" disabled>
+                                Reset All
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="panel-footer-actions">
