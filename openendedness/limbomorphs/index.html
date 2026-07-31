@@ -148,6 +148,21 @@
             text-transform: lowercase;
         }
 
+        @media (max-width: 600px) {
+            .perturbation-grid {
+                grid-template-columns: minmax(0, auto) repeat(3, 1fr);
+            }
+            .perturbation-grid .colhead,
+            .perturbation-grid .rowhead {
+                font-size: 0.62rem;
+                letter-spacing: 0.02em;
+                padding: 0.3rem 0.35rem;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+                text-align: center;
+            }
+        }
+
         .center-viz {
             display: grid;
             gap: 1rem;
