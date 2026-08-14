@@ -13,7 +13,10 @@ const DrawingState = {
     lineCtx: null,
     lineStrokes: [],
     activeLineStroke: null,
-    isDistanceDrawEnabled: true,
+    // 'direct'   -> distance from drawn stroke pixels themselves (default)
+    // 'shortest' -> distance from canvas midpoint, strokes force detours
+    // 'ridge'    -> distance from computed clearance-ridge center (legacy)
+    warpMode: 'direct',
     brushWidth: 8,
     distanceFieldCache: null,
     distanceFieldDirty: true,
@@ -81,31 +84,7 @@ function downloadBlobFallback(blob, fileName) {
     }, 0);
 }
 
-async function saveBlobToVersionSubdirectory(blob, fileName, subdirectoryName) {
-    if (typeof window !== 'undefined' && typeof window.showDirectoryPicker === 'function') {
-        try {
-            if (!DrawingProjectSaveRootHandle) {
-                DrawingProjectSaveRootHandle = await window.showDirectoryPicker({
-                    id: 'gifbreeder-save-root',
-                    mode: 'readwrite'
-                });
-            }
-
-            const targetDirectory = await getNestedDirectoryHandle(
-                DrawingProjectSaveRootHandle,
-                getTargetSaveDirectorySegments(subdirectoryName)
-            );
-            const fileHandle = await targetDirectory.getFileHandle(fileName, { create: true });
-            const writable = await fileHandle.createWritable();
-            await writable.write(blob);
-            await writable.close();
-            return true;
-        } catch (error) {
-            if (error && error.name === 'AbortError') return false;
-            console.warn('Falling back to browser download:', error);
-        }
-    }
-
+async function saveBlobToVersionSubdirectory(blob, fileName, _subdirectoryName) {
     downloadBlobFallback(blob, fileName);
     return false;
 }
@@ -203,15 +182,19 @@ function setupDistanceDrawingEvents() {
     const lineCanvas = DrawingState.lineCanvas;
     if (!lineCanvas) return;
 
-    const toggleButton = document.getElementById('distance-draw-toggle-btn');
+    const toolSelect = document.getElementById('drawing-tool-select');
     const clearButton = document.getElementById('distance-clear-btn');
     const brushSlider = document.getElementById('distance-brush-slider');
 
-    if (toggleButton) {
-        toggleButton.addEventListener('click', () => {
-            DrawingState.isDistanceDrawEnabled = !DrawingState.isDistanceDrawEnabled;
-            toggleButton.classList.toggle('is-active', DrawingState.isDistanceDrawEnabled);
-            lineCanvas.style.pointerEvents = DrawingState.isDistanceDrawEnabled ? 'auto' : 'none';
+    if (toolSelect) {
+        toolSelect.value = DrawingState.warpMode;
+        toolSelect.addEventListener('change', () => {
+            const nextMode = toolSelect.value;
+            if (nextMode !== 'direct' && nextMode !== 'shortest' && nextMode !== 'ridge') return;
+            if (nextMode === DrawingState.warpMode) return;
+            DrawingState.warpMode = nextMode;
+            markDistanceFieldDirty();
+            runDistanceFieldUpdate();
             saveDrawingStateToSession();
         });
     }
@@ -258,7 +241,6 @@ function getDistanceCanvasPoint(event) {
 }
 
 function handleDistancePointerDown(event) {
-    if (!DrawingState.isDistanceDrawEnabled) return;
     const canvas = DrawingState.lineCanvas;
     const point = getDistanceCanvasPoint(event);
     if (!canvas || !point) return;
@@ -407,11 +389,30 @@ function buildDistanceFieldFromLines(width, height) {
         mask[pixelIndex] = alphaData[pixelIndex * 4 + 3] > DRAWING_DISTANCE_LINE_ALPHA_THRESHOLD ? 1 : 0;
     }
 
-    // Walls = drawn strokes + image border. The "center" of each walled-off
-    // region is a connected ridge: clearance peaks anchored together by
-    // topology-preserving thinning. d = geodesic distance from that ridge,
-    // so walls truly divide the pattern even when strokes only partially
-    // cross the image.
+    let values;
+    if (DrawingState.warpMode === 'ridge') {
+        values = computeRidgeCenterValues(mask, width, height);
+    } else if (DrawingState.warpMode === 'shortest') {
+        values = computeShortestDistanceValues(mask, width, height);
+    } else {
+        values = computeDirectCenterValues(mask, width, height);
+    }
+
+    return {
+        width,
+        height,
+        values,
+        mask
+    };
+}
+
+// Ridge-center warp (legacy): walls = drawn strokes + image border. The
+// "center" of each walled-off region is a connected ridge (clearance peaks
+// anchored together by topology-preserving thinning). d = geodesic distance
+// from that ridge, so walls truly divide the pattern even when strokes only
+// partially cross the image.
+function computeRidgeCenterValues(mask, width, height) {
+    const pixelCount = width * height;
     const clearance = computeWallClearanceField(mask, width, height);
     const centers = extractConnectedCenterRidge(clearance, mask, width, height);
     const centerDistances = new Float64Array(pixelCount).fill(Infinity);
@@ -425,21 +426,96 @@ function buildDistanceFieldFromLines(width, height) {
     }
 
     const values = new Float32Array(pixelCount);
-    if (centerCount > 0) {
-        runGridDijkstra(centerDistances, mask, width, height, true);
-        for (let index = 0; index < pixelCount; index++) {
-            values[index] = Number.isFinite(centerDistances[index])
-                ? centerDistances[index] / width
-                : 0;
+    if (centerCount === 0) return values;
+
+    runGridDijkstra(centerDistances, mask, width, height, true);
+    for (let index = 0; index < pixelCount; index++) {
+        values[index] = Number.isFinite(centerDistances[index])
+            ? centerDistances[index] / width
+            : 0;
+    }
+    return values;
+}
+
+// Shortest-distance warp: center stays fixed at the canvas midpoint. Pixels
+// whose straight line to center is blocked by a stroke are re-measured as the
+// shortest path around the obstruction.
+function computeShortestDistanceValues(mask, width, height) {
+    const pixelCount = width * height;
+    const values = new Float32Array(pixelCount);
+
+    const cx = (width / 2) | 0;
+    const cy = (height / 2) | 0;
+    const centerIndex = cy * width + cx;
+    const seedIndex = mask[centerIndex]
+        ? findNearestFreePixel(mask, width, height, cx, cy)
+        : centerIndex;
+    if (seedIndex < 0) return values;
+
+    const distances = new Float64Array(pixelCount).fill(Infinity);
+    distances[seedIndex] = 0;
+    runGridDijkstra(distances, mask, width, height, true);
+
+    for (let index = 0; index < pixelCount; index++) {
+        values[index] = Number.isFinite(distances[index])
+            ? distances[index] / width
+            : 0;
+    }
+    return values;
+}
+
+// BFS to nudge the fixed center onto the nearest non-wall pixel when the user
+// happens to draw directly on top of the canvas midpoint.
+function findNearestFreePixel(mask, width, height, sx, sy) {
+    const seen = new Uint8Array(width * height);
+    const queue = [sy * width + sx];
+    seen[sy * width + sx] = 1;
+    while (queue.length) {
+        const index = queue.shift();
+        if (!mask[index]) return index;
+        const px = index % width;
+        const py = (index / width) | 0;
+        for (let dy = -1; dy <= 1; dy++) {
+            const ny = py + dy;
+            if (ny < 0 || ny >= height) continue;
+            for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = px + dx;
+                if (nx < 0 || nx >= width) continue;
+                const neighborIndex = ny * width + nx;
+                if (seen[neighborIndex]) continue;
+                seen[neighborIndex] = 1;
+                queue.push(neighborIndex);
+            }
+        }
+    }
+    return -1;
+}
+
+// Direct-center warp: the drawn stroke IS the center. d at every pixel is the
+// geodesic distance from the nearest stroke pixel, with strokes not treated as
+// walls (wallsBlock=false), so the flood crosses stroke pixels freely.
+function computeDirectCenterValues(mask, width, height) {
+    const pixelCount = width * height;
+    const distances = new Float64Array(pixelCount).fill(Infinity);
+    let seedCount = 0;
+    for (let index = 0; index < pixelCount; index++) {
+        if (mask[index]) {
+            distances[index] = 0;
+            seedCount++;
         }
     }
 
-    return {
-        width,
-        height,
-        values,
-        mask
-    };
+    const values = new Float32Array(pixelCount);
+    if (seedCount === 0) return values;
+
+    runGridDijkstra(distances, mask, width, height, false);
+    for (let index = 0; index < pixelCount; index++) {
+        values[index] = Number.isFinite(distances[index])
+            ? distances[index] / width
+            : 0;
+    }
+    return values;
 }
 
 function computeWallClearanceField(mask, width, height) {
@@ -694,7 +770,7 @@ function saveDrawingStateToSession() {
             genome: DrawingState.genome.serialize(),
             strokes: DrawingState.lineStrokes,
             brushWidth: DrawingState.brushWidth,
-            isDistanceDrawEnabled: DrawingState.isDistanceDrawEnabled
+            warpMode: DrawingState.warpMode
         };
         sessionStorage.setItem(DRAWING_STATE_STORAGE_KEY, JSON.stringify(payload));
     } catch (error) {
@@ -728,13 +804,10 @@ function restoreDrawingStateFromSession() {
             const slider = document.getElementById('distance-brush-slider');
             if (slider) slider.value = String(DrawingState.brushWidth);
         }
-        if (typeof parsed.isDistanceDrawEnabled === 'boolean') {
-            DrawingState.isDistanceDrawEnabled = parsed.isDistanceDrawEnabled;
-            const toggle = document.getElementById('distance-draw-toggle-btn');
-            if (toggle) toggle.classList.toggle('is-active', DrawingState.isDistanceDrawEnabled);
-            if (DrawingState.lineCanvas) {
-                DrawingState.lineCanvas.style.pointerEvents = DrawingState.isDistanceDrawEnabled ? 'auto' : 'none';
-            }
+        if (parsed.warpMode === 'direct' || parsed.warpMode === 'shortest' || parsed.warpMode === 'ridge') {
+            DrawingState.warpMode = parsed.warpMode;
+            const toolSelect = document.getElementById('drawing-tool-select');
+            if (toolSelect) toolSelect.value = DrawingState.warpMode;
         }
         markDistanceFieldDirty();
         applyLoadedGenome(genome, parsed.label || `Genome ${genome.id}`, { persist: false });
