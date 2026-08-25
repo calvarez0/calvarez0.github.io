@@ -1,0 +1,28 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>probe</title></head>
+<body>
+<div id="log" style="white-space:pre;font-family:monospace;font-size:11px"></div>
+<script>
+const logEl = document.getElementById('log');
+const errors = [];
+function log(...a){
+  const s = a.map(x => (x && x.stack) ? x.stack : (typeof x === 'object' ? JSON.stringify(x) : String(x))).join(' ');
+  errors.push(s);
+  logEl.textContent += s + '\n';
+}
+window.addEventListener('error', e => log('ERROR:', e.message, 'at', e.filename+':'+e.lineno+':'+e.colno, e.error && e.error.stack));
+window.addEventListener('unhandledrejection', e => log('REJECT:', e.reason && (e.reason.stack || e.reason.message || e.reason)));
+const orig = console.error;
+console.error = (...a) => { log('console.error:', ...a); orig.apply(console, a); };
+</script>
+<iframe id="frame" src="http://localhost:8765/openendedness/gifbreeder/3d.html" style="width:1200px;height:800px;border:1px solid #000"></iframe>
+<script>
+setTimeout(() => {
+  try {
+    const doc = document.getElementById('frame').contentDocument;
+    const gallery = doc.querySelector('#gallery-list') || doc.querySelector('.gallery-panel') || doc.body;
+    logEl.textContent += '\n=== GALLERY TEXT ===\n' + (gallery ? gallery.innerText.slice(0, 800) : 'no gallery el');
+  } catch (e) { logEl.textContent += '\n=== frame read err: ' + e.message; }
+}, 6000);
+</script>
+</body></html>

@@ -36,9 +36,8 @@ function clampChannel01(value) {
 }
 
 function normalizeCPPNTimeInput(value) {
-    if (!Number.isFinite(value)) return 0;
-    if (Math.abs(value) <= 1) return value;
-    return value / Math.max(GIF_FRAME_COUNT - 1, 1);
+    // Callers pass the already-normalized CPPN t input; only guard NaN.
+    return Number.isFinite(value) ? value : 0;
 }
 
 function hsvToDisplayRgb(h, s, v) {
@@ -431,7 +430,13 @@ function getDistanceFieldPixel(distanceField, px, py, width, height) {
 
 function renderFrameToRgba(network, width, height, timestep, options = {}) {
     const data = new Uint8ClampedArray(width * height * 4);
-    const scale = 1.0;
+    const xExtent = Number.isFinite(options.xExtent) ? options.xExtent : 0.5;
+    const yExtent = Number.isFinite(options.yExtent) ? options.yExtent : 0.5;
+    const tExtent = Number.isFinite(options.tExtent) ? options.tExtent : 0.5;
+    const scaleX = 2 * xExtent;
+    const scaleY = 2 * yExtent;
+    const frameFraction = timestep / Math.max(GIF_FRAME_COUNT - 1, 1);
+    const tInput = 0.5 + (frameFraction - 0.5) * 2 * tExtent;
     const distanceField = options.distanceField || null;
     // 'invert' paints line pixels as the opposite of the pattern color so the
     // exported GIF matches the preview's difference-blend overlay.
@@ -439,10 +444,10 @@ function renderFrameToRgba(network, width, height, timestep, options = {}) {
 
     for (let py = 0; py < height; py++) {
         for (let px = 0; px < width; px++) {
-            const x = (px / width - 0.5) * scale;
-            const y = (py / height - 0.5) * scale;
+            const x = (px / width - 0.5) * scaleX;
+            const y = (py / height - 0.5) * scaleY;
             const fieldPixel = getDistanceFieldPixel(distanceField, px, py, width, height);
-            const rgb = network.activate(x, y, timestep, fieldPixel ? fieldPixel.d : null);
+            const rgb = network.activate(x, y, tInput, fieldPixel ? fieldPixel.d : null);
 
             const idx = (py * width + px) * 4;
             const r = Math.round(clampChannel01(rgb.r) * 255);
@@ -486,7 +491,10 @@ function createGifBytes(genome, options = {}) {
     for (let frameIndex = 0; frameIndex < frameCount; frameIndex++) {
         const rgba = renderFrameToRgba(network, width, height, frameIndex, {
             distanceField: options.distanceField || null,
-            distanceLineRendering: options.distanceLineRendering || 'black'
+            distanceLineRendering: options.distanceLineRendering || 'black',
+            xExtent: options.xExtent,
+            yExtent: options.yExtent,
+            tExtent: options.tExtent
         });
         indexedFrames.push(imageDataToGif332Indices(rgba));
 

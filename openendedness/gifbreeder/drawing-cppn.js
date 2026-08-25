@@ -108,9 +108,9 @@ function getCPPNDisplayNodeLabel(node, mode = null) {
 }
 
 function normalizeCPPNTimeInput(value) {
-    if (!Number.isFinite(value)) return 0;
-    if (value > 0 && value < 1) return value;
-    return value / Math.max(GIF_FRAME_COUNT - 1, 1);
+    // Callers pass the already-normalized CPPN t input (usually in [0, 1] but
+    // extent controls can push it outside that range). Only guard against NaN.
+    return Number.isFinite(value) ? value : 0;
 }
 
 function hsvToDisplayRgb(h, s, v) {
@@ -531,7 +531,18 @@ class CPPNRenderer {
     renderFrameToImageData(network, ctx, width, height, timestep, options = {}) {
         const imageData = ctx.createImageData(width, height);
         const data = imageData.data;
-        const scale = 1.0;
+        // Defaults reproduce the legacy fixed [-0.5, 0.5] cube when the caller
+        // doesn't specify extents.
+        const xExtent = Number.isFinite(options.xExtent) ? options.xExtent : 0.5;
+        const yExtent = Number.isFinite(options.yExtent) ? options.yExtent : 0.5;
+        const tExtent = Number.isFinite(options.tExtent) ? options.tExtent : 0.5;
+        const scaleX = 2 * xExtent;
+        const scaleY = 2 * yExtent;
+        // Frame -> normalized t centered at 0.5 with half-width tExtent. When
+        // tExtent = 0.5 this reproduces t = frame/(N-1) ∈ [0, 1]. Larger
+        // tExtent extends both ends symmetrically outside [0, 1].
+        const frameFraction = timestep / Math.max(GIF_FRAME_COUNT - 1, 1);
+        const tInput = 0.5 + (frameFraction - 0.5) * 2 * tExtent;
         const distanceField = options.distanceField || null;
         // 'black': paint line pixels black. 'invert': paint them as the
         // opposite of the pattern color (matches the preview's difference
@@ -541,10 +552,10 @@ class CPPNRenderer {
 
         for (let py = 0; py < height; py++) {
             for (let px = 0; px < width; px++) {
-                const x = (px / width - 0.5) * scale;
-                const y = (py / height - 0.5) * scale;
+                const x = (px / width - 0.5) * scaleX;
+                const y = (py / height - 0.5) * scaleY;
                 const fieldPixel = this.getDistanceFieldPixel(distanceField, px, py, width, height);
-                const rgb = network.activate(x, y, timestep, fieldPixel ? fieldPixel.d : null);
+                const rgb = network.activate(x, y, tInput, fieldPixel ? fieldPixel.d : null);
 
                 const idx = (py * width + px) * 4;
                 const r = Math.round(clampChannel01(rgb.r) * 255);
@@ -580,7 +591,10 @@ class CPPNRenderer {
                 frameIndex,
                 {
                     distanceField: state.distanceField,
-                    distanceLineRendering: state.distanceLineRendering
+                    distanceLineRendering: state.distanceLineRendering,
+                    xExtent: state.xExtent,
+                    yExtent: state.yExtent,
+                    tExtent: state.tExtent
                 }
             );
         }
@@ -623,6 +637,9 @@ class CPPNRenderer {
             height,
             distanceField: options.distanceField || null,
             distanceLineRendering: options.distanceLineRendering || 'black',
+            xExtent: options.xExtent,
+            yExtent: options.yExtent,
+            tExtent: options.tExtent,
             cachedFrames: new Array(GIF_FRAME_COUNT),
             lastFrameIndex: -1,
             startTime: performance.now(),
@@ -676,7 +693,10 @@ class CPPNRenderer {
         for (let frameIndex = 0; frameIndex < frameCount; frameIndex++) {
             const imageData = this.renderFrameToImageData(network, ctx, width, height, frameIndex, {
                 distanceField: options.distanceField || null,
-                distanceLineRendering: options.distanceLineRendering || 'black'
+                distanceLineRendering: options.distanceLineRendering || 'black',
+                xExtent: options.xExtent,
+                yExtent: options.yExtent,
+                tExtent: options.tExtent
             });
             indexedFrames.push(imageDataToGif332Indices(imageData));
         }

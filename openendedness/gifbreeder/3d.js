@@ -11,7 +11,7 @@
  * and cached. Switching between them at the same (N, k) is then instant.
  */
 
-const GALLERY_DIR = 'limbomorphs_archive';
+const GALLERY_DIR = 'limbomorphs';
 const GALLERY_MANIFEST_PATH = `${GALLERY_DIR}/manifest.json`;
 const GALLERY_TILE_RESOLUTION = 32;
 // Solid-torus embedding constants. Chosen so the donut sits inside the same
@@ -328,12 +328,18 @@ const CACHE_BYTE_BUDGET = 800 * 1024 * 1024;
 const State = {
     resolution: 128,
     k: 4,
+    // Half-widths of the CPPN input ranges. Defaults reproduce the original
+    // [-0.5, 0.5] cube and [0, 1] time range. Extents mutate the CPPN inputs
+    // sampled at each voxel; the visual voxel grid is unchanged.
+    xExtent: 0.5,
+    yExtent: 0.5,
+    tExtent: 0.5,
     shape: 'cube', // 'cube' | 'torus'
     // Which source axis (x=0, y=1, t=2) is displayed at each display axis
     // (display X, Y, Z). Default [0, 1, 2] = identity. Any of the 6
     // permutations in AXIS_PERMUTATIONS is valid.
     axisPerm: [0, 1, 2],
-    autoRotate: true,
+    autoRotate: false,
     partsVisible: [],
     activeFileName: null,
     activeResult: null, // { N, labels, centers, counts, k } — always in natural (unswapped) order
@@ -807,12 +813,16 @@ function distanceFieldValueAt(field, ix, iy, N) {
 function sampleSubgrid(network, N, distanceField) {
     const stride = Math.max(1, Math.floor(N / 12));
     const points = [];
+    const denom = Math.max(1, N - 1);
+    const xScale = 2 * State.xExtent;
+    const yScale = 2 * State.yExtent;
+    const tScale = 2 * State.tExtent;
     for (let iz = 0; iz < N; iz += stride) {
-        const z = iz / Math.max(1, N - 1);
+        const z = 0.5 + (iz / denom - 0.5) * tScale;
         for (let iy = 0; iy < N; iy += stride) {
-            const y = iy / Math.max(1, N - 1) - 0.5;
+            const y = (iy / denom - 0.5) * yScale;
             for (let ix = 0; ix < N; ix += stride) {
-                const x = ix / Math.max(1, N - 1) - 0.5;
+                const x = (ix / denom - 0.5) * xScale;
                 const d = distanceFieldValueAt(distanceField, ix, iy, N);
                 const c = network.activate(x, y, z, d, true);
                 points.push(c.r, c.g, c.b);
@@ -897,15 +907,18 @@ async function assignLabelsStreaming(network, N, centers, k, onProgress, isCance
     const labels = new Uint8Array(N * N * N);
     const counts = new Uint32Array(k);
     const denom = Math.max(1, N - 1);
+    const xScale = 2 * State.xExtent;
+    const yScale = 2 * State.yExtent;
+    const tScale = 2 * State.tExtent;
     const slicesPerChunk = Math.max(1, Math.floor(N / 24));
     for (let iz = 0; iz < N; iz += slicesPerChunk) {
         const endIz = Math.min(N, iz + slicesPerChunk);
         for (let z_i = iz; z_i < endIz; z_i++) {
-            const z = z_i / denom;
+            const z = 0.5 + (z_i / denom - 0.5) * tScale;
             for (let iy = 0; iy < N; iy++) {
-                const y = iy / denom - 0.5;
+                const y = (iy / denom - 0.5) * yScale;
                 for (let ix = 0; ix < N; ix++) {
-                    const x = ix / denom - 0.5;
+                    const x = (ix / denom - 0.5) * xScale;
                     const dOverride = distanceFieldValueAt(distanceField, ix, iy, N);
                     const c = network.activate(x, y, z, dOverride, true);
                     let best = 0, bestD = Infinity;
@@ -1201,7 +1214,18 @@ function syncToggleAll() {
 // --- Cache ---
 
 function cacheKeyFor(fileName, N, k) {
-    return `${fileName}::N=${N}::k=${k}`;
+    // Extents change what the CPPN sees at each voxel, so cached labels are
+    // extent-specific. Rounded to 3 decimals so tiny slider jitter shares a
+    // cache entry with a "clean" typed value like 0.5.
+    const xe = roundExtentKey(State.xExtent);
+    const ye = roundExtentKey(State.yExtent);
+    const te = roundExtentKey(State.tExtent);
+    return `${fileName}::N=${N}::k=${k}::x=${xe}::y=${ye}::t=${te}`;
+}
+
+function roundExtentKey(value) {
+    if (!Number.isFinite(value)) return '0';
+    return String(Math.round(value * 1000) / 1000);
 }
 
 function estimateResultBytes(result) {
@@ -1901,6 +1925,10 @@ function bindControls() {
         State.controls.update();
     });
 
+    bindVolumeExtentInput('volume-x-extent', 'xExtent');
+    bindVolumeExtentInput('volume-y-extent', 'yExtent');
+    bindVolumeExtentInput('volume-t-extent', 'tExtent');
+
     document.getElementById('volume-bg-color').addEventListener('input', (e) => {
         if (State.scene) State.scene.background = new THREE.Color(e.target.value);
         refreshAxisLabelInk(e.target.value);
@@ -1923,6 +1951,27 @@ function bindControls() {
     }
 
     document.getElementById('genome-upload-input').addEventListener('change', handleGenomeUpload);
+}
+
+function bindVolumeExtentInput(inputId, stateKey) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    input.value = String(State[stateKey]);
+    input.addEventListener('change', () => {
+        const raw = Number.parseFloat(input.value);
+        if (!Number.isFinite(raw)) return;
+        State[stateKey] = raw;
+        // Extents change what the CPPN sees, so the cluster labels must be
+        // recomputed. Cached results at the same (name, N, k) but different
+        // extents live under different keys — adopt one if it exists, else
+        // kick off a fresh compute.
+        if (State.activeFileName) {
+            const cached = cacheGet(cacheKeyFor(State.activeFileName, State.resolution, State.k));
+            if (cached) adoptResult(cached, State.activeFileName);
+            else setPreviewStatus(`${State.activeFileName} | re-sampling volume with new extents…`);
+        }
+        invalidateJobsAndRestart();
+    });
 }
 
 // Only surface the "Show perturbation" checkbox when the current entry

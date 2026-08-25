@@ -419,10 +419,19 @@ class CPPNNetwork {
         return result;
     }
 
-    activate(x, y, t = 0) {
+    activate(x, y, t = 0, distanceOverride = null, preNormalizedT = false) {
         // GifBreeder inputs: x, y, distance, t, bias(=1)
-        const d = Math.sqrt(x * x + y * y);
-        const normalizedTime = normalizeCPPNTimeInput(t);
+        // distanceOverride lets callers (e.g. the 3D volume with a stroke
+        // distance field) inject d instead of using the Euclidean fallback.
+        // preNormalizedT lets callers pass t directly (outside [0,1] is fine)
+        // instead of routing it through the frame-index normalizer — needed
+        // by callers that sweep a continuous t range like the 3D t-axis.
+        const d = Number.isFinite(distanceOverride)
+            ? distanceOverride
+            : Math.sqrt(x * x + y * y);
+        const normalizedTime = preNormalizedT
+            ? (Number.isFinite(t) ? t : 0)
+            : normalizeCPPNTimeInput(t);
 
         for (const node of this.nodes.values()) {
             if (node.type === 'input') {

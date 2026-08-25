@@ -22,7 +22,20 @@ const DrawingState = {
     distanceFieldDirty: true,
     renderPending: false,
     exportInProgress: false,
-    loadedGenomeName: 'No genome loaded'
+    loadedGenomeName: 'No genome loaded',
+    showDField: false,
+    dFieldCanvas: null,
+    dFieldCtx: null,
+    // Half-width of the CPPN x/y input ranges (defaults reproduce the fixed
+    // [-0.5, 0.5] cube the renderer used before extents were configurable).
+    xExtent: 0.5,
+    yExtent: 0.5,
+    // Half-width of the CPPN t-input range around t=0.5. 0.5 → t ∈ [0, 1].
+    tExtent: 0.5,
+    // performance.now() at the start of the current animation loop; used by
+    // the pixel-inspector ticker to compute the CPPN t input for the frame
+    // currently on screen. Null when no genome is loaded.
+    animationStartTime: null
 };
 const DRAWING_ARCHIVE_DIR = 'archive';
 const DRAWING_EXPRESSIONS_DIR = 'expressions';
@@ -105,6 +118,11 @@ function initDrawingPage() {
     DrawingState.previewCtx = previewCanvas.getContext('2d', { willReadFrequently: true });
     DrawingState.lineCanvas = lineCanvas;
     DrawingState.lineCtx = lineCanvas.getContext('2d');
+    const dFieldCanvas = document.getElementById('distance-field-canvas');
+    if (dFieldCanvas) {
+        DrawingState.dFieldCanvas = dFieldCanvas;
+        DrawingState.dFieldCtx = dFieldCanvas.getContext('2d');
+    }
     DrawingState.renderer = new CPPN.CPPNRenderer();
 
     setupDrawingPageEvents();
@@ -118,6 +136,7 @@ function initDrawingPage() {
     setDrawingActionsEnabled(false);
     const restoredFromSession = restoreDrawingStateFromSession();
     initGalleryPanel({ skipAutoSelect: restoredFromSession });
+    requestAnimationFrame(tickPixelInspectorT);
 }
 
 // The preview surface is a square of absolutely-positioned canvases; CSS
@@ -210,6 +229,20 @@ function setupDistanceDrawingEvents() {
         });
     }
 
+    const dFieldToggle = document.getElementById('drawing-show-d-field');
+    if (dFieldToggle) {
+        dFieldToggle.checked = DrawingState.showDField;
+        dFieldToggle.addEventListener('change', () => {
+            DrawingState.showDField = dFieldToggle.checked;
+            renderDistanceFieldOverlay();
+            saveDrawingStateToSession();
+        });
+    }
+
+    bindExtentInput('drawing-x-extent', 'xExtent');
+    bindExtentInput('drawing-y-extent', 'yExtent');
+    bindExtentInput('drawing-t-extent', 'tExtent');
+
     if (brushSlider) {
         brushSlider.addEventListener('input', (event) => {
             const nextWidth = Number.parseFloat(event.target.value);
@@ -225,6 +258,31 @@ function setupDistanceDrawingEvents() {
     lineCanvas.addEventListener('pointerup', handleDistancePointerUp);
     lineCanvas.addEventListener('pointercancel', handleDistancePointerUp);
     lineCanvas.addEventListener('lostpointercapture', handleDistancePointerUp);
+    lineCanvas.addEventListener('pointermove', handlePixelInspectorMove);
+    lineCanvas.addEventListener('pointerleave', hidePixelInspector);
+}
+
+function bindExtentInput(inputId, stateKey) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    input.value = String(DrawingState[stateKey]);
+    input.addEventListener('input', () => {
+        const raw = Number.parseFloat(input.value);
+        if (!Number.isFinite(raw)) return;
+        DrawingState[stateKey] = raw;
+        // Extent changes rescale the CPPN inputs, so the field-in-CPPN-units
+        // and the render both need refreshing. The stroke pixel mask itself
+        // is invariant to extent (strokes live in canvas-fractional space).
+        renderCPPNPreview();
+        saveDrawingStateToSession();
+    });
+}
+
+function restoreExtentField(stateKey, value, inputId) {
+    if (!Number.isFinite(value)) return;
+    DrawingState[stateKey] = value;
+    const input = document.getElementById(inputId);
+    if (input) input.value = String(value);
 }
 
 function getDistanceCanvasPoint(event) {
@@ -493,29 +551,113 @@ function findNearestFreePixel(mask, width, height, sx, sy) {
 }
 
 // Direct-center warp: the drawn stroke IS the center. d at every pixel is the
-// geodesic distance from the nearest stroke pixel, with strokes not treated as
-// walls (wallsBlock=false), so the flood crosses stroke pixels freely.
+// true Euclidean coord-space distance to the nearest stroke pixel. Matches the
+// CPPN's native d = sqrt(x*x + y*y) exactly when the stroke is a single pixel
+// at the canvas midpoint — no octagonal / grid-metric artifacts a Dijkstra
+// flood would introduce. Uses an exact 2D EDT (Felzenszwalb-Huttenlocher
+// lower-envelope) with per-axis scaling hx=1/width, hy=1/height so distances
+// come out in the CPPN's [-0.5, 0.5]^2 coord units.
 function computeDirectCenterValues(mask, width, height) {
     const pixelCount = width * height;
-    const distances = new Float64Array(pixelCount).fill(Infinity);
+    const values = new Float32Array(pixelCount);
+
     let seedCount = 0;
     for (let index = 0; index < pixelCount; index++) {
-        if (mask[index]) {
-            distances[index] = 0;
-            seedCount++;
+        if (mask[index]) seedCount++;
+    }
+    if (seedCount === 0) return values;
+
+    return computeExactEuclideanDistanceField(mask, width, height, 1 / width, 1 / height);
+}
+
+// Exact 2D Euclidean distance transform. For each pixel, returns the
+// Euclidean distance (in coord units) to the nearest pixel where mask != 0.
+// Two 1D sweeps: column pass gives squared coord y-distance per column;
+// row pass composes it into full squared 2D distance via lower envelope of
+// parabolas with axis-weight a = hx^2.
+function computeExactEuclideanDistanceField(mask, width, height, hx, hy) {
+    const pixelCount = width * height;
+    const INF = Number.POSITIVE_INFINITY;
+    const hy2 = hy * hy;
+    const hx2 = hx * hx;
+
+    const g = new Float64Array(pixelCount);
+    const colIn = new Float64Array(height);
+    const colOut = new Float64Array(height);
+    for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+            colIn[y] = mask[y * width + x] ? 0 : INF;
+        }
+        edt1dWeighted(colIn, colOut, height, hy2);
+        for (let y = 0; y < height; y++) {
+            g[y * width + x] = colOut[y];
         }
     }
 
+    const rowIn = new Float64Array(width);
+    const rowOut = new Float64Array(width);
     const values = new Float32Array(pixelCount);
-    if (seedCount === 0) return values;
-
-    runGridDijkstra(distances, mask, width, height, false);
-    for (let index = 0; index < pixelCount; index++) {
-        values[index] = Number.isFinite(distances[index])
-            ? distances[index] / width
-            : 0;
+    for (let y = 0; y < height; y++) {
+        const rowBase = y * width;
+        for (let x = 0; x < width; x++) {
+            rowIn[x] = g[rowBase + x];
+        }
+        edt1dWeighted(rowIn, rowOut, width, hx2);
+        for (let x = 0; x < width; x++) {
+            const dSq = rowOut[x];
+            values[rowBase + x] = Number.isFinite(dSq) ? Math.sqrt(dSq) : 0;
+        }
     }
     return values;
+}
+
+// 1D lower-envelope EDT (Felzenszwalb-Huttenlocher, 2004), generalized to
+// weighted squared-distance parabolas f_p(q) = a*(q - p)^2 + fSrc[p].
+// Positions with fSrc[p] = +Infinity are skipped (no parabola contributed).
+// Writes out[q] = min_p f_p(q), or +Infinity if no finite source exists.
+function edt1dWeighted(fSrc, out, n, a) {
+    const v = new Int32Array(n);
+    const z = new Float64Array(n + 1);
+    let k = -1;
+    z[0] = Number.NEGATIVE_INFINITY;
+
+    for (let q = 0; q < n; q++) {
+        const fq = fSrc[q];
+        if (!Number.isFinite(fq)) continue;
+
+        let pushed = false;
+        while (k >= 0) {
+            const p = v[k];
+            const s = ((fq + a * q * q) - (fSrc[p] + a * p * p)) / (2 * a * (q - p));
+            if (s > z[k]) {
+                k++;
+                v[k] = q;
+                z[k] = s;
+                z[k + 1] = Number.POSITIVE_INFINITY;
+                pushed = true;
+                break;
+            }
+            k--;
+        }
+        if (!pushed) {
+            k = 0;
+            v[0] = q;
+            z[0] = Number.NEGATIVE_INFINITY;
+            z[1] = Number.POSITIVE_INFINITY;
+        }
+    }
+
+    if (k < 0) {
+        for (let q = 0; q < n; q++) out[q] = Number.POSITIVE_INFINITY;
+        return;
+    }
+
+    let ptr = 0;
+    for (let q = 0; q < n; q++) {
+        while (z[ptr + 1] < q) ptr++;
+        const dq = q - v[ptr];
+        out[q] = a * dq * dq + fSrc[v[ptr]];
+    }
 }
 
 function computeWallClearanceField(mask, width, height) {
@@ -770,7 +912,11 @@ function saveDrawingStateToSession() {
             genome: DrawingState.genome.serialize(),
             strokes: DrawingState.lineStrokes,
             brushWidth: DrawingState.brushWidth,
-            warpMode: DrawingState.warpMode
+            warpMode: DrawingState.warpMode,
+            showDField: DrawingState.showDField,
+            xExtent: DrawingState.xExtent,
+            yExtent: DrawingState.yExtent,
+            tExtent: DrawingState.tExtent
         };
         sessionStorage.setItem(DRAWING_STATE_STORAGE_KEY, JSON.stringify(payload));
     } catch (error) {
@@ -809,6 +955,14 @@ function restoreDrawingStateFromSession() {
             const toolSelect = document.getElementById('drawing-tool-select');
             if (toolSelect) toolSelect.value = DrawingState.warpMode;
         }
+        if (typeof parsed.showDField === 'boolean') {
+            DrawingState.showDField = parsed.showDField;
+            const dFieldToggle = document.getElementById('drawing-show-d-field');
+            if (dFieldToggle) dFieldToggle.checked = DrawingState.showDField;
+        }
+        restoreExtentField('xExtent', parsed.xExtent, 'drawing-x-extent');
+        restoreExtentField('yExtent', parsed.yExtent, 'drawing-y-extent');
+        restoreExtentField('tExtent', parsed.tExtent, 'drawing-t-extent');
         markDistanceFieldDirty();
         applyLoadedGenome(genome, parsed.label || `Genome ${genome.id}`, { persist: false });
         redrawDistanceLines();
@@ -1015,11 +1169,227 @@ function renderCPPNPreview(onComplete = null) {
     // 'none': don't bake line pixels into the pattern — the difference-blend
     // overlay canvas shows them as the live-inverted color instead. Baking
     // them here too would double-invert wherever the overlay sits on top.
+    DrawingState.animationStartTime = performance.now();
     DrawingState.renderer.renderProgressive(DrawingState.genome, DrawingState.previewCanvas, onComplete, {
         resolution: DRAWING_DISTANCE_PREVIEW_RESOLUTION,
         distanceField,
-        distanceLineRendering: 'none'
+        distanceLineRendering: 'none',
+        xExtent: DrawingState.xExtent,
+        yExtent: DrawingState.yExtent,
+        tExtent: DrawingState.tExtent
     });
+    renderDistanceFieldOverlay(distanceField);
+}
+
+function renderDistanceFieldOverlay(precomputedField) {
+    const canvas = DrawingState.dFieldCanvas;
+    const ctx = DrawingState.dFieldCtx;
+    if (!canvas || !ctx) return;
+
+    if (!DrawingState.showDField) {
+        canvas.hidden = true;
+        return;
+    }
+
+    const size = DRAWING_DISTANCE_PREVIEW_RESOLUTION;
+    const field = precomputedField !== undefined
+        ? precomputedField
+        : getDistanceFieldForResolution(size);
+
+    // Show the overlay even without strokes so the user still sees the
+    // Euclidean d the CPPN would consume.
+    const gridW = field ? field.width : size;
+    const gridH = field ? field.height : size;
+    if (canvas.width !== gridW || canvas.height !== gridH) {
+        canvas.width = gridW;
+        canvas.height = gridH;
+    }
+    canvas.hidden = false;
+
+    const xExtent = DrawingState.xExtent;
+    const yExtent = DrawingState.yExtent;
+    // buildDistanceFieldFromLines divides by grid width, so values are in
+    // "fraction of grid" units. Scale by 2*xExtent to get CPPN-coord distances
+    // that can be compared against the Euclidean fallback.
+    const valueScale = 2 * xExtent;
+    const maxNorm = Math.max(1e-6, Math.hypot(xExtent, yExtent));
+
+    const image = ctx.createImageData(gridW, gridH);
+    const data = image.data;
+    const ridgeMode = DrawingState.warpMode !== 'shortest';
+    const values = field ? field.values : null;
+    const mask = field ? field.mask : null;
+
+    const ridgeCutoff = 0.02 * maxNorm;
+    const detourCutoff = 0.02 * maxNorm;
+
+    for (let py = 0; py < gridH; py++) {
+        const yCoord = ((py + 0.5) / gridH - 0.5) * 2 * yExtent;
+        for (let px = 0; px < gridW; px++) {
+            const xCoord = ((px + 0.5) / gridW - 0.5) * 2 * xExtent;
+            const euclid = Math.hypot(xCoord, yCoord);
+            const idx = py * gridW + px;
+            const d = values ? values[idx] * valueScale : euclid;
+            const outIdx = idx * 4;
+
+            if (mask && mask[idx]) {
+                data[outIdx] = 0;
+                data[outIdx + 1] = 0;
+                data[outIdx + 2] = 0;
+                data[outIdx + 3] = 0;
+                continue;
+            }
+
+            const [rBase, gBase, bBase] = distanceFieldColor(d / maxNorm);
+            let r = rBase, g = gBase, b = bBase;
+
+            if (ridgeMode && Number.isFinite(d) && d <= ridgeCutoff) {
+                r = 255; g = 50; b = 60;
+            } else if (!ridgeMode && Number.isFinite(d) && d > euclid + detourCutoff) {
+                const strength = Math.min(1, (d - euclid) / (0.5 * maxNorm));
+                r = Math.round(r * (1 - strength) + 255 * strength);
+                g = Math.round(g * (1 - strength) + 60 * strength);
+                b = Math.round(b * (1 - strength) + 200 * strength);
+            }
+
+            data[outIdx] = r;
+            data[outIdx + 1] = g;
+            data[outIdx + 2] = b;
+            data[outIdx + 3] = 255;
+        }
+    }
+
+    if (!ridgeMode) {
+        const cx = Math.floor(gridW / 2);
+        const cy = Math.floor(gridH / 2);
+        const radius = Math.max(1, Math.round(gridW / 90));
+        for (let dy = -radius; dy <= radius; dy++) {
+            for (let dx = -radius; dx <= radius; dx++) {
+                if (dx * dx + dy * dy > radius * radius) continue;
+                const nx = cx + dx;
+                const ny = cy + dy;
+                if (nx < 0 || ny < 0 || nx >= gridW || ny >= gridH) continue;
+                const outIdx = (ny * gridW + nx) * 4;
+                data[outIdx] = 255;
+                data[outIdx + 1] = 50;
+                data[outIdx + 2] = 60;
+                data[outIdx + 3] = 255;
+            }
+        }
+    }
+
+    ctx.putImageData(image, 0, 0);
+}
+
+// Smooth colormap for normalized d. 0..1 sweeps deep blue -> teal -> yellow;
+// >1 pushes into orange/red so detour distances stand out.
+function distanceFieldColor(normalized) {
+    if (!Number.isFinite(normalized)) return [30, 30, 36];
+    if (normalized <= 1) {
+        const stops = [
+            [0.00, 30, 20, 90],
+            [0.30, 40, 100, 175],
+            [0.60, 60, 175, 165],
+            [0.85, 180, 210, 100],
+            [1.00, 250, 235, 90]
+        ];
+        return interpolateColormap(stops, normalized, [250, 235, 90]);
+    }
+    const excess = Math.min(1, normalized - 1);
+    const stops = [
+        [0.0, 250, 200, 90],
+        [0.5, 240, 120, 90],
+        [1.0, 200, 60, 90]
+    ];
+    return interpolateColormap(stops, excess, [200, 60, 90]);
+}
+
+function interpolateColormap(stops, position, fallback) {
+    for (let i = 1; i < stops.length; i++) {
+        if (position <= stops[i][0]) {
+            const [a0, ar, ag, ab] = stops[i - 1];
+            const [b0, br, bg, bb] = stops[i];
+            const t = (position - a0) / (b0 - a0);
+            return [ar + (br - ar) * t, ag + (bg - ag) * t, ab + (bb - ab) * t];
+        }
+    }
+    return fallback;
+}
+
+// Populate the (x, y, d) readout for the pixel under the cursor. x/y are in
+// CPPN coord space (matching the network's inputs); d is read from the same
+// distance field the renderer consumes, or the Euclidean fallback the CPPN
+// uses when no strokes exist.
+function handlePixelInspectorMove(event) {
+    const canvas = DrawingState.lineCanvas;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const imgX = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+    const imgY = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+    const xExtent = DrawingState.xExtent;
+    const yExtent = DrawingState.yExtent;
+    const xCoord = (imgX - 0.5) * 2 * xExtent;
+    const yCoord = (imgY - 0.5) * 2 * yExtent;
+
+    const field = getDistanceFieldForResolution(DRAWING_DISTANCE_PREVIEW_RESOLUTION);
+    let dValue;
+    if (field && field.values) {
+        const px = Math.max(0, Math.min(field.width - 1, Math.floor(imgX * field.width)));
+        const py = Math.max(0, Math.min(field.height - 1, Math.floor(imgY * field.height)));
+        const raw = field.values[py * field.width + px];
+        // field.values are normalized by grid width; rescale into CPPN coord
+        // units so the readout matches what the network sees.
+        dValue = Number.isFinite(raw) ? raw * 2 * xExtent : 0;
+    } else {
+        dValue = Math.hypot(xCoord, yCoord);
+    }
+
+    writePixelInspector(xCoord, yCoord, dValue);
+}
+
+function writePixelInspector(x, y, d) {
+    const xEl = document.getElementById('pi-x');
+    const yEl = document.getElementById('pi-y');
+    const dEl = document.getElementById('pi-d');
+    if (xEl) xEl.textContent = x === null ? '—' : formatInspectorNumber(x);
+    if (yEl) yEl.textContent = y === null ? '—' : formatInspectorNumber(y);
+    if (dEl) dEl.textContent = d === null ? '—' : formatInspectorNumber(d);
+}
+
+function hidePixelInspector() {
+    writePixelInspector(null, null, null);
+}
+
+function formatInspectorNumber(value) {
+    if (!Number.isFinite(value)) return '—';
+    const sign = value < 0 ? '-' : ' ';
+    return sign + Math.abs(value).toFixed(3);
+}
+
+// Mirrors the tInput formula in renderFrameToImageData so the readout matches
+// exactly what the CPPN sees on the frame currently on screen.
+function currentAnimationTInput() {
+    if (!DrawingState.genome || DrawingState.animationStartTime === null) return null;
+    const cfg = window.CPPN && window.CPPN.GIF_CONFIG;
+    const frameCount = cfg && Number.isFinite(cfg.frameCount) ? cfg.frameCount : 45;
+    const frameRate = cfg && Number.isFinite(cfg.frameRate) ? cfg.frameRate : 15;
+    const frameDurationMs = 1000 / Math.max(1, frameRate);
+    const elapsed = performance.now() - DrawingState.animationStartTime;
+    const frameIndex = ((Math.floor(elapsed / frameDurationMs) % frameCount) + frameCount) % frameCount;
+    const frameFraction = frameIndex / Math.max(frameCount - 1, 1);
+    return 0.5 + (frameFraction - 0.5) * 2 * DrawingState.tExtent;
+}
+
+function tickPixelInspectorT() {
+    const tEl = document.getElementById('pi-t');
+    if (tEl) {
+        const t = currentAnimationTInput();
+        tEl.textContent = t === null ? '—' : formatInspectorNumber(t);
+    }
+    requestAnimationFrame(tickPixelInspectorT);
 }
 
 function setDistanceLoadingVisible(isVisible) {
@@ -1089,7 +1459,10 @@ async function downloadPreviewImage(resolution = DRAWING_DOWNLOAD_GIF_RESOLUTION
                     frameDurationMs,
                     outputColorMode: outputModeManager ? outputModeManager.getMode() : 'hsv',
                     distanceField,
-                    distanceLineRendering: 'invert'
+                    distanceLineRendering: 'invert',
+                    xExtent: DrawingState.xExtent,
+                    yExtent: DrawingState.yExtent,
+                    tExtent: DrawingState.tExtent
                 },
                 (progress) => {
                     if (!button) return;
@@ -1104,7 +1477,10 @@ async function downloadPreviewImage(resolution = DRAWING_DOWNLOAD_GIF_RESOLUTION
             blob = DrawingState.renderer.createGifBlob(DrawingState.genome, {
                 resolution: exportResolution,
                 distanceField: getDistanceFieldForResolution(exportResolution),
-                distanceLineRendering: 'invert'
+                distanceLineRendering: 'invert',
+                xExtent: DrawingState.xExtent,
+                yExtent: DrawingState.yExtent,
+                tExtent: DrawingState.tExtent
             });
         }
 
@@ -1220,20 +1596,14 @@ async function downloadDrawingGenomeJson() {
     );
 }
 
+// The old on-screen status line was replaced by the pixel-inspector under the
+// preview. Route the (rare) status texts to the console so errors are still
+// discoverable in devtools without eating layout space.
 function setPreviewStatus(text) {
-    const container = document.getElementById('preview-status');
-    container.innerHTML = '';
-
-    const p = document.createElement('p');
-    p.textContent = text;
-    container.appendChild(p);
+    if (text) console.warn('[drawing]', text);
 }
 
-function refreshPreviewStatus() {
-    const genomeText = DrawingState.loadedGenomeName || 'No genome loaded';
-    const size = DRAWING_DISTANCE_PREVIEW_RESOLUTION;
-    setPreviewStatus(`${genomeText} | Preview: ${size} x ${size} | d follows drawn line regions`);
-}
+function refreshPreviewStatus() {}
 
 function setGalleryStatus(text) {
     const container = document.getElementById('gallery-status');
