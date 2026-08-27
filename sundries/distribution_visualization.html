@@ -563,13 +563,13 @@
             const x = d3.scaleLinear().range([0, width]);
             const y = d3.scaleLinear().range([height, 0]);
 
-            svg.append('g')
-                .attr('class', 'axis')
+            const xAxisG = svg.append('g')
+                .attr('class', 'axis axis-x')
                 .attr('transform', `translate(0,${height})`)
                 .call(d3.axisBottom(x));
 
-            svg.append('g')
-                .attr('class', 'axis')
+            const yAxisG = svg.append('g')
+                .attr('class', 'axis axis-y')
                 .call(d3.axisLeft(y));
 
             const line = d3.line()
@@ -579,7 +579,7 @@
             const path = svg.append('path')
                 .attr('class', 'line');
 
-            return { svg, x, y, line, path };
+            return { svg, x, y, line, path, xAxisG, yAxisG };
         }
 
         function setupBernoulliPlot() {
@@ -602,16 +602,16 @@
                 .domain([0, 1])
                 .range([height, 0]);
 
-            svg.append('g')
-                .attr('class', 'axis')
+            const xAxisG = svg.append('g')
+                .attr('class', 'axis axis-x')
                 .attr('transform', `translate(0,${height})`)
                 .call(d3.axisBottom(x));
 
-            svg.append('g')
-                .attr('class', 'axis')
+            const yAxisG = svg.append('g')
+                .attr('class', 'axis axis-y')
                 .call(d3.axisLeft(y));
 
-            return { svg, x, y };
+            return { svg, x, y, xAxisG, yAxisG };
         }
 
         function setupPoissonPlot() {
@@ -629,16 +629,16 @@
             const x = d3.scaleLinear().range([0, width]);
             const y = d3.scaleLinear().range([height, 0]);
 
-            svg.append('g')
-                .attr('class', 'axis')
+            const xAxisG = svg.append('g')
+                .attr('class', 'axis axis-x')
                 .attr('transform', `translate(0,${height})`)
                 .call(d3.axisBottom(x));
 
-            svg.append('g')
-                .attr('class', 'axis')
+            const yAxisG = svg.append('g')
+                .attr('class', 'axis axis-y')
                 .call(d3.axisLeft(y));
 
-            return { svg, x, y };
+            return { svg, x, y, xAxisG, yAxisG };
         }
 
         // Initialize plots
@@ -657,17 +657,17 @@
             
             gaussianPlot.x.domain([d3.min(data, d => d.x), d3.max(data, d => d.x)]);
             gaussianPlot.y.domain([0, d3.max(data, d => d.y)]);
-            
-            gaussianPlot.svg.selectAll('.axis')
-                .transition()
-                .duration(200)
-                .call(d3.axisBottom(gaussianPlot.x))
-                .call(d3.axisLeft(gaussianPlot.y));
 
+            // Update each axis group with its own generator. The previous
+            // `selectAll('.axis').call(axisBottom).call(axisLeft)` applied
+            // both generators to both groups, which overwrote the y-axis with
+            // x-axis ticks (the visible "y-axis disappears" bug).
+            gaussianPlot.xAxisG.call(d3.axisBottom(gaussianPlot.x));
+            gaussianPlot.yAxisG.call(d3.axisLeft(gaussianPlot.y));
+
+            // No transition so drags update immediately.
             gaussianPlot.path
                 .datum(data)
-                .transition()
-                .duration(200)
                 .attr('d', gaussianPlot.line);
         }
 
@@ -694,11 +694,9 @@
             poissonPlot.x.domain([0, d3.max(data, d => d.x)]);
             poissonPlot.y.domain([0, d3.max(data, d => d.y)]);
 
-            poissonPlot.svg.selectAll('.axis')
-                .transition()
-                .duration(200)
-                .call(d3.axisBottom(poissonPlot.x))
-                .call(d3.axisLeft(poissonPlot.y));
+            // Same fix as gaussianPlot: update each axis group independently.
+            poissonPlot.xAxisG.call(d3.axisBottom(poissonPlot.x));
+            poissonPlot.yAxisG.call(d3.axisLeft(poissonPlot.y));
 
             poissonPlot.svg.selectAll('circle').remove();
             
