@@ -285,8 +285,17 @@ function buildStrokeMask(strokes, width, height) {
     return { width, height, mask };
 }
 
-function buildDistanceFieldFromStrokes(strokes, width, height) {
-    if (!Array.isArray(strokes) || strokes.length === 0) return null;
+function buildDistanceFieldFromStrokes(strokes, width, height, expression = {}) {
+    if (!Array.isArray(strokes) || strokes.length === 0) {
+        if (expression.centerMode !== 'zero' && expression.centerMode !== 'max') return null;
+        const values = new Float32Array(width * height);
+        if (expression.centerMode === 'max') {
+            const xMax = Math.max(Math.abs(expression.xMin ?? -0.5), Math.abs(expression.xMax ?? 0.5));
+            const yMax = Math.max(Math.abs(expression.yMin ?? -0.5), Math.abs(expression.yMax ?? 0.5));
+            values.fill(Math.hypot(xMax, yMax));
+        }
+        return { width, height, values, mask: new Uint8Array(width * height) };
+    }
     const maskCanvas = document.createElement('canvas');
     maskCanvas.width = width;
     maskCanvas.height = height;
@@ -295,9 +304,42 @@ function buildDistanceFieldFromStrokes(strokes, width, height) {
     drawStrokesToContext(strokes, maskCtx, width, height);
     const alphaData = maskCtx.getImageData(0, 0, width, height).data;
     const pixelCount = width * height;
+    const xWidth = Number.isFinite(expression.xMin) && Number.isFinite(expression.xMax)
+        ? Math.abs(expression.xMax - expression.xMin)
+        : 1;
     const mask = new Uint8Array(pixelCount);
     for (let i = 0; i < pixelCount; i++) {
         mask[i] = alphaData[i * 4 + 3] > DRAWING_LINE_ALPHA_THRESHOLD ? 1 : 0;
+    }
+    // The drawing page's default makes the stroke itself the new center. The
+    // legacy ridge behavior remains available for old/specified expressions.
+    if (expression.warpMode === 'direct' || expression.warpMode === 'shortest') {
+        const distances = new Float64Array(pixelCount).fill(Infinity);
+        if (expression.warpMode === 'direct') {
+            for (let index = 0; index < pixelCount; index++) if (mask[index]) distances[index] = 0;
+            runGridDijkstra(distances, new Uint8Array(pixelCount), width, height, false);
+        } else {
+            const cx = Math.floor(width / 2);
+            const cy = Math.floor(height / 2);
+            let seed = cy * width + cx;
+            if (mask[seed]) {
+                seed = -1;
+                for (let radius = 1; radius < Math.max(width, height) && seed < 0; radius++) {
+                    for (let y = Math.max(0, cy - radius); y <= Math.min(height - 1, cy + radius) && seed < 0; y++) {
+                        for (let x = Math.max(0, cx - radius); x <= Math.min(width - 1, cx + radius); x++) {
+                            if (!mask[y * width + x]) { seed = y * width + x; break; }
+                        }
+                    }
+                }
+            }
+            if (seed >= 0) distances[seed] = 0;
+            runGridDijkstra(distances, mask, width, height, true);
+        }
+        const values = new Float32Array(pixelCount);
+        for (let index = 0; index < pixelCount; index++) {
+            values[index] = Number.isFinite(distances[index]) ? (distances[index] / width) * xWidth : 0;
+        }
+        return { width, height, values, mask };
     }
     const clearance = computeWallClearanceField(mask, width, height);
     const centers = extractConnectedCenterRidge(clearance, mask, width, height);
@@ -314,7 +356,7 @@ function buildDistanceFieldFromStrokes(strokes, width, height) {
         runGridDijkstra(centerDistances, mask, width, height, true);
         for (let index = 0; index < pixelCount; index++) {
             values[index] = Number.isFinite(centerDistances[index])
-                ? centerDistances[index] / width
+                ? (centerDistances[index] / width) * xWidth
                 : 0;
         }
     }
@@ -328,12 +370,12 @@ const CACHE_BYTE_BUDGET = 800 * 1024 * 1024;
 const State = {
     resolution: 128,
     k: 4,
-    // Half-widths of the CPPN input ranges. Defaults reproduce the original
-    // [-0.5, 0.5] cube and [0, 1] time range. Extents mutate the CPPN inputs
-    // sampled at each voxel; the visual voxel grid is unchanged.
-    xExtent: 0.5,
-    yExtent: 0.5,
-    tExtent: 0.5,
+    xMin: -0.5,
+    xMax: 0.5,
+    yMin: -0.5,
+    yMax: 0.5,
+    tMin: 0,
+    tMax: 1,
     shape: 'cube', // 'cube' | 'torus'
     // Which source axis (x=0, y=1, t=2) is displayed at each display axis
     // (display X, Y, Z). Default [0, 1, 2] = identity. Any of the 6
@@ -810,19 +852,25 @@ function distanceFieldValueAt(field, ix, iy, N) {
     return field.values[sy * field.width + sx];
 }
 
-function sampleSubgrid(network, N, distanceField) {
+function expressionRanges(expression) {
+    return {
+        xMin: State.xMin, xMax: State.xMax,
+        yMin: State.yMin, yMax: State.yMax,
+        tMin: State.tMin, tMax: State.tMax
+    };
+}
+
+function sampleSubgrid(network, N, distanceField, expression) {
     const stride = Math.max(1, Math.floor(N / 12));
     const points = [];
     const denom = Math.max(1, N - 1);
-    const xScale = 2 * State.xExtent;
-    const yScale = 2 * State.yExtent;
-    const tScale = 2 * State.tExtent;
+    const ranges = expressionRanges(expression);
     for (let iz = 0; iz < N; iz += stride) {
-        const z = 0.5 + (iz / denom - 0.5) * tScale;
+        const z = ranges.tMin + (iz / denom) * (ranges.tMax - ranges.tMin);
         for (let iy = 0; iy < N; iy += stride) {
-            const y = (iy / denom - 0.5) * yScale;
+            const y = ranges.yMin + (iy / denom) * (ranges.yMax - ranges.yMin);
             for (let ix = 0; ix < N; ix += stride) {
-                const x = (ix / denom - 0.5) * xScale;
+                const x = ranges.xMin + (ix / denom) * (ranges.xMax - ranges.xMin);
                 const d = distanceFieldValueAt(distanceField, ix, iy, N);
                 const c = network.activate(x, y, z, d, true);
                 points.push(c.r, c.g, c.b);
@@ -903,22 +951,20 @@ function kMeansPlusPlus(sample, k, iterations = 12) {
 // Full-grid pass: at each voxel, evaluate the network and assign the nearest
 // centroid label. Chunked over z slices so we can yield to the UI and check
 // for cancellation between chunks.
-async function assignLabelsStreaming(network, N, centers, k, onProgress, isCancelled, distanceField) {
+async function assignLabelsStreaming(network, N, centers, k, onProgress, isCancelled, distanceField, expression) {
     const labels = new Uint8Array(N * N * N);
     const counts = new Uint32Array(k);
     const denom = Math.max(1, N - 1);
-    const xScale = 2 * State.xExtent;
-    const yScale = 2 * State.yExtent;
-    const tScale = 2 * State.tExtent;
+    const ranges = expressionRanges(expression);
     const slicesPerChunk = Math.max(1, Math.floor(N / 24));
     for (let iz = 0; iz < N; iz += slicesPerChunk) {
         const endIz = Math.min(N, iz + slicesPerChunk);
         for (let z_i = iz; z_i < endIz; z_i++) {
-            const z = 0.5 + (z_i / denom - 0.5) * tScale;
+            const z = ranges.tMin + (z_i / denom) * (ranges.tMax - ranges.tMin);
             for (let iy = 0; iy < N; iy++) {
-                const y = (iy / denom - 0.5) * yScale;
+                const y = ranges.yMin + (iy / denom) * (ranges.yMax - ranges.yMin);
                 for (let ix = 0; ix < N; ix++) {
-                    const x = (ix / denom - 0.5) * xScale;
+                    const x = ranges.xMin + (ix / denom) * (ranges.xMax - ranges.xMin);
                     const dOverride = distanceFieldValueAt(distanceField, ix, iy, N);
                     const c = network.activate(x, y, z, dOverride, true);
                     let best = 0, bestD = Infinity;
@@ -941,13 +987,11 @@ async function assignLabelsStreaming(network, N, centers, k, onProgress, isCance
     return { labels, counts };
 }
 
-async function computeClusteredVolume(network, N, k, onProgress, isCancelled, strokes) {
+async function computeClusteredVolume(network, N, k, onProgress, isCancelled, strokes, expression) {
     if (typeof onProgress === 'function') onProgress(0, 'sampling');
-    const distanceField = (Array.isArray(strokes) && strokes.length > 0)
-        ? buildDistanceFieldFromStrokes(strokes, N, N)
-        : null;
+    const distanceField = buildDistanceFieldFromStrokes(strokes, N, N, expression);
     if (isCancelled()) return null;
-    const subsample = sampleSubgrid(network, N, distanceField);
+    const subsample = sampleSubgrid(network, N, distanceField, expression);
     if (isCancelled()) return null;
     if (typeof onProgress === 'function') onProgress(0, 'clustering');
     const centers = kMeansPlusPlus(subsample, k);
@@ -956,7 +1000,8 @@ async function computeClusteredVolume(network, N, k, onProgress, isCancelled, st
         network, N, centers, k,
         (frac) => { if (typeof onProgress === 'function') onProgress(frac, 'assigning'); },
         isCancelled,
-        distanceField
+        distanceField,
+        expression
     );
     if (!result) return null;
     return {
@@ -1214,13 +1259,9 @@ function syncToggleAll() {
 // --- Cache ---
 
 function cacheKeyFor(fileName, N, k) {
-    // Extents change what the CPPN sees at each voxel, so cached labels are
-    // extent-specific. Rounded to 3 decimals so tiny slider jitter shares a
-    // cache entry with a "clean" typed value like 0.5.
-    const xe = roundExtentKey(State.xExtent);
-    const ye = roundExtentKey(State.yExtent);
-    const te = roundExtentKey(State.tExtent);
-    return `${fileName}::N=${N}::k=${k}::x=${xe}::y=${ye}::t=${te}`;
+    const ranges = [State.xMin, State.xMax, State.yMin, State.yMax, State.tMin, State.tMax]
+        .map(roundExtentKey).join(',');
+    return `${fileName}::N=${N}::k=${k}::ranges=${ranges}`;
 }
 
 function roundExtentKey(value) {
@@ -1343,7 +1384,8 @@ async function processQueue() {
                     }
                 },
                 isCancelled,
-                entry.strokes || null
+                entry.strokes || null,
+                entry.expression || null
             );
             if (isCancelled()) continue;
             if (!result) continue;
@@ -1394,6 +1436,8 @@ function adoptResult(result, fileName) {
 
 function selectActive(fileName) {
     if (!fileName) return;
+    const entry = State.galleryEntries.get(fileName);
+    if (entry && entry.expression) adoptExpressionRanges(entry.expression);
     State.activeFileName = fileName;
     const cached = cacheGet(cacheKeyFor(fileName, State.resolution, State.k));
     if (cached) {
@@ -1403,9 +1447,6 @@ function selectActive(fileName) {
         setPreviewStatus(`${fileName} | preparing ${State.resolution}³ volume…`);
     }
     invalidateJobsAndRestart();
-    // Mirror the current selection to localStorage so the drawing page picks it
-    // up on its next load (or on a live storage event, if it ever listens).
-    persistActiveToDrawing();
 }
 
 // Write the current active entry (its underlying payload + preserved strokes)
@@ -1616,7 +1657,17 @@ function transferContentHash(payload, strokes) {
     // Cheap hash: JSON of the genome shape + strokes. Genomes are small enough
     // that stringifying is fine and catches any mutation from the drawing page.
     try {
-        return JSON.stringify({ g: payload.genome || null, s: strokes });
+        return JSON.stringify({
+            g: payload.genome || null,
+            s: strokes,
+            expression: {
+                warpMode: payload.warpMode,
+                centerMode: payload.centerMode,
+                xMin: payload.xMin, xMax: payload.xMax,
+                yMin: payload.yMin, yMax: payload.yMax,
+                tMin: payload.tMin, tMax: payload.tMax
+            }
+        });
     } catch (error) {
         return String(Math.random());
     }
@@ -1656,12 +1707,12 @@ function ensureDrawingTransferTile(fileName, label) {
     return tile;
 }
 
-function renderDrawingTransferTile(canvas, genome, strokes) {
+function renderDrawingTransferTile(canvas, genome, strokes, expression) {
     if (!canvas || !State.tileRenderer) return;
     const res = GALLERY_TILE_RESOLUTION;
     const distanceField = strokes && strokes.length
-        ? buildDistanceFieldFromStrokes(strokes, res, res)
-        : null;
+        ? buildDistanceFieldFromStrokes(strokes, res, res, expression)
+        : buildDistanceFieldFromStrokes(null, res, res, expression);
     State.tileRenderer.renderProgressive(genome, canvas, null, {
         resolution: res,
         distanceField,
@@ -1697,7 +1748,7 @@ function applyDrawingTransfer(payload, options = {}) {
     const tile = ensureDrawingTransferTile(fileName, label);
     if (tile) {
         const canvas = tile.querySelector('canvas');
-        if (contentChanged) renderDrawingTransferTile(canvas, loadResult.genome, strokes);
+        if (contentChanged) renderDrawingTransferTile(canvas, loadResult.genome, strokes, payload);
     }
 
     State.galleryEntries.set(fileName, {
@@ -1706,6 +1757,7 @@ function applyDrawingTransfer(payload, options = {}) {
         genome: loadResult.genome,
         tile,
         strokes,
+        expression: payload,
         contentHash,
         label
     });
@@ -1722,6 +1774,7 @@ function applyDrawingTransfer(payload, options = {}) {
         selectActive(fileName);
     } else if (contentChanged && State.activeFileName === fileName) {
         // Content changed on the currently-selected entry — force a recompute.
+        adoptExpressionRanges(payload);
         invalidateJobsAndRestart();
     }
     return true;
@@ -1925,9 +1978,12 @@ function bindControls() {
         State.controls.update();
     });
 
-    bindVolumeExtentInput('volume-x-extent', 'xExtent');
-    bindVolumeExtentInput('volume-y-extent', 'yExtent');
-    bindVolumeExtentInput('volume-t-extent', 'tExtent');
+    bindVolumeRangeInput('volume-x-min', 'xMin');
+    bindVolumeRangeInput('volume-x-max', 'xMax');
+    bindVolumeRangeInput('volume-y-min', 'yMin');
+    bindVolumeRangeInput('volume-y-max', 'yMax');
+    bindVolumeRangeInput('volume-t-min', 'tMin');
+    bindVolumeRangeInput('volume-t-max', 'tMax');
 
     document.getElementById('volume-bg-color').addEventListener('input', (e) => {
         if (State.scene) State.scene.background = new THREE.Color(e.target.value);
@@ -1953,7 +2009,7 @@ function bindControls() {
     document.getElementById('genome-upload-input').addEventListener('change', handleGenomeUpload);
 }
 
-function bindVolumeExtentInput(inputId, stateKey) {
+function bindVolumeRangeInput(inputId, stateKey) {
     const input = document.getElementById(inputId);
     if (!input) return;
     input.value = String(State[stateKey]);
@@ -1961,17 +2017,27 @@ function bindVolumeExtentInput(inputId, stateKey) {
         const raw = Number.parseFloat(input.value);
         if (!Number.isFinite(raw)) return;
         State[stateKey] = raw;
-        // Extents change what the CPPN sees, so the cluster labels must be
+        // Ranges change what the CPPN sees, so the cluster labels must be
         // recomputed. Cached results at the same (name, N, k) but different
         // extents live under different keys — adopt one if it exists, else
         // kick off a fresh compute.
         if (State.activeFileName) {
             const cached = cacheGet(cacheKeyFor(State.activeFileName, State.resolution, State.k));
             if (cached) adoptResult(cached, State.activeFileName);
-            else setPreviewStatus(`${State.activeFileName} | re-sampling volume with new extents…`);
+            else setPreviewStatus(`${State.activeFileName} | re-sampling volume with new ranges…`);
         }
         invalidateJobsAndRestart();
     });
+}
+
+function adoptExpressionRanges(expression) {
+    const fields = ['xMin', 'xMax', 'yMin', 'yMax', 'tMin', 'tMax'];
+    for (const field of fields) {
+        if (!Number.isFinite(expression[field])) continue;
+        State[field] = expression[field];
+        const input = document.getElementById(`volume-${field.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`);
+        if (input) input.value = String(expression[field]);
+    }
 }
 
 // Only surface the "Show perturbation" checkbox when the current entry

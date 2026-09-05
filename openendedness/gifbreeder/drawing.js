@@ -26,12 +26,22 @@ const DrawingState = {
     showDField: false,
     dFieldCanvas: null,
     dFieldCtx: null,
-    // Half-width of the CPPN x/y input ranges (defaults reproduce the fixed
-    // [-0.5, 0.5] cube the renderer used before extents were configurable).
-    xExtent: 0.5,
-    yExtent: 0.5,
-    // Half-width of the CPPN t-input range around t=0.5. 0.5 → t ∈ [0, 1].
-    tExtent: 0.5,
+    // Direct CPPN input ranges. Defaults reproduce the fixed [-0.5, 0.5]
+    // x/y cube and t ∈ [0, 1] used before ranges were configurable.
+    // Widening tMax-tMin also lengthens the GIF proportionally so that
+    // Δt per frame stays constant (see DRAWING_BASELINE_FRAME_COUNT).
+    xMin: -0.5,
+    xMax: 0.5,
+    yMin: -0.5,
+    yMax: 0.5,
+    tMin: 0,
+    tMax: 1,
+    // When there are no drawn strokes, this controls what the CPPN sees for
+    // its d input. 'normal' = Euclidean distance from origin (default);
+    // 'zero' = d clamped to 0 everywhere; 'max' = d clamped to the corner
+    // distance. The clear-lines button cycles through these when the canvas
+    // has no user strokes.
+    centerMode: 'normal',
     // performance.now() at the start of the current animation loop; used by
     // the pixel-inspector ticker to compute the CPPN t input for the frame
     // currently on screen. Null when no genome is loaded.
@@ -53,7 +63,17 @@ const DRAWING_DISTANCE_LINE_ALPHA_THRESHOLD = 8;
 const DRAWING_GALLERY_DIR = 'limbomorphs';
 const DRAWING_GALLERY_MANIFEST_PATH = `${DRAWING_GALLERY_DIR}/manifest.json`;
 const DRAWING_GALLERY_TILE_RESOLUTION = 32;
-const DRAWING_STATE_STORAGE_KEY = 'cppn-drawing-state-v1';
+// v3: switched from scale-factor extents to direct min/max ranges. Older
+// payloads carry incompatible xExtent/yExtent/tExtent fields.
+const DRAWING_STATE_STORAGE_KEY = 'cppn-drawing-state-v3';
+// Shared with 3d.js. Unlike the page-private session snapshot above, this is
+// the authoritative expression to select when the user follows the 3D tab.
+const DRAWING_TRANSFER_STORAGE_KEY = 'gifbreeder-3d-transfer-v1';
+// Frame count baseline (matches CPPN.GIF_CONFIG.frameCount at t ∈ [0, 1]).
+// Actual frame count scales linearly with (tMax - tMin) so Δt/frame stays
+// fixed and the GIF simply runs longer when t widens.
+const DRAWING_BASELINE_FRAME_COUNT = 45;
+const DRAWING_BASELINE_T_WIDTH = 1;
 const LAB_SEED_STORAGE_KEY = 'cppn-activation-seed-v1';
 let DrawingProjectSaveRootHandle = null;
 
@@ -220,11 +240,22 @@ function setupDistanceDrawingEvents() {
 
     if (clearButton) {
         clearButton.addEventListener('click', () => {
-            DrawingState.lineStrokes = [];
-            DrawingState.activeLineStroke = null;
-            markDistanceFieldDirty();
-            redrawDistanceLines();
-            runDistanceFieldUpdate();
+            if (DrawingState.lineStrokes.length > 0) {
+                // Any drawn strokes → button acts as "Clear Lines". Reset the
+                // centerMode too so the next click on the empty canvas starts
+                // from the natural Euclidean d.
+                DrawingState.lineStrokes = [];
+                DrawingState.activeLineStroke = null;
+                DrawingState.centerMode = 'normal';
+                markDistanceFieldDirty();
+                redrawDistanceLines();
+                runDistanceFieldUpdate();
+            } else {
+                // No strokes → cycle centerMode: normal → zero → max → normal.
+                DrawingState.centerMode = nextCenterMode(DrawingState.centerMode);
+                renderCPPNPreview();
+            }
+            updateClearButtonLabel();
             saveDrawingStateToSession();
         });
     }
@@ -239,9 +270,12 @@ function setupDistanceDrawingEvents() {
         });
     }
 
-    bindExtentInput('drawing-x-extent', 'xExtent');
-    bindExtentInput('drawing-y-extent', 'yExtent');
-    bindExtentInput('drawing-t-extent', 'tExtent');
+    bindRangeInput('drawing-x-min', 'xMin');
+    bindRangeInput('drawing-x-max', 'xMax');
+    bindRangeInput('drawing-y-min', 'yMin');
+    bindRangeInput('drawing-y-max', 'yMax');
+    bindRangeInput('drawing-t-min', 'tMin');
+    bindRangeInput('drawing-t-max', 'tMax');
 
     if (brushSlider) {
         brushSlider.addEventListener('input', (event) => {
@@ -260,9 +294,11 @@ function setupDistanceDrawingEvents() {
     lineCanvas.addEventListener('lostpointercapture', handleDistancePointerUp);
     lineCanvas.addEventListener('pointermove', handlePixelInspectorMove);
     lineCanvas.addEventListener('pointerleave', hidePixelInspector);
+
+    updateClearButtonLabel();
 }
 
-function bindExtentInput(inputId, stateKey) {
+function bindRangeInput(inputId, stateKey) {
     const input = document.getElementById(inputId);
     if (!input) return;
     input.value = String(DrawingState[stateKey]);
@@ -270,19 +306,49 @@ function bindExtentInput(inputId, stateKey) {
         const raw = Number.parseFloat(input.value);
         if (!Number.isFinite(raw)) return;
         DrawingState[stateKey] = raw;
-        // Extent changes rescale the CPPN inputs, so the field-in-CPPN-units
-        // and the render both need refreshing. The stroke pixel mask itself
-        // is invariant to extent (strokes live in canvas-fractional space).
+        // Range changes rescale the CPPN inputs (and, for t, may change the
+        // derived frame count), so the field-in-CPPN-units and the render
+        // both need refreshing. The stroke pixel mask itself is invariant to
+        // range (strokes live in canvas-fractional space).
         renderCPPNPreview();
         saveDrawingStateToSession();
     });
 }
 
-function restoreExtentField(stateKey, value, inputId) {
+function restoreRangeField(stateKey, value, inputId) {
     if (!Number.isFinite(value)) return;
     DrawingState[stateKey] = value;
     const input = document.getElementById(inputId);
     if (input) input.value = String(value);
+}
+
+function nextCenterMode(mode) {
+    if (mode === 'normal') return 'zero';
+    if (mode === 'zero') return 'max';
+    return 'normal';
+}
+
+function updateClearButtonLabel() {
+    const btn = document.getElementById('distance-clear-btn');
+    if (!btn) return;
+    if (DrawingState.lineStrokes.length > 0) {
+        btn.textContent = 'Clear Lines';
+        return;
+    }
+    switch (DrawingState.centerMode) {
+        case 'zero': btn.textContent = 'd = max'; break;
+        case 'max': btn.textContent = 'Restore Center'; break;
+        default: btn.textContent = 'Remove Center'; break;
+    }
+}
+
+// Frame count scales with the t-input width so Δt per frame stays constant
+// and widening t makes the GIF run for longer rather than speeding it up.
+function getDerivedFrameCount() {
+    const width = DrawingState.tMax - DrawingState.tMin;
+    if (!Number.isFinite(width) || width <= 0) return 2;
+    const scaled = Math.round(DRAWING_BASELINE_FRAME_COUNT * (width / DRAWING_BASELINE_T_WIDTH));
+    return Math.max(2, scaled);
 }
 
 function getDistanceCanvasPoint(event) {
@@ -315,6 +381,7 @@ function handleDistancePointerDown(event) {
     };
     DrawingState.lineStrokes.push(DrawingState.activeLineStroke);
     redrawDistanceLines();
+    updateClearButtonLabel();
 }
 
 function handleDistancePointerMove(event) {
@@ -903,7 +970,7 @@ function saveDrawingStateToSession() {
 
     try {
         const payload = {
-            format: 'cppn-drawing-state-v1',
+            format: 'cppn-drawing-state-v3',
             savedAt: new Date().toISOString(),
             label: DrawingState.loadedGenomeName,
             innovationState: window.NEAT && typeof window.NEAT.exportInnovationState === 'function'
@@ -914,13 +981,44 @@ function saveDrawingStateToSession() {
             brushWidth: DrawingState.brushWidth,
             warpMode: DrawingState.warpMode,
             showDField: DrawingState.showDField,
-            xExtent: DrawingState.xExtent,
-            yExtent: DrawingState.yExtent,
-            tExtent: DrawingState.tExtent
+            centerMode: DrawingState.centerMode,
+            xMin: DrawingState.xMin,
+            xMax: DrawingState.xMax,
+            yMin: DrawingState.yMin,
+            yMax: DrawingState.yMax,
+            tMin: DrawingState.tMin,
+            tMax: DrawingState.tMax
         };
         sessionStorage.setItem(DRAWING_STATE_STORAGE_KEY, JSON.stringify(payload));
+        publishDrawingStateTo3D(payload);
     } catch (error) {
         // Ignore session persistence issues (private mode/quota, etc.).
+    }
+}
+
+function publishDrawingStateTo3D(sessionPayload) {
+    if (typeof localStorage === 'undefined') return;
+    const payload = sessionPayload || {};
+    try {
+        localStorage.setItem(DRAWING_TRANSFER_STORAGE_KEY, JSON.stringify({
+            format: 'gifbreeder-3d-transfer-v1',
+            savedAt: new Date().toISOString(),
+            label: payload.label || DrawingState.loadedGenomeName,
+            innovationState: payload.innovationState || null,
+            genome: payload.genome || DrawingState.genome.serialize(),
+            lineStrokes: payload.strokes || DrawingState.lineStrokes,
+            brushWidth: DrawingState.brushWidth,
+            warpMode: DrawingState.warpMode,
+            centerMode: DrawingState.centerMode,
+            xMin: DrawingState.xMin,
+            xMax: DrawingState.xMax,
+            yMin: DrawingState.yMin,
+            yMax: DrawingState.yMax,
+            tMin: DrawingState.tMin,
+            tMax: DrawingState.tMax
+        }));
+    } catch (error) {
+        // Storage may be unavailable in private mode; session persistence still works.
     }
 }
 
@@ -960,12 +1058,22 @@ function restoreDrawingStateFromSession() {
             const dFieldToggle = document.getElementById('drawing-show-d-field');
             if (dFieldToggle) dFieldToggle.checked = DrawingState.showDField;
         }
-        restoreExtentField('xExtent', parsed.xExtent, 'drawing-x-extent');
-        restoreExtentField('yExtent', parsed.yExtent, 'drawing-y-extent');
-        restoreExtentField('tExtent', parsed.tExtent, 'drawing-t-extent');
+        if (parsed.centerMode === 'normal' || parsed.centerMode === 'zero' || parsed.centerMode === 'max') {
+            DrawingState.centerMode = parsed.centerMode;
+        }
+        restoreRangeField('xMin', parsed.xMin, 'drawing-x-min');
+        restoreRangeField('xMax', parsed.xMax, 'drawing-x-max');
+        restoreRangeField('yMin', parsed.yMin, 'drawing-y-min');
+        restoreRangeField('yMax', parsed.yMax, 'drawing-y-max');
+        restoreRangeField('tMin', parsed.tMin, 'drawing-t-min');
+        restoreRangeField('tMax', parsed.tMax, 'drawing-t-max');
         markDistanceFieldDirty();
         applyLoadedGenome(genome, parsed.label || `Genome ${genome.id}`, { persist: false });
         redrawDistanceLines();
+        updateClearButtonLabel();
+        // Refresh the cross-page authority too: a prior visit to 3D must not
+        // make a gallery choice outrank this restored drawing expression.
+        saveDrawingStateToSession();
         return true;
     } catch (error) {
         return false;
@@ -1174,9 +1282,14 @@ function renderCPPNPreview(onComplete = null) {
         resolution: DRAWING_DISTANCE_PREVIEW_RESOLUTION,
         distanceField,
         distanceLineRendering: 'none',
-        xExtent: DrawingState.xExtent,
-        yExtent: DrawingState.yExtent,
-        tExtent: DrawingState.tExtent
+        xMin: DrawingState.xMin,
+        xMax: DrawingState.xMax,
+        yMin: DrawingState.yMin,
+        yMax: DrawingState.yMax,
+        tMin: DrawingState.tMin,
+        tMax: DrawingState.tMax,
+        centerMode: DrawingState.centerMode,
+        frameCount: getDerivedFrameCount()
     });
     renderDistanceFieldOverlay(distanceField);
 }
@@ -1206,13 +1319,18 @@ function renderDistanceFieldOverlay(precomputedField) {
     }
     canvas.hidden = false;
 
-    const xExtent = DrawingState.xExtent;
-    const yExtent = DrawingState.yExtent;
+    const xWidth = DrawingState.xMax - DrawingState.xMin;
+    const yWidth = DrawingState.yMax - DrawingState.yMin;
     // buildDistanceFieldFromLines divides by grid width, so values are in
-    // "fraction of grid" units. Scale by 2*xExtent to get CPPN-coord distances
+    // "fraction of grid" units. Scale by xWidth to get CPPN-coord distances
     // that can be compared against the Euclidean fallback.
-    const valueScale = 2 * xExtent;
-    const maxNorm = Math.max(1e-6, Math.hypot(xExtent, yExtent));
+    const valueScale = xWidth;
+    // Furthest corner from (0, 0) inside the CPPN-space rectangle. Used to
+    // normalize the heatmap so 1.0 = the far corner. When the range doesn't
+    // straddle 0, this is just the hypotenuse of the rectangle from origin.
+    const xExtreme = Math.max(Math.abs(DrawingState.xMin), Math.abs(DrawingState.xMax));
+    const yExtreme = Math.max(Math.abs(DrawingState.yMin), Math.abs(DrawingState.yMax));
+    const maxNorm = Math.max(1e-6, Math.hypot(xExtreme, yExtreme));
 
     const image = ctx.createImageData(gridW, gridH);
     const data = image.data;
@@ -1223,13 +1341,24 @@ function renderDistanceFieldOverlay(precomputedField) {
     const ridgeCutoff = 0.02 * maxNorm;
     const detourCutoff = 0.02 * maxNorm;
 
+    // When there's no field but centerMode is pinning d to a constant, mirror
+    // that in the overlay so the heatmap matches what the CPPN actually sees.
+    let centerModeConstant = null;
+    if (!values) {
+        if (DrawingState.centerMode === 'zero') centerModeConstant = 0;
+        else if (DrawingState.centerMode === 'max') centerModeConstant = maxNorm;
+    }
+
     for (let py = 0; py < gridH; py++) {
-        const yCoord = ((py + 0.5) / gridH - 0.5) * 2 * yExtent;
+        const yCoord = DrawingState.yMin + ((py + 0.5) / gridH) * yWidth;
         for (let px = 0; px < gridW; px++) {
-            const xCoord = ((px + 0.5) / gridW - 0.5) * 2 * xExtent;
+            const xCoord = DrawingState.xMin + ((px + 0.5) / gridW) * xWidth;
             const euclid = Math.hypot(xCoord, yCoord);
             const idx = py * gridW + px;
-            const d = values ? values[idx] * valueScale : euclid;
+            let d;
+            if (values) d = values[idx] * valueScale;
+            else if (centerModeConstant !== null) d = centerModeConstant;
+            else d = euclid;
             const outIdx = idx * 4;
 
             if (mask && mask[idx]) {
@@ -1243,13 +1372,17 @@ function renderDistanceFieldOverlay(precomputedField) {
             const [rBase, gBase, bBase] = distanceFieldColor(d / maxNorm);
             let r = rBase, g = gBase, b = bBase;
 
-            if (ridgeMode && Number.isFinite(d) && d <= ridgeCutoff) {
-                r = 255; g = 50; b = 60;
-            } else if (!ridgeMode && Number.isFinite(d) && d > euclid + detourCutoff) {
-                const strength = Math.min(1, (d - euclid) / (0.5 * maxNorm));
-                r = Math.round(r * (1 - strength) + 255 * strength);
-                g = Math.round(g * (1 - strength) + 60 * strength);
-                b = Math.round(b * (1 - strength) + 200 * strength);
+            // Ridge/detour highlights only make sense when d has structure to
+            // highlight. Under a constant centerMode override, skip them.
+            if (centerModeConstant === null) {
+                if (ridgeMode && Number.isFinite(d) && d <= ridgeCutoff) {
+                    r = 255; g = 50; b = 60;
+                } else if (!ridgeMode && Number.isFinite(d) && d > euclid + detourCutoff) {
+                    const strength = Math.min(1, (d - euclid) / (0.5 * maxNorm));
+                    r = Math.round(r * (1 - strength) + 255 * strength);
+                    g = Math.round(g * (1 - strength) + 60 * strength);
+                    b = Math.round(b * (1 - strength) + 200 * strength);
+                }
             }
 
             data[outIdx] = r;
@@ -1329,10 +1462,10 @@ function handlePixelInspectorMove(event) {
 
     const imgX = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
     const imgY = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
-    const xExtent = DrawingState.xExtent;
-    const yExtent = DrawingState.yExtent;
-    const xCoord = (imgX - 0.5) * 2 * xExtent;
-    const yCoord = (imgY - 0.5) * 2 * yExtent;
+    const xWidth = DrawingState.xMax - DrawingState.xMin;
+    const yWidth = DrawingState.yMax - DrawingState.yMin;
+    const xCoord = DrawingState.xMin + imgX * xWidth;
+    const yCoord = DrawingState.yMin + imgY * yWidth;
 
     const field = getDistanceFieldForResolution(DRAWING_DISTANCE_PREVIEW_RESOLUTION);
     let dValue;
@@ -1342,7 +1475,14 @@ function handlePixelInspectorMove(event) {
         const raw = field.values[py * field.width + px];
         // field.values are normalized by grid width; rescale into CPPN coord
         // units so the readout matches what the network sees.
-        dValue = Number.isFinite(raw) ? raw * 2 * xExtent : 0;
+        dValue = Number.isFinite(raw) ? raw * xWidth : 0;
+    } else if (DrawingState.centerMode === 'zero') {
+        dValue = 0;
+    } else if (DrawingState.centerMode === 'max') {
+        dValue = Math.hypot(
+            Math.max(Math.abs(DrawingState.xMin), Math.abs(DrawingState.xMax)),
+            Math.max(Math.abs(DrawingState.yMin), Math.abs(DrawingState.yMax))
+        );
     } else {
         dValue = Math.hypot(xCoord, yCoord);
     }
@@ -1374,13 +1514,13 @@ function formatInspectorNumber(value) {
 function currentAnimationTInput() {
     if (!DrawingState.genome || DrawingState.animationStartTime === null) return null;
     const cfg = window.CPPN && window.CPPN.GIF_CONFIG;
-    const frameCount = cfg && Number.isFinite(cfg.frameCount) ? cfg.frameCount : 45;
     const frameRate = cfg && Number.isFinite(cfg.frameRate) ? cfg.frameRate : 15;
     const frameDurationMs = 1000 / Math.max(1, frameRate);
+    const frameCount = getDerivedFrameCount();
     const elapsed = performance.now() - DrawingState.animationStartTime;
     const frameIndex = ((Math.floor(elapsed / frameDurationMs) % frameCount) + frameCount) % frameCount;
     const frameFraction = frameIndex / Math.max(frameCount - 1, 1);
-    return 0.5 + (frameFraction - 0.5) * 2 * DrawingState.tExtent;
+    return DrawingState.tMin + frameFraction * (DrawingState.tMax - DrawingState.tMin);
 }
 
 function tickPixelInspectorT() {
@@ -1443,9 +1583,9 @@ async function downloadPreviewImage(resolution = DRAWING_DOWNLOAD_GIF_RESOLUTION
         const frameRate = window.CPPN && window.CPPN.GIF_CONFIG && Number.isFinite(window.CPPN.GIF_CONFIG.frameRate)
             ? window.CPPN.GIF_CONFIG.frameRate
             : 15;
-        const frameCount = window.CPPN && window.CPPN.GIF_CONFIG && Number.isFinite(window.CPPN.GIF_CONFIG.frameCount)
-            ? window.CPPN.GIF_CONFIG.frameCount
-            : 45;
+        // Frame count scales with t width so widening T lengthens the GIF
+        // rather than speeding it up.
+        const frameCount = getDerivedFrameCount();
         const frameDurationMs = 1000 / Math.max(1, frameRate);
 
         let blob;
@@ -1460,9 +1600,13 @@ async function downloadPreviewImage(resolution = DRAWING_DOWNLOAD_GIF_RESOLUTION
                     outputColorMode: outputModeManager ? outputModeManager.getMode() : 'hsv',
                     distanceField,
                     distanceLineRendering: 'invert',
-                    xExtent: DrawingState.xExtent,
-                    yExtent: DrawingState.yExtent,
-                    tExtent: DrawingState.tExtent
+                    xMin: DrawingState.xMin,
+                    xMax: DrawingState.xMax,
+                    yMin: DrawingState.yMin,
+                    yMax: DrawingState.yMax,
+                    tMin: DrawingState.tMin,
+                    tMax: DrawingState.tMax,
+                    centerMode: DrawingState.centerMode
                 },
                 (progress) => {
                     if (!button) return;
@@ -1476,11 +1620,17 @@ async function downloadPreviewImage(resolution = DRAWING_DOWNLOAD_GIF_RESOLUTION
         } catch (workerError) {
             blob = DrawingState.renderer.createGifBlob(DrawingState.genome, {
                 resolution: exportResolution,
+                frameCount,
+                frameDurationMs,
                 distanceField: getDistanceFieldForResolution(exportResolution),
                 distanceLineRendering: 'invert',
-                xExtent: DrawingState.xExtent,
-                yExtent: DrawingState.yExtent,
-                tExtent: DrawingState.tExtent
+                xMin: DrawingState.xMin,
+                xMax: DrawingState.xMax,
+                yMin: DrawingState.yMin,
+                yMax: DrawingState.yMax,
+                tMin: DrawingState.tMin,
+                tMax: DrawingState.tMax,
+                centerMode: DrawingState.centerMode
             });
         }
 

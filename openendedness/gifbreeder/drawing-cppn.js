@@ -531,18 +531,35 @@ class CPPNRenderer {
     renderFrameToImageData(network, ctx, width, height, timestep, options = {}) {
         const imageData = ctx.createImageData(width, height);
         const data = imageData.data;
-        // Defaults reproduce the legacy fixed [-0.5, 0.5] cube when the caller
-        // doesn't specify extents.
-        const xExtent = Number.isFinite(options.xExtent) ? options.xExtent : 0.5;
-        const yExtent = Number.isFinite(options.yExtent) ? options.yExtent : 0.5;
-        const tExtent = Number.isFinite(options.tExtent) ? options.tExtent : 0.5;
-        const scaleX = 2 * xExtent;
-        const scaleY = 2 * yExtent;
-        // Frame -> normalized t centered at 0.5 with half-width tExtent. When
-        // tExtent = 0.5 this reproduces t = frame/(N-1) ∈ [0, 1]. Larger
-        // tExtent extends both ends symmetrically outside [0, 1].
-        const frameFraction = timestep / Math.max(GIF_FRAME_COUNT - 1, 1);
-        const tInput = 0.5 + (frameFraction - 0.5) * 2 * tExtent;
+        // Direct CPPN input ranges. Defaults reproduce the legacy fixed
+        // [-0.5, 0.5] x/y cube and t ∈ [0, 1] when the caller omits ranges.
+        const xMin = Number.isFinite(options.xMin) ? options.xMin : -0.5;
+        const xMax = Number.isFinite(options.xMax) ? options.xMax : 0.5;
+        const yMin = Number.isFinite(options.yMin) ? options.yMin : -0.5;
+        const yMax = Number.isFinite(options.yMax) ? options.yMax : 0.5;
+        const tMin = Number.isFinite(options.tMin) ? options.tMin : 0;
+        const tMax = Number.isFinite(options.tMax) ? options.tMax : 1;
+        const xWidth = xMax - xMin;
+        const yWidth = yMax - yMin;
+        // Applies only when there's no stroke-derived distance field. 'zero'
+        // pins d to 0, 'max' pins d to the far-corner Euclidean distance so
+        // the pattern behaves as if every pixel were maximally far from the
+        // origin. Anything else leaves d as the natural Euclidean fallback.
+        const centerMode = options.centerMode === 'zero' || options.centerMode === 'max'
+            ? options.centerMode
+            : 'normal';
+        const centerMaxD = Math.hypot(
+            Math.max(Math.abs(xMin), Math.abs(xMax)),
+            Math.max(Math.abs(yMin), Math.abs(yMax))
+        );
+        // Total frames the caller intends to render at (used to spread t
+        // evenly across [tMin, tMax]). Defaults to the baseline count so
+        // legacy single-shot render() calls without a frameCount still work.
+        const frameCount = Number.isInteger(options.frameCount) && options.frameCount > 0
+            ? options.frameCount
+            : GIF_FRAME_COUNT;
+        const frameFraction = timestep / Math.max(frameCount - 1, 1);
+        const tInput = tMin + frameFraction * (tMax - tMin);
         const distanceField = options.distanceField || null;
         // 'black': paint line pixels black. 'invert': paint them as the
         // opposite of the pattern color (matches the preview's difference
@@ -552,10 +569,20 @@ class CPPNRenderer {
 
         for (let py = 0; py < height; py++) {
             for (let px = 0; px < width; px++) {
-                const x = (px / width - 0.5) * scaleX;
-                const y = (py / height - 0.5) * scaleY;
+                const x = xMin + (px / width) * xWidth;
+                const y = yMin + (py / height) * yWidth;
                 const fieldPixel = this.getDistanceFieldPixel(distanceField, px, py, width, height);
-                const rgb = network.activate(x, y, tInput, fieldPixel ? fieldPixel.d : null);
+                let d;
+                if (fieldPixel) {
+                    d = fieldPixel.d;
+                } else if (centerMode === 'zero') {
+                    d = 0;
+                } else if (centerMode === 'max') {
+                    d = centerMaxD;
+                } else {
+                    d = null;
+                }
+                const rgb = network.activate(x, y, tInput, d);
 
                 const idx = (py * width + px) * 4;
                 const r = Math.round(clampChannel01(rgb.r) * 255);
@@ -592,9 +619,14 @@ class CPPNRenderer {
                 {
                     distanceField: state.distanceField,
                     distanceLineRendering: state.distanceLineRendering,
-                    xExtent: state.xExtent,
-                    yExtent: state.yExtent,
-                    tExtent: state.tExtent
+                    xMin: state.xMin,
+                    xMax: state.xMax,
+                    yMin: state.yMin,
+                    yMax: state.yMax,
+                    tMin: state.tMin,
+                    tMax: state.tMax,
+                    centerMode: state.centerMode,
+                    frameCount: state.frameCount
                 }
             );
         }
@@ -629,6 +661,10 @@ class CPPNRenderer {
         const height = width;
         this.ensureCanvasSize(canvas, width, height);
 
+        const frameCount = Number.isInteger(options.frameCount) && options.frameCount > 0
+            ? options.frameCount
+            : GIF_FRAME_COUNT;
+
         const state = {
             token: Symbol('gif-loop'),
             ctx,
@@ -637,10 +673,15 @@ class CPPNRenderer {
             height,
             distanceField: options.distanceField || null,
             distanceLineRendering: options.distanceLineRendering || 'black',
-            xExtent: options.xExtent,
-            yExtent: options.yExtent,
-            tExtent: options.tExtent,
-            cachedFrames: new Array(GIF_FRAME_COUNT),
+            xMin: options.xMin,
+            xMax: options.xMax,
+            yMin: options.yMin,
+            yMax: options.yMax,
+            tMin: options.tMin,
+            tMax: options.tMax,
+            centerMode: options.centerMode,
+            frameCount,
+            cachedFrames: new Array(frameCount),
             lastFrameIndex: -1,
             startTime: performance.now(),
             rafId: null
@@ -656,7 +697,7 @@ class CPPNRenderer {
             if (!currentState || currentState.token !== state.token) return;
 
             const elapsed = timestamp - currentState.startTime;
-            const frameIndex = Math.floor(elapsed / GIF_FRAME_DURATION_MS) % GIF_FRAME_COUNT;
+            const frameIndex = Math.floor(elapsed / GIF_FRAME_DURATION_MS) % currentState.frameCount;
             if (frameIndex !== currentState.lastFrameIndex) {
                 this.drawFrame(currentState, frameIndex);
                 currentState.lastFrameIndex = frameIndex;
@@ -694,9 +735,14 @@ class CPPNRenderer {
             const imageData = this.renderFrameToImageData(network, ctx, width, height, frameIndex, {
                 distanceField: options.distanceField || null,
                 distanceLineRendering: options.distanceLineRendering || 'black',
-                xExtent: options.xExtent,
-                yExtent: options.yExtent,
-                tExtent: options.tExtent
+                xMin: options.xMin,
+                xMax: options.xMax,
+                yMin: options.yMin,
+                yMax: options.yMax,
+                tMin: options.tMin,
+                tMax: options.tMax,
+                centerMode: options.centerMode,
+                frameCount
             });
             indexedFrames.push(imageDataToGif332Indices(imageData));
         }

@@ -687,6 +687,9 @@ class NetworkVisualizer {
         this.onConnectionWeightChanged = typeof options.onConnectionWeightChanged === 'function'
             ? options.onConnectionWeightChanged
             : null;
+        this.onConnectionEnabledChanged = typeof options.onConnectionEnabledChanged === 'function'
+            ? options.onConnectionEnabledChanged
+            : null;
 
         if (this.interactive) {
             this.bindInteractions();
@@ -808,7 +811,7 @@ class NetworkVisualizer {
             return;
         }
 
-        const weightText = `w ${conn.weight.toFixed(3)}`;
+        const weightText = `${conn.enabled === false ? 'OFF · ' : ''}w ${conn.weight.toFixed(3)}`;
         const textWidth = Math.max(30, weightText.length * 6.2);
         const boxHeight = 16;
         const x = meta.midX - textWidth / 2;
@@ -839,9 +842,13 @@ class NetworkVisualizer {
         const strokeWidth = this.getConnectionStrokeWidth(conn.weight);
         const hitWidth = this.getConnectionHitWidth(conn.weight);
 
-        line.style.stroke = (isSelected || isHovered) ? 'var(--accent)' : 'var(--fg)';
+        line.style.stroke = conn.enabled === false
+            ? '#e02020'
+            : ((isSelected || isHovered) ? 'var(--accent)' : 'var(--fg)');
         line.setAttribute('stroke-width', strokeWidth.toFixed(2));
-        line.setAttribute('stroke-opacity', isSelected ? '0.95' : (isHovered ? '0.78' : (isPositive ? '0.62' : '0.28')));
+        line.setAttribute('stroke-opacity', conn.enabled === false
+            ? (isSelected || isHovered ? '1' : '0.82')
+            : (isSelected ? '0.95' : (isHovered ? '0.78' : (isPositive ? '0.62' : '0.28'))));
 
         if (hitLine) {
             hitLine.setAttribute('stroke-width', hitWidth.toFixed(2));
@@ -884,6 +891,25 @@ class NetworkVisualizer {
             this.onConnectionWeightChanged(conn, connectionIndex);
         }
 
+        return conn;
+    }
+
+    ablateConnection(connectionIndex) {
+        return this.setConnectionEnabled(connectionIndex, false);
+    }
+
+    setConnectionEnabled(connectionIndex, enabled) {
+        if (!this.currentGenome || !this.currentGenome.connections) return null;
+        const conn = this.currentGenome.connections[connectionIndex];
+        if (!conn) return null;
+        const nextEnabled = Boolean(enabled);
+        if ((conn.enabled !== false) !== nextEnabled) {
+            conn.enabled = nextEnabled;
+            this.updateConnectionStyle(connectionIndex);
+            if (this.onConnectionEnabledChanged) {
+                this.onConnectionEnabledChanged(conn, connectionIndex);
+            }
+        }
         return conn;
     }
 
@@ -997,8 +1023,6 @@ class NetworkVisualizer {
         this.hoveredConnectionIndex = null;
 
         genome.connections.forEach((conn, connectionIndex) => {
-            if (!conn.enabled) return;
-
             const fromPos = nodePositions.get(conn.fromId);
             const toPos = nodePositions.get(conn.toId);
             if (!fromPos || !toPos) return;
@@ -1037,7 +1061,11 @@ class NetworkVisualizer {
                 });
                 hitLine.addEventListener('click', (event) => {
                     event.stopPropagation();
-                    this.selectConnection(connectionIndex);
+                    if (this.selectedConnectionIndex === connectionIndex) {
+                        this.ablateConnection(connectionIndex);
+                    } else {
+                        this.selectConnection(connectionIndex);
+                    }
                 });
 
                 hitsGroup.appendChild(hitLine);

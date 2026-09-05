@@ -59,9 +59,23 @@
             gap: 12px;
         }
 
-        .volume-extent-control input[type="number"] {
-            width: 64px;
-            margin-left: 4px;
+        .volume-range-pair {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+        }
+
+        .volume-range-pair input[type="number"] {
+            width: 44px;
+        }
+
+        .volume-range-pair .range-axis,
+        .volume-range-pair .range-sep,
+        .volume-range-pair .range-close {
+            opacity: 0.55;
         }
 
         .info-icon {
@@ -346,18 +360,27 @@
                     </label>
                     <button id="volume-autorotate" class="secondary-btn" type="button">Auto-rotate</button>
                     <button id="volume-reset-view" class="secondary-btn" type="button">Reset view</button>
-                    <span class="info-icon" tabindex="0" role="img" aria-label="Range help" data-tip="Each number is the half-width of a CPPN input range: X and Y around 0 (0.5 → [-0.5, 0.5]); T around 0.5 (0.5 → [0, 1]). Larger values sample further out — the volume is re-clustered on change.">i</span>
-                    <label class="font-mono-tech volume-extent-control" title="Half-width of the CPPN x-input range (default 0.5 → x ∈ [-0.5, 0.5])">
-                        X
-                        <input id="volume-x-extent" type="number" step="0.1" value="0.5">
+                    <span class="info-icon" tabindex="0" role="img" aria-label="Range help" data-tip="Direct min/max for each CPPN input. Values transferred from Drawing are adopted automatically and the volume is re-clustered on change.">i</span>
+                    <label class="volume-range-pair" title="CPPN x-input range">
+                        <span class="range-axis">X ∈ [</span>
+                        <input id="volume-x-min" type="number" step="0.1" value="-0.5" aria-label="X min">
+                        <span class="range-sep">,</span>
+                        <input id="volume-x-max" type="number" step="0.1" value="0.5" aria-label="X max">
+                        <span class="range-close">]</span>
                     </label>
-                    <label class="font-mono-tech volume-extent-control" title="Half-width of the CPPN y-input range (default 0.5 → y ∈ [-0.5, 0.5])">
-                        Y
-                        <input id="volume-y-extent" type="number" step="0.1" value="0.5">
+                    <label class="volume-range-pair" title="CPPN y-input range">
+                        <span class="range-axis">Y ∈ [</span>
+                        <input id="volume-y-min" type="number" step="0.1" value="-0.5" aria-label="Y min">
+                        <span class="range-sep">,</span>
+                        <input id="volume-y-max" type="number" step="0.1" value="0.5" aria-label="Y max">
+                        <span class="range-close">]</span>
                     </label>
-                    <label class="font-mono-tech volume-extent-control" title="Half-width of the CPPN t-input range around t=0.5 (default 0.5 → t ∈ [0, 1]). Increase to extend both ends symmetrically.">
-                        T
-                        <input id="volume-t-extent" type="number" step="0.1" value="0.5">
+                    <label class="volume-range-pair" title="CPPN t-input range">
+                        <span class="range-axis">T ∈ [</span>
+                        <input id="volume-t-min" type="number" step="0.1" value="0" aria-label="T min">
+                        <span class="range-sep">,</span>
+                        <input id="volume-t-max" type="number" step="0.1" value="1" aria-label="T max">
+                        <span class="range-close">]</span>
                     </label>
                     <label class="font-mono-tech">
                         BG

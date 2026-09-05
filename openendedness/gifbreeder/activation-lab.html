@@ -77,18 +77,12 @@
                             <span id="connection-name"></span>
                         </div>
                         <div class="connection-row">
-                            <span class="connection-label">Activation Value</span>
+                            <span class="connection-label">Connection State</span>
+                            <button id="connection-enabled-toggle" class="secondary-btn connection-toggle-btn" type="button"></button>
+                        </div>
+                        <div class="connection-row">
+                            <label class="connection-label" for="connection-value-input">Activation Value</label>
                             <input id="connection-value-input" type="number" step="0.01">
-                        </div>
-                        <div class="connection-row connection-slider-row">
-                            <span class="connection-label">Slide</span>
-                            <input id="connection-value-slider" type="range" step="0.01">
-                        </div>
-                        <div class="connection-buttons">
-                            <button class="secondary-btn" data-delta="-0.25">-0.25</button>
-                            <button class="secondary-btn" data-delta="-0.1">-0.10</button>
-                            <button class="secondary-btn" data-delta="0.1">+0.10</button>
-                            <button class="secondary-btn" data-delta="0.25">+0.25</button>
                         </div>
                         <div class="connection-reset-buttons">
                             <button id="reset-connection-btn" class="secondary-btn" disabled>

@@ -614,23 +614,15 @@ body {
     font-size: 12px;
 }
 
-.connection-slider-row {
-    align-items: center;
+.connection-toggle-btn {
+    min-width: 112px;
+    padding: 6px 10px;
 }
 
-#connection-value-slider {
-    width: 180px;
-}
-
-.connection-buttons {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.connection-buttons .secondary-btn {
-    padding: 6px 8px;
-    min-width: 58px;
+.connection-toggle-btn.is-off {
+    color: #fff;
+    background: #e02020;
+    border-color: #e02020;
 }
 
 .connection-wide-btn {
@@ -717,6 +709,13 @@ body {
     background: #0000ff;
     color: #fff;
     border-color: #0000ff;
+}
+
+.connection-chip.is-ablated,
+.connection-chip.is-ablated.is-active {
+    background: #e02020;
+    color: #fff;
+    border-color: #e02020;
 }
 
 @media (max-width: 900px) {
@@ -832,8 +831,7 @@ body {
         justify-content: flex-start;
     }
 
-    .activation-lab-page #connection-value-input,
-    .activation-lab-page #connection-value-slider {
+    .activation-lab-page #connection-value-input {
         width: 100%;
         max-width: 100%;
     }

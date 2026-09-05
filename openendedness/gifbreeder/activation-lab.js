@@ -50,7 +50,8 @@ function initActivationLab() {
     LabState.visualizer = new CPPN.NetworkVisualizer(networkSvg, {
         interactive: true,
         onConnectionSelected: handleConnectionSelection,
-        onConnectionWeightChanged: handleConnectionWeightChange
+        onConnectionWeightChanged: handleConnectionWeightChange,
+        onConnectionEnabledChanged: handleConnectionEnabledChange
     });
     LabState.renderer = new CPPN.CPPNRenderer();
 
@@ -81,14 +82,7 @@ function setupActivationLabEvents() {
     document.querySelector('.lab-controls').addEventListener('click', handleLabOutputModeButtonClick);
     window.addEventListener('cppn-output-mode-change', handleLabOutputModeChange);
 
-    document.querySelector('.connection-buttons').addEventListener('click', (event) => {
-        const button = event.target.closest('button[data-delta]');
-        if (!button) return;
-
-        const delta = Number.parseFloat(button.dataset.delta);
-        if (!Number.isFinite(delta)) return;
-        nudgeSelectedConnection(delta);
-    });
+    document.getElementById('connection-enabled-toggle').addEventListener('click', toggleSelectedConnectionEnabled);
 
     document.getElementById('connection-value-input').addEventListener('input', (event) => {
         const nextValue = Number.parseFloat(event.target.value);
@@ -96,19 +90,6 @@ function setupActivationLabEvents() {
         setSelectedConnectionValue(nextValue);
     });
 
-    document.getElementById('connection-value-slider').addEventListener('input', (event) => {
-        const nextValue = Number.parseFloat(event.target.value);
-        if (!Number.isFinite(nextValue)) return;
-        setSelectedConnectionValue(nextValue);
-    });
-
-    window.addEventListener('keydown', (event) => {
-        if (event.key === '[') {
-            nudgeSelectedConnection(-0.05);
-        } else if (event.key === ']') {
-            nudgeSelectedConnection(0.05);
-        }
-    });
 
     window.addEventListener('resize', () => {
         if (!LabState.genome) return;
@@ -463,13 +444,21 @@ function handleConnectionWeightChange(conn, connectionIndex) {
     populateConnectionEditor(conn, connectionIndex);
 }
 
+function handleConnectionEnabledChange(conn, connectionIndex) {
+    if (!conn) return;
+    LabState.selectedConnectionIndex = connectionIndex;
+    populateConnectionEditor(conn, connectionIndex);
+    renderConnectionPicker();
+    queuePreviewRender();
+}
+
 function populateConnectionEditor(conn, connectionIndex) {
     LabState.selectedConnectionIndex = connectionIndex;
     const placeholder = document.getElementById('connection-placeholder');
     const controls = document.getElementById('connection-controls');
     const nameEl = document.getElementById('connection-name');
     const valueInput = document.getElementById('connection-value-input');
-    const valueSlider = document.getElementById('connection-value-slider');
+    const enabledToggle = document.getElementById('connection-enabled-toggle');
     const bounds = getWeightBounds();
 
     const fromNode = LabState.genome.nodes.get(conn.fromId);
@@ -484,9 +473,10 @@ function populateConnectionEditor(conn, connectionIndex) {
     valueInput.min = String(bounds.min);
     valueInput.max = String(bounds.max);
     valueInput.value = conn.weight.toFixed(3);
-    valueSlider.min = String(bounds.min);
-    valueSlider.max = String(bounds.max);
-    valueSlider.value = String(conn.weight);
+    valueInput.disabled = conn.enabled === false;
+    enabledToggle.textContent = conn.enabled === false ? 'Turn On' : 'Turn Off';
+    enabledToggle.classList.toggle('is-off', conn.enabled === false);
+    enabledToggle.setAttribute('aria-pressed', conn.enabled === false ? 'false' : 'true');
     updateResetConnectionButtonState(connectionIndex);
     updateConnectionPickerSelection();
 }
@@ -519,18 +509,6 @@ function enforceLabWeightBounds() {
     window.NEAT.CONFIG.weightMax = LAB_WEIGHT_BOUNDS.max;
 }
 
-function nudgeSelectedConnection(delta) {
-    const conn = LabState.visualizer.nudgeSelectedConnection(delta);
-    if (!conn) return;
-
-    const selectedIndex = LabState.visualizer.selectedConnectionIndex;
-    if (selectedIndex !== null) {
-        populateConnectionEditor(conn, selectedIndex);
-    }
-
-    queuePreviewRender();
-}
-
 function setSelectedConnectionValue(nextValue) {
     const selectedIndex = LabState.visualizer.selectedConnectionIndex;
     if (selectedIndex === null) return;
@@ -540,6 +518,15 @@ function setSelectedConnectionValue(nextValue) {
 
     populateConnectionEditor(conn, selectedIndex);
     queuePreviewRender();
+}
+
+function toggleSelectedConnectionEnabled() {
+    if (!LabState.visualizer) return;
+    const selectedIndex = LabState.visualizer.selectedConnectionIndex;
+    if (!Number.isInteger(selectedIndex) || !LabState.genome) return;
+    const conn = LabState.genome.connections[selectedIndex];
+    if (!conn) return;
+    LabState.visualizer.setConnectionEnabled(selectedIndex, conn.enabled === false);
 }
 
 function handleGenomeUpload(event) {
@@ -860,12 +847,12 @@ function renderConnectionPicker() {
     picker.innerHTML = '';
     const connections = LabState.genome.connections
         .map((conn, index) => ({ conn, index }))
-        .filter(({ conn }) => conn && conn.enabled);
+        .filter(({ conn }) => conn);
 
     if (connections.length === 0) {
         const message = document.createElement('p');
         message.className = 'placeholder';
-        message.textContent = 'No enabled connections';
+        message.textContent = 'No connections';
         picker.appendChild(message);
         return;
     }
@@ -876,6 +863,7 @@ function renderConnectionPicker() {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'connection-chip';
+        button.classList.toggle('is-ablated', conn.enabled === false);
         button.dataset.connIndex = String(index);
         button.textContent = String(order + 1);
         button.title = `${formatNodeLabel(fromNode)} -> ${formatNodeLabel(toNode)} (#${index})`;

@@ -112,16 +112,16 @@
             color: var(--fg);
             height: 1.4em;
             line-height: 1.4em;
-            margin-bottom: 12px;
+            margin: 4px 0 0;
             opacity: 0.9;
             letter-spacing: 0.02em;
             white-space: nowrap;
-            overflow: hidden;
+            flex: 0 0 auto;
         }
 
         .pixel-inspector .pi-key { opacity: 0.6; margin-right: 4px; }
-        .pixel-inspector .pi-key ~ .pi-key { margin-left: 14px; }
-        .pixel-inspector .pi-val { display: inline-block; min-width: 4em; }
+        .pixel-inspector .pi-key ~ .pi-key { margin-left: 10px; }
+        .pixel-inspector .pi-val { display: inline-block; min-width: 3.4em; }
 
         .distance-loading-overlay {
             position: absolute;
@@ -198,24 +198,17 @@
         .inspector-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             gap: 16px;
             margin-bottom: 12px;
-        }
-
-        .inspector-row .pixel-inspector {
-            margin-bottom: 0;
-            flex: 0 1 auto;
         }
 
         .inspector-row-advanced {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 8px;
             flex-wrap: nowrap;
             font-family: 'Space Mono', monospace;
             font-size: 12px;
-            margin-left: auto;
         }
 
         .inspector-row-advanced label {
@@ -225,8 +218,23 @@
             white-space: nowrap;
         }
 
+        .inspector-row-advanced .range-pair {
+            gap: 3px;
+        }
+
+        .inspector-row-advanced .range-pair .range-axis,
+        .inspector-row-advanced .range-pair .range-sep,
+        .inspector-row-advanced .range-pair .range-close {
+            opacity: 0.55;
+            white-space: pre;
+        }
+
         .inspector-row-advanced input[type="number"] {
-            width: 64px;
+            width: 52px;
+        }
+
+        .inspector-row-advanced .range-pair input[type="number"] {
+            width: 44px;
         }
 
         .info-icon {
@@ -298,7 +306,7 @@
         }
 
         .drawing-panel .panel-footer-actions {
-            margin-top: 12px;
+            margin-top: 4px;
         }
 
         .gallery-panel {
@@ -368,7 +376,7 @@
                         <option value="shortest">Shortest Distance</option>
                         <option value="ridge">Ridge Center (legacy)</option>
                     </select>
-                    <button id="distance-clear-btn" class="secondary-btn" type="button">Clear Lines</button>
+                    <button id="distance-clear-btn" class="secondary-btn" type="button">Remove Center</button>
                     <label class="distance-brush-control">
                         <span>Line</span>
                         <input id="distance-brush-slider" type="range" min="2" max="36" step="1" value="8">
@@ -380,25 +388,28 @@
                 </div>
 
                 <div class="inspector-row">
-                    <div id="pixel-inspector" class="pixel-inspector" aria-live="polite">
-                        <span class="pi-key">x</span> <span class="pi-val" id="pi-x">&mdash;</span>
-                        <span class="pi-key">y</span> <span class="pi-val" id="pi-y">&mdash;</span>
-                        <span class="pi-key">d</span> <span class="pi-val" id="pi-d">&mdash;</span>
-                        <span class="pi-key">t</span> <span class="pi-val" id="pi-t">&mdash;</span>
-                    </div>
                     <div class="inspector-row-advanced" aria-label="Advanced controls">
-                        <span class="info-icon" tabindex="0" role="img" aria-label="Range help" data-tip="Each number is the half-width of a CPPN input range: X and Y around 0 (0.5 → [-0.5, 0.5]); T around 0.5 (0.5 → [0, 1]).">i</span>
-                        <label title="Half-width of the CPPN x-input range (default 0.5 → x ∈ [-0.5, 0.5])">
-                            X
-                            <input id="drawing-x-extent" type="number" step="0.1" value="0.5">
+                        <span class="info-icon" tabindex="0" role="img" aria-label="Range help" data-tip="Direct min/max for each CPPN input. Defaults reproduce X, Y ∈ [-0.5, 0.5] and T ∈ [0, 1]. Widening T also lengthens the GIF proportionally (same Δt per frame).">i</span>
+                        <label class="range-pair" title="CPPN x-input range">
+                            <span class="range-axis">X ∈ [</span>
+                            <input id="drawing-x-min" type="number" step="0.1" value="-0.5" aria-label="X min">
+                            <span class="range-sep">,</span>
+                            <input id="drawing-x-max" type="number" step="0.1" value="0.5" aria-label="X max">
+                            <span class="range-close">]</span>
                         </label>
-                        <label title="Half-width of the CPPN y-input range (default 0.5 → y ∈ [-0.5, 0.5])">
-                            Y
-                            <input id="drawing-y-extent" type="number" step="0.1" value="0.5">
+                        <label class="range-pair" title="CPPN y-input range">
+                            <span class="range-axis">Y ∈ [</span>
+                            <input id="drawing-y-min" type="number" step="0.1" value="-0.5" aria-label="Y min">
+                            <span class="range-sep">,</span>
+                            <input id="drawing-y-max" type="number" step="0.1" value="0.5" aria-label="Y max">
+                            <span class="range-close">]</span>
                         </label>
-                        <label title="Half-width of the CPPN t-input range around t=0.5 (default 0.5 → t ∈ [0, 1]). Increase to extend both ends symmetrically.">
-                            T
-                            <input id="drawing-t-extent" type="number" step="0.1" value="0.5">
+                        <label class="range-pair" title="CPPN t-input range. Widening also lengthens the GIF proportionally.">
+                            <span class="range-axis">T ∈ [</span>
+                            <input id="drawing-t-min" type="number" step="0.1" value="0" aria-label="T min">
+                            <span class="range-sep">,</span>
+                            <input id="drawing-t-max" type="number" step="0.1" value="1" aria-label="T max">
+                            <span class="range-close">]</span>
                         </label>
                         <label title="Overlay the distance field: heatmap of d + center ridges (ridge mode) or detour highlights (shortest mode)">
                             <input id="drawing-show-d-field" type="checkbox">
@@ -417,6 +428,13 @@
                             <span>Recomputing centers&hellip;</span>
                         </div>
                     </div>
+                </div>
+
+                <div id="pixel-inspector" class="pixel-inspector" aria-live="polite">
+                    <span class="pi-key">x</span> <span class="pi-val" id="pi-x">&mdash;</span>
+                    <span class="pi-key">y</span> <span class="pi-val" id="pi-y">&mdash;</span>
+                    <span class="pi-key">d</span> <span class="pi-val" id="pi-d">&mdash;</span>
+                    <span class="pi-key">t</span> <span class="pi-val" id="pi-t">&mdash;</span>
                 </div>
 
                 <div class="panel-footer-actions">

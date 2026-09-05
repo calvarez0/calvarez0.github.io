@@ -430,13 +430,26 @@ function getDistanceFieldPixel(distanceField, px, py, width, height) {
 
 function renderFrameToRgba(network, width, height, timestep, options = {}) {
     const data = new Uint8ClampedArray(width * height * 4);
-    const xExtent = Number.isFinite(options.xExtent) ? options.xExtent : 0.5;
-    const yExtent = Number.isFinite(options.yExtent) ? options.yExtent : 0.5;
-    const tExtent = Number.isFinite(options.tExtent) ? options.tExtent : 0.5;
-    const scaleX = 2 * xExtent;
-    const scaleY = 2 * yExtent;
-    const frameFraction = timestep / Math.max(GIF_FRAME_COUNT - 1, 1);
-    const tInput = 0.5 + (frameFraction - 0.5) * 2 * tExtent;
+    const xMin = Number.isFinite(options.xMin) ? options.xMin : -0.5;
+    const xMax = Number.isFinite(options.xMax) ? options.xMax : 0.5;
+    const yMin = Number.isFinite(options.yMin) ? options.yMin : -0.5;
+    const yMax = Number.isFinite(options.yMax) ? options.yMax : 0.5;
+    const tMin = Number.isFinite(options.tMin) ? options.tMin : 0;
+    const tMax = Number.isFinite(options.tMax) ? options.tMax : 1;
+    const xWidth = xMax - xMin;
+    const yWidth = yMax - yMin;
+    const centerMode = options.centerMode === 'zero' || options.centerMode === 'max'
+        ? options.centerMode
+        : 'normal';
+    const centerMaxD = Math.hypot(
+        Math.max(Math.abs(xMin), Math.abs(xMax)),
+        Math.max(Math.abs(yMin), Math.abs(yMax))
+    );
+    const frameCount = Number.isInteger(options.frameCount) && options.frameCount > 0
+        ? options.frameCount
+        : GIF_FRAME_COUNT;
+    const frameFraction = timestep / Math.max(frameCount - 1, 1);
+    const tInput = tMin + frameFraction * (tMax - tMin);
     const distanceField = options.distanceField || null;
     // 'invert' paints line pixels as the opposite of the pattern color so the
     // exported GIF matches the preview's difference-blend overlay.
@@ -444,10 +457,20 @@ function renderFrameToRgba(network, width, height, timestep, options = {}) {
 
     for (let py = 0; py < height; py++) {
         for (let px = 0; px < width; px++) {
-            const x = (px / width - 0.5) * scaleX;
-            const y = (py / height - 0.5) * scaleY;
+            const x = xMin + (px / width) * xWidth;
+            const y = yMin + (py / height) * yWidth;
             const fieldPixel = getDistanceFieldPixel(distanceField, px, py, width, height);
-            const rgb = network.activate(x, y, tInput, fieldPixel ? fieldPixel.d : null);
+            let d;
+            if (fieldPixel) {
+                d = fieldPixel.d;
+            } else if (centerMode === 'zero') {
+                d = 0;
+            } else if (centerMode === 'max') {
+                d = centerMaxD;
+            } else {
+                d = null;
+            }
+            const rgb = network.activate(x, y, tInput, d);
 
             const idx = (py * width + px) * 4;
             const r = Math.round(clampChannel01(rgb.r) * 255);
@@ -492,9 +515,14 @@ function createGifBytes(genome, options = {}) {
         const rgba = renderFrameToRgba(network, width, height, frameIndex, {
             distanceField: options.distanceField || null,
             distanceLineRendering: options.distanceLineRendering || 'black',
-            xExtent: options.xExtent,
-            yExtent: options.yExtent,
-            tExtent: options.tExtent
+            xMin: options.xMin,
+            xMax: options.xMax,
+            yMin: options.yMin,
+            yMax: options.yMax,
+            tMin: options.tMin,
+            tMax: options.tMax,
+            centerMode: options.centerMode,
+            frameCount
         });
         indexedFrames.push(imageDataToGif332Indices(rgba));
 
