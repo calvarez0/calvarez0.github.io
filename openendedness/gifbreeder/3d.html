@@ -6,7 +6,7 @@
     <title>Limbomorph 3D</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <style>
         body.drawing-page {
@@ -64,7 +64,7 @@
             align-items: center;
             gap: 3px;
             white-space: nowrap;
-            font-family: 'Space Mono', monospace;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             font-size: 12px;
         }
 
@@ -87,7 +87,7 @@
             height: 16px;
             border-radius: 50%;
             border: 1px solid currentColor;
-            font-family: 'Space Mono', monospace;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             font-size: 10px;
             font-style: italic;
             line-height: 1;
@@ -112,7 +112,7 @@
             background: var(--bg);
             color: var(--fg);
             border: 1px solid var(--border);
-            font-family: 'Space Mono', monospace;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             font-size: 11px;
             font-style: normal;
             line-height: 1.4;
@@ -152,7 +152,7 @@
             justify-content: center;
             background: rgba(0, 0, 0, 0.55);
             color: #fff;
-            font-family: 'Space Mono', monospace;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             font-size: 13px;
             pointer-events: none;
             z-index: 2;
@@ -161,7 +161,7 @@
         .volume-loading[hidden] { display: none; }
 
         .volume-hint {
-            font-family: 'Space Mono', monospace;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             font-size: 11px;
             opacity: 0.7;
             margin-top: 6px;
@@ -188,7 +188,7 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            font-family: 'Space Mono', monospace;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             font-size: 12px;
         }
 
@@ -211,7 +211,7 @@
             gap: 8px;
             padding: 4px 6px;
             border: 1px solid var(--border);
-            font-family: 'Space Mono', monospace;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             font-size: 12px;
             cursor: pointer;
             user-select: none;
@@ -307,8 +307,8 @@
         <div class="site-nav-inner">
             <a href="../../index.html" class="site-brand">AA</a>
             <div class="site-nav-actions">
-                <a href="../../index.html" class="nav-link font-mono-tech">Home</a>
-                <button id="theme-toggle" class="theme-btn font-mono-tech">Invert</button>
+                <a href="../../index.html" class="nav-link font-sans-ui">Home</a>
+                <button id="theme-toggle" class="theme-btn font-sans-ui">Invert</button>
             </div>
         </div>
     </nav>
@@ -326,14 +326,14 @@
         <div class="drawing-main">
             <section class="network-panel volume-panel">
                 <div class="controls" aria-label="3D controls">
-                    <label class="font-mono-tech">
+                    <label class="font-sans-ui">
                         Shape
                         <select id="volume-shape">
                             <option value="cube" selected>Cube</option>
                             <option value="torus">Torus</option>
                         </select>
                     </label>
-                    <label class="font-mono-tech">
+                    <label class="font-sans-ui">
                         Resolution
                         <select id="volume-resolution">
                             <option value="64">64³ (fast)</option>
@@ -342,7 +342,7 @@
                             <option value="512">512³ (very slow)</option>
                         </select>
                     </label>
-                    <label class="font-mono-tech">
+                    <label class="font-sans-ui">
                         Parts
                         <select id="volume-k">
                             <option value="2">2</option>
@@ -354,7 +354,7 @@
                             <option value="8">8</option>
                         </select>
                     </label>
-                    <label class="font-mono-tech">
+                    <label class="font-sans-ui">
                         Axes
                         <select id="volume-axis-perm"></select>
                     </label>
@@ -382,7 +382,7 @@
                         <input id="volume-t-max" type="number" step="0.1" value="1" aria-label="T max">
                         <span class="range-close">]</span>
                     </label>
-                    <label class="font-mono-tech">
+                    <label class="font-sans-ui">
                         BG
                         <input id="volume-bg-color" type="color" value="#808080">
                     </label>

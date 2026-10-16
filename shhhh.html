@@ -16,7 +16,7 @@
         body {
             background-color: #000;
             color: #0f0;
-            font-family: 'Courier New', monospace;
+            font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 20px;
             scroll-behavior: smooth;
@@ -116,7 +116,7 @@
             border: none;
             color: #0f0;
             padding: 0px;
-            font-family: 'Courier New', monospace;
+            font-family: system-ui, -apple-system, sans-serif;
             font-size: 1.2em;
             width: calc(100% - 100px);
             margin: 0;
@@ -132,7 +132,7 @@
 
         .prompt {
             color: #0f0;
-            font-family: 'Courier New', monospace;
+            font-family: system-ui, -apple-system, sans-serif;
             font-size: 1.2em;
         }
 
@@ -151,7 +151,7 @@
             right: 0;
             top: 100%;
             margin-top: 4px;
-            font-family: 'Courier New', monospace;
+            font-family: system-ui, -apple-system, sans-serif;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -258,7 +258,7 @@
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#0F0';
-            ctx.font = fontSize + 'px monospace';
+            ctx.font = fontSize + 'px sans-serif';
 
             for (let i = 0; i < drops.length; i++) {
                 const text = characters.charAt(Math.floor(Math.random() * characters.length));

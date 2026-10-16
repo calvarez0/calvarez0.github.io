@@ -11,16 +11,9 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        @font-face {
-            font-family: 'Fraunces';
-            src: url('assets/fraunces_static/Fraunces_72pt_SuperSoft-Bold.ttf') format('truetype');
-            font-weight: 600;
-            font-style: normal;
-        }
-
         @font-face {
             font-family: 'Akzidenz-Grotesk Pro';
             src: url('assets/akzidenz_static/akzidenzgroteskpro_md.ttf') format('truetype');
@@ -30,9 +23,9 @@
 
         :root {
             --bg: #f4f4f0;
-            --fg: #111111;
+            --fg: #000000;
             --border: #111111;
-            --accent: #0000ff; /* Deep electric blue for subtle links */
+            --accent: #0000ff;
             --section-band-bg: #f4f4f0;
             --selection-bg: #111111;
             --selection-fg: #e0e0e0;
@@ -65,18 +58,13 @@
         }
 
         /* Typography */
-        .font-serif-elegant {
-            font-family: 'EB Garamond', serif;
+        .font-sans-reading {
+            font-family: 'Akzidenz-Grotesk Pro', system-ui, -apple-system, sans-serif;
             font-weight: 500;
         }
         
-        .font-mono-tech {
+        .font-sans-ui {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-
-        .font-fraunces {
-            font-family: 'Fraunces', serif;
-            font-weight: 600;
         }
 
         .font-akzidenz {
@@ -133,7 +121,7 @@
             transition: color 0.2s;
         }
         
-        .text-link:hover {
+        a:not(.card-link-chip, .index-row, [role="button"]):is(:hover, :focus-visible) {
             color: var(--accent);
             text-decoration-color: var(--accent);
         }
@@ -152,18 +140,61 @@
 
         /* Theme Toggle */
         .theme-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             background: transparent;
-            border: 1px solid var(--border);
+            border: 0;
+            border-radius: 0;
             color: var(--fg);
-            padding: 2px 12px;
-            text-transform: uppercase;
-            font-size: 0.75rem;
+            width: 58px;
+            height: 44px;
+            flex-shrink: 0;
+            padding: 4px;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        .theme-btn:hover {
+
+        .theme-switch-track {
+            position: relative;
+            display: block;
+            width: 50px;
+            height: 24px;
+            border: 1px solid var(--fg);
+            background: linear-gradient(90deg, var(--fg) 50%, var(--bg) 50%);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .theme-switch-track::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 16px;
+            background: var(--bg);
+            transition: transform 0.2s ease;
+        }
+
+        .dark .theme-switch-track::after {
+            transform: translateX(24px);
             background: var(--fg);
-            color: var(--bg);
+        }
+
+        /* Hover lift disabled for now.
+        .theme-btn:hover .theme-switch-track {
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0 var(--border);
+        }
+        */
+
+        .theme-btn:active .theme-switch-track {
+            transform: translate(1px, 1px);
+            box-shadow: none;
+        }
+
+        .theme-btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 4px;
         }
 
         .card-link-chip {
@@ -172,10 +203,10 @@
             justify-content: center;
             border: 1px solid currentColor;
             padding: 3px 9px;
-            font-size: 0.65rem;
+            font-size: 0.875rem;
             line-height: 1.2;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             text-decoration: none;
             transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
         }
@@ -193,88 +224,117 @@
             color: var(--fg);
         }
 
-        .profile-hero {
-            display: flex;
-            align-items: flex-start;
-            gap: clamp(0.5rem, 1.8vw, 1rem);
-            min-width: 0;
+        .page-container {
+            width: 100%;
+            max-width: 64rem;
+            margin-inline: auto;
         }
 
-        .profile-identity {
+        .profile-hero {
             display: flex;
-            align-items: flex-end;
-            gap: clamp(0.5rem, 1.8vw, 1rem);
-            min-width: 0;
-            flex: 1 1 auto;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .profile-bio {
+            display: flow-root;
+            font-size: 1.0625rem;
+            line-height: 1.6;
+        }
+
+        .profile-bio > p:first-of-type {
+            margin-top: 0;
+        }
+
+        .profile-bio > p + p {
+            margin-top: 1rem;
+        }
+
+        .profile-photo {
+            float: right;
+            width: 13rem;
+            max-width: 40%;
+            margin: 0 0 1rem 1.5rem;
         }
 
         .profile-avatar {
-            width: clamp(4.75rem, 18vw, 12rem);
+            display: block;
+            width: 100%;
             height: auto;
-            flex: 0 0 auto;
+        }
+
+        .profile-caption {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            opacity: 0.7;
+        }
+
+        body:not(.dark) :is(.profile-caption, .subtext, .opacity-50, .opacity-60, .opacity-80),
+        body:not(.dark) .index-row:hover .subtext {
+            opacity: 1;
         }
 
         .profile-name {
-            font-size: clamp(2.1rem, 10.8vw, 5.5rem);
-            line-height: 0.92;
-            letter-spacing: -0.02em;
+            font-size: clamp(1.8rem, 6.5vw, 3.5rem);
+            line-height: 1.05;
+            letter-spacing: -0.035em;
             min-width: 0;
-            flex: 1 1 auto;
         }
 
-        .profile-invert-btn {
-            margin-left: auto;
-            align-self: flex-start;
-            white-space: nowrap;
+        .contact-strip {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 0.75rem 1.5rem;
         }
 
-        @media (max-width: 767px) {
-            .profile-hero {
-                width: 100%;
+        @media (max-width: 479px) {
+            .profile-photo {
+                margin-left: 1rem;
             }
 
-            .profile-identity {
-                gap: clamp(0.45rem, 2.2vw, 0.9rem);
+            .profile-caption {
+                font-size: 0.6875rem;
             }
+        }
 
-            .profile-avatar {
-                width: clamp(6.5rem, 34vw, 9.5rem);
-            }
-
-            .profile-name {
-                font-size: clamp(3.3rem, 16vw, 5rem);
-                line-height: 0.88;
-            }
-
-            .profile-invert-btn {
-                padding: 2px 10px;
-                font-size: 0.7rem;
+        @media (prefers-reduced-motion: reduce) {
+            .theme-switch-track,
+            .theme-switch-track::after {
+                transition: none;
             }
         }
     </style>
 </head>
 <body class="antialiased min-h-screen font-akzidenz">
 
-    <div class="md:flex min-h-screen">
+    <main class="page-container min-h-screen">
         
-        <aside class="md:w-5/12 lg:w-4/12 md:fixed md:h-screen border-b md:border-b-0 md:border-r brutal-border flex flex-col justify-between" style="background-color: var(--bg);" target="_blank" rel="noopener noreferrer">
+        <section aria-label="About Alex Alvarez" class="border-b brutal-border">
             
-            <div class="p-6 md:p-10 flex-grow overflow-y-auto">
-                <header class="mb-8">
-                    <div class="profile-hero">
-                        <div class="profile-identity">
-                            <img src="assets/profile.jpg" alt="Alex Alvarez" class="profile-avatar contrast-125" onerror="this.style.display='none'">
-                            <h1 class="profile-name tracking-tight font-akzidenz">Alex<br>Alvarez</h1>
-                        </div>
-                        <button id="theme-toggle" class="theme-btn font-mono-tech profile-invert-btn">Invert</button>
-                    </div>
+            <div class="p-5 md:p-6">
+                <header class="profile-hero">
+                    <h1 class="profile-name font-akzidenz">Alex Alvarez</h1>
+                    <button id="theme-toggle" type="button" class="theme-btn" aria-label="Switch to light mode" title="Switch to light mode"><span class="theme-switch-track" aria-hidden="true"></span></button>
                 </header>
 
-                <div class="space-y-4 text-xl leading-relaxed">
+                <div class="profile-bio">
+                    <figure class="profile-photo">
+                        <img src="assets/profile.jpg" alt="Alex Alvarez (right) at the Museo Napoleonico in Havana" class="profile-avatar contrast-125">
+                        <figcaption class="profile-caption font-sans-ui">Me (right) at the Museo Napoleonico in Havana</figcaption>
+                    </figure>
                     <!-- <p>I'm a pre-doc researcher at Harvard Medical School. As an undergrad I was part of the <a href="https://yschoe.github.io/" class="text-link" target="_blank" rel="noopener noreferrer">Brain Networks Lab</a>, <a href="https://sites.google.com/tamu.edu/yamauchi-cognitive-science-lab/research?authuser=0" class="text-link" target="_blank" rel="noopener noreferrer">Cognitive Science Lab</a>, and <a href="https://artsci.tamu.edu/psychological-brain-sciences/contact/profiles/carlos-bolanos.html" class="text-link" target="_blank" rel="noopener noreferrer">Addiction Nueroscience Lab</a> at Texas A&M University.</p> -->
 
                     <p>
-                        I'm a <a href = "https://bcs.mit.edu/postbac1" class="text-link" target="_blank" rel="noopener noreferrer">post-baccalaureate research scholar</a> in the <a href = "https://cocosci.mit.edu/" class="text-link" target="_blank" rel="noopener noreferrer">Computational Cognitive Science Lab</a> at MIT, where I study principles of learning and intelligence across natural and artificial systems. I'm broadly interested in open-endedness, meta-learning, and computational psychiatry. Previously, I studied computer science and psychology at Texas A&M University where I worked with <a href="https://scholar.google.com/citations?user=nFb_T4wAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Yoonsuck Choe</a>, <a href="https://scholar.google.com/citations?user=zOqjA-sAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Takashi Yamauchi</a>, and <a href="https://scholar.google.com/citations?user=6TsCDRwAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Carlos Bolaños</a>.
+                        I'm a <a href = "https://bcs.mit.edu/postbac1" class="text-link" target="_blank" rel="noopener noreferrer">post-baccalaureate research scholar</a> in the <a href = "https://cocosci.mit.edu/" class="text-link" target="_blank" rel="noopener noreferrer">Computational Cognitive Science Lab</a> at MIT, where I study principles of learning and intelligence across natural and artificial systems. I'm broadly interested in where ideas come from and how we choose between them. 
+                    </p>
+
+                    <p>
+                        Previously, I studied computer science and psychology at Texas A&M University where I worked with <a href="https://scholar.google.com/citations?user=nFb_T4wAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Yoonsuck Choe</a>, <a href="https://scholar.google.com/citations?user=zOqjA-sAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Takashi Yamauchi</a>, and <a href="https://scholar.google.com/citations?user=6TsCDRwAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Carlos Bolaños</a>.
                     </p>
 
                     <p>
@@ -282,7 +342,7 @@
                     </p>
                 </div>
 
-                <div class="mt-8 font-mono-tech text-xs uppercase tracking-widest space-y-3">
+                <div class="news-links mt-5 font-sans-ui text-sm space-y-3">
                     <h2 class="text-sm font-bold border-b brutal-border pb-2 mb-3">Updates</h2>
 
                     <div class="flex justify-between gap-4">
@@ -323,9 +383,9 @@
                 </div>
             </div>
 
-            <div class="p-6 md:p-10 border-t brutal-border font-mono-tech text-sm flex flex-col gap-2">
-                alexrez [at] mit [dot] edu
-                <div class="flex gap-4 mt-2">
+            <div class="contact-strip px-5 py-4 md:px-6 border-t brutal-border font-sans-ui text-sm">
+                <span>alexrez at em i tee dot e dee you</span>
+                <div class="flex flex-wrap gap-x-4 gap-y-2">
                     <a href="https://scholar.google.com/citations?user=FqABySkAAAAJ&hl=en" class="hover:underline" target="_blank" rel="noopener noreferrer">Scholar</a>
                     <a href="https://bsky.app/profile/alexrez.bsky.social" class="hover:underline" target="_blank" rel="noopener noreferrer">Bluesky</a>
                     <a href="https://github.com/calvarez0" class="hover:underline" target="_blank" rel="noopener noreferrer">Github</a>
@@ -333,29 +393,27 @@
                     <a href="https://twitter.com/0xalexrez" class="hover:underline" target="_blank" rel="noopener noreferrer">Twitter</a>
                 </div>
             </div>
-        </aside>
-
-        <main class="md:w-7/12 lg:w-8/12 md:ml-auto">
+        </section>
 
             <section id="research" class="border-b brutal-border">
-                <!-- <div class="p-6 md:p-10 section-band border-b-2 brutal-border">
-                    <h2 class="font-mono-tech text-sm uppercase tracking-widest mb-2">Research</h2>
+                <!-- <div class="p-5 md:p-6 section-band border-b brutal-border">
+                    <h2 class="font-sans-ui text-sm mb-2">Research</h2>
                 </div> -->
 
                 <div class="flex flex-col">
                     <!-- Interference/Subgoals Paper -->
-                    <!-- <div class="index-row border-b brutal-border p-6 md:p-10">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                    <!-- <div class="index-row border-b brutal-border p-5 md:p-6">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-gray-400 font-sans-ui text-sm">Image/GIF placeholder</span>
                                 </div>
                             </div>
                             <div class="flex-grow">
                                 <h3 class="font-akzidenz text-2xl mb-2">Interference & Subgoals in Neural Networks</h3>
                                 <p class="text-base mb-3 opacity-80">Coming soon</p>
                                 <p class="text-base mb-4">TLDR: Placeholder description for interference and subgoals research.</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
                                     <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
                                     <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
                                 </div>
@@ -364,18 +422,18 @@
                     </div>
 
                     // Syne
-                    <div class="index-row border-b brutal-border p-6 md:p-10">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                    <span class="text-gray-400 font-mono-tech text-sm">Image/GIF placeholder</span>
+                    <div class="index-row border-b brutal-border p-5 md:p-6">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-gray-400 font-sans-ui text-sm">Image/GIF placeholder</span>
                                 </div>
                             </div>
                             <div class="flex-grow">
                                 <h3 class="font-akzidenz text-2xl mb-2">SYNE</h3>
                                 <p class="text-base mb-3 opacity-80">Coming soon</p>
                                 <p class="text-base mb-4">TLDR: Placeholder description for Syne project.</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
                                     <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
                                     <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
                                 </div>
@@ -384,10 +442,10 @@
                     </div> -->
 
                     <!-- Limbomorphs -->
-                    <div class="index-row border-b brutal-border p-6 md:p-10" data-card-link="/openendedness/limbomorphs/index.html" data-card-target="_blank" role="link" tabindex="0">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
+                    <div class="index-row border-b brutal-border p-5 md:p-6" data-card-link="openendedness/limbomorphs/index.html" data-card-target="_blank" role="link" tabindex="0">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
                                     <img src="openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-1hno91tpi_a.gif" alt="Limbomorph species a" class="w-full h-full object-cover">
                                     <img src="openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-1kf9rs6w4_c.gif" alt="Limbomorph species c" class="w-full h-full object-cover">
                                     <img src="openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-enqnro76u_h.gif" alt="Limbomorph species h" class="w-full h-full object-cover">
@@ -400,21 +458,22 @@
                                 <h3 class="font-akzidenz text-2xl mb-2">Limbomorphs</h3>
                                 <p class="text-base mb-3 opacity-80">ALife 2026</p>
                                 <p class="text-base mb-4">Lifelike creatures with species-specific reactions to perturbations emerge from Gifbreeder despite the absence of explicit agents, environments, or local interactions.</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <a href="/openendedness/limbomorphs/index.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web Paper</a>
-                                    <a href="/openendedness/limbomorphs/Limbomorphs.pdf" class="card-link-chip" target="_blank" rel="noopener noreferrer">PDF</a>
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
+                                    <a href="openendedness/limbomorphs/index.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web Paper</a>
+                                    <a href="openendedness/limbomorphs/Limbomorphs.pdf" class="card-link-chip" target="_blank" rel="noopener noreferrer">PDF</a>
                                     <a href="https://arxiv.org/abs/2607.23842" class="card-link-chip" target="_blank" rel="noopener noreferrer">arXiv</a>
-                                    <a href="/openendedness/gifbreeder/drawing.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Drawing App</a>
+                                    <a href="openendedness/gifbreeder/drawing.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Drawing App</a>
+                                    <a href="https://x.com/0xalexrez/status/2082930070440570953?s=20" class="card-link-chip" target="_blank" rel="noopener noreferrer">Tweet</a>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- GIFBreeder -->
-                    <div class="index-row border-b brutal-border p-6 md:p-10" data-card-link="/openendedness/gifbreeder/index.html" data-card-target="_blank" role="link" tabindex="0">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
+                    <div class="index-row border-b brutal-border p-5 md:p-6" data-card-link="openendedness/gifbreeder/index.html" data-card-target="_blank" role="link" tabindex="0">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
                                     <img src="assets/gifbreeder/preview-64/activation-lab-output-trwerhx67.gif" alt="GIFBreeder output 1" class="w-full h-full object-cover">
                                     <img src="assets/gifbreeder/preview-64/activation-lab-output-09fy1uuyk.gif" alt="GIFBreeder output 2" class="w-full h-full object-cover">
                                     <img src="assets/gifbreeder/preview-64/activation-lab-output-n30hi1h8h.gif" alt="GIFBreeder output 3" class="w-full h-full object-cover">
@@ -427,19 +486,19 @@
                                 <h3 class="font-akzidenz text-2xl mb-2">GIFBreeder</h3>
                                 <p class="text-base mb-3 opacity-80">Interactive Platform</p>
                                 <p class="text-base mb-4">Adding a time variable to Picbreeder brings images to life.</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
-                                    <a href="/openendedness/gifbreeder/index.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web App</a>
-                                    <a href="/openendedness/gifbreeder-og/" class="card-link-chip" target="_blank" rel="noopener noreferrer">Picbreeder-faithful</a>
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
+                                    <a href="openendedness/gifbreeder/index.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web App</a>
+                                    <a href="openendedness/gifbreeder-og/" class="card-link-chip" target="_blank" rel="noopener noreferrer">Picbreeder-faithful</a>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Picbreeder -->
-                    <a href="/openendedness/picbreeder/index.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
+                    <a href="openendedness/picbreeder/index.html" class="index-row border-b brutal-border p-5 md:p-6 block" target="_blank" rel="noopener noreferrer">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
                                     <img src="assets/picbreeder/preview-64/alien.png" alt="Picbreeder alien output" class="w-full h-full object-cover">
                                     <img src="assets/picbreeder/preview-64/abstract.png" alt="Picbreeder abstract output" class="w-full h-full object-cover">
                                     <img src="assets/picbreeder/preview-64/clover.png" alt="Picbreeder clover output" class="w-full h-full object-cover">
@@ -452,7 +511,7 @@
                                 <h3 class="font-akzidenz text-2xl mb-2">Picbreeder</h3>
                                 <p class="text-base mb-3 opacity-80">Interactive Platform</p>
                                 <p class="text-base mb-4">My take on Picbreeder!</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
                                     <span class="card-link-chip">Web App</span>
                                 </div>
                             </div>
@@ -460,10 +519,10 @@
                     </a>
 
                     <!-- Side Quest -->
-                    <a href="https://www.sideqoest.com/" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 overflow-hidden">
+                    <!-- <a href="https://www.sideqoest.com/" class="index-row border-b brutal-border p-5 md:p-6 block" target="_blank" rel="noopener noreferrer">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 overflow-hidden">
                                     <img src="assets/platforms/side%20quest.gif" alt="Side Quest preview" class="w-full h-full object-cover">
                                 </div>
                             </div>
@@ -471,18 +530,18 @@
                                 <h3 class="font-akzidenz text-2xl mb-2">Side Quest</h3>
                                 <p class="text-base mb-3 opacity-80">Interactive Platform</p>
                                 <p class="text-base mb-4">Interactive evolution guiding LLMs.</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
                                     <span class="card-link-chip">Beta</span>
                                 </div>
                             </div>
                         </div>
-                    </a>
+                    </a> -->
 
                     <!-- You-Axis -->
-                    <!-- <div class="index-row border-b brutal-border p-6 md:p-10">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 overflow-hidden">
+                    <!-- <div class="index-row border-b brutal-border p-5 md:p-6">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 overflow-hidden">
                                     <img src="assets/you-axis.png" alt="You-Axis preview" class="w-full h-full object-cover">
                                 </div>
                             </div>
@@ -490,7 +549,7 @@
                                 <h3 class="font-akzidenz text-2xl mb-2">You-Axis</h3>
                                 <p class="text-base mb-3 opacity-80">Coming soon</p>
                                 <p class="text-base mb-4">Using Contrastive Activation Addition, we isolate a direction in space that invokes the model's subjective opinions. Shifting the embeddings along this axis in latent space can reveal the model's ideological bias. When we force the model to give us an opinion, where does it draw its ethical model from? What does the LLM's moral compass look like?</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
                                     <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
                                     <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
                                 </div>
@@ -499,10 +558,10 @@
                     </div> -->
 
                     <!-- Visual Saliency -->
-                    <div class="index-row border-b brutal-border p-6 md:p-10" data-card-link="lambert/index.html" role="link" tabindex="0">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 overflow-hidden">
+                    <div class="index-row border-b brutal-border p-5 md:p-6" data-card-link="lambert/index.html" role="link" tabindex="0">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 overflow-hidden">
                                     <img src="assets/lambert/saliency_process_preview_v6.gif" alt="Saliency process preview" class="h-full object-cover max-w-none" style="width: calc(100% + 10px); margin-left: -5px;">
                                 </div>
                             </div>
@@ -510,7 +569,7 @@
                                 <h3 class="font-akzidenz text-2xl mb-2">Saliency Thresholds in Neural Code and its Relation to the Power-Law, Gaussian, and Lambert W Function</h3>
                                 <p class="text-base mb-3 opacity-80">NeurIPS 2025 Workshop on Symmetry and Geometry in Neural Representations</p>
                                 <p class="text-base mb-4">How does the brain calculate visual saliency?</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
                                     <a href="https://openreview.net/pdf?id=cjo2oadaRz" class="card-link-chip" target="_blank" rel="noopener noreferrer">PDF</a>
                                     <a href="lambert/index.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Demo</a>
                                 </div>
@@ -519,10 +578,10 @@
                     </div>
 
                     <!-- AblOEh -->
-                    <a href="openendedness/ablOEh.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 overflow-hidden">
+                    <a href="openendedness/ablOEh.html" class="index-row border-b brutal-border p-5 md:p-6 block" target="_blank" rel="noopener noreferrer">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 overflow-hidden">
                                     <img src="assets/platforms/abloeh.gif" alt="AblOEh preview" class="w-full h-full object-cover">
                                 </div>
                             </div>
@@ -530,7 +589,7 @@
                                 <h3 class="font-akzidenz text-2xl mb-2">"AblOEh"</h3>
                                 <p class="text-base mb-3 opacity-80">Interactive Platform </p>
                                 <p class="text-base mb-4">Neuroevolutionary dress design.</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
                                     <span class="card-link-chip">Web App</span>
                                 </div>
                             </div>
@@ -538,10 +597,10 @@
                     </a>
 
                     <!-- Synthbreeder -->
-                    <a href="openendedness/synthbreeder.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 overflow-hidden">
+                    <a href="openendedness/synthbreeder.html" class="index-row border-b brutal-border p-5 md:p-6 block" target="_blank" rel="noopener noreferrer">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 overflow-hidden">
                                     <img src="assets/synth_zoomed.gif" alt="Synthbreeder preview" class="w-full h-full object-cover">
                                 </div>
                             </div>
@@ -549,7 +608,7 @@
                                 <h3 class="font-akzidenz text-2xl mb-2">Synthbreeder</h3>
                                 <p class="text-base mb-3 opacity-80">Interactive Platform</p>
                                 <p class="text-base mb-4">Breed synthesizer sounds.</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
                                     <span class="card-link-chip">Web App</span>
                                 </div>
                             </div>
@@ -557,10 +616,10 @@
                     </a>
 
                     <!-- Boids -->
-                    <a href="boids/index.html" class="index-row border-b brutal-border p-6 md:p-10 block" target="_blank" rel="noopener noreferrer">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 overflow-hidden">
+                    <a href="boids/index.html" class="index-row border-b brutal-border p-5 md:p-6 block" target="_blank" rel="noopener noreferrer">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 overflow-hidden">
                                     <img src="assets/boids.gif" alt="Boids dynamic perception delay preview" class="w-full h-full object-cover">
                                 </div>
                             </div>
@@ -568,7 +627,7 @@
                                 <h3 class="font-akzidenz text-2xl mb-2">BOIDS + Dynamic Perception Delay</h3>
                                 <p class="text-base mb-3 opacity-80">Interactive Demo</p>
                                 <p class="text-base mb-4">How does collective behavior emerge from simple local rules?</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
                                     <span class="card-link-chip">Web App</span>
                                 </div>
                             </div>
@@ -576,10 +635,10 @@
                     </a>
 
                     <!-- Demographic IQ -->
-                    <div class="index-row border-b brutal-border p-6 md:p-10" data-card-link="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" data-card-target="_blank" role="link" tabindex="0">
-                        <div class="md:flex md:gap-8 items-start">
-                            <div class="md:w-64 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-48 overflow-hidden">
+                    <div class="index-row border-b brutal-border p-5 md:p-6" data-card-link="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" data-card-target="_blank" role="link" tabindex="0">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 overflow-hidden">
                                     <img src="demographic_iq/assets/demo.png" alt="Demographic IQ preview" class="w-full h-full object-cover">
                                 </div>
                             </div>
@@ -587,7 +646,7 @@
                                 <h3 class="font-akzidenz text-2xl mb-2">Demographic IQ</h3>
                                 <p class="text-base mb-3 opacity-80">Human-Policy Interface</p>
                                 <p class="text-base mb-4">Voter information tool for the 2024 presidential election.</p>
-                                <div class="flex flex-wrap gap-3 font-mono-tech text-xs">
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
                                     <a href="demographic_iq/" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web App</a>
                                     <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" class="card-link-chip" target="_blank" rel="noopener noreferrer">Press</a>
                                     <a href="https://x.com/0xalexrez/status/1851390704796176734" class="card-link-chip" target="_blank" rel="noopener noreferrer">Tweet</a>
@@ -599,68 +658,68 @@
             </section>
 
             <section>
-                <div class="p-6 md:p-10 section-band border-b-2 brutal-border">
-                    <h2 class="font-mono-tech text-sm uppercase tracking-widest mb-2">Previously</h2>
+                <div class="p-5 md:p-6 section-band border-b brutal-border">
+                    <h2 class="font-sans-ui text-sm mb-2">Old Sundries</h2>
                 </div>
 
-                <div class="flex flex-col font-mono-tech text-sm">
+                <div class="flex flex-col font-sans-ui text-sm">
 
-                    <a href="assets/Spectral Bias.pdf" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
+                    <a href="assets/Spectral Bias.pdf" class="index-row block border-b brutal-border p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
                         <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
                             <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">RESEARCH</div>
                             <div class="col-span-10">
-                                <h3 class="font-serif-elegant text-2xl mb-1">Spectral Bias & Saddle Points</h3>
-                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">Is spectral bias correlated to saddle point drops in the loss landscape?</p>
+                                <h3 class="font-sans-reading text-2xl mb-1">Spectral Bias & Saddle Points</h3>
+                                <p class="opacity-80 subtext font-sans-reading text-lg">Is spectral bias correlated to saddle point drops in the loss landscape?</p>
                             </div>
                         </div>
                     </a>
 
-                    <a href="assets/Continuum of Algorithms.pdf" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
+                    <a href="assets/Continuum of Algorithms.pdf" class="index-row block border-b brutal-border p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
                         <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
                             <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">PAPER</div>
                             <div class="col-span-10">
-                                <h3 class="font-serif-elegant text-2xl mb-1">A Continuum of Algorithms</h3>
-                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">How does the brain compute physical reasoning?</p>
+                                <h3 class="font-sans-reading text-2xl mb-1">A Continuum of Algorithms</h3>
+                                <p class="opacity-80 subtext font-sans-reading text-lg">How does the brain compute physical reasoning?</p>
                             </div>
                         </div>
                     </a>
 
-                    <a href="sundries/connectome_visualization.html" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
+                    <a href="sundries/connectome_visualization.html" class="index-row block border-b brutal-border p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
                         <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
                             <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">VISUAL</div>
                             <div class="col-span-10">
-                                <h3 class="font-serif-elegant text-2xl mb-1">C. Elegans Connectome</h3>
-                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">What does the connectome look like on a 3D plane?</p>
+                                <h3 class="font-sans-reading text-2xl mb-1">C. Elegans Connectome</h3>
+                                <p class="opacity-80 subtext font-sans-reading text-lg">What does the connectome look like on a 3D plane?</p>
                             </div>
                         </div>
                     </a>
 
-                    <a href="sundries/evolve-images.html" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
+                    <a href="sundries/evolve-images.html" class="index-row block border-b brutal-border p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
                         <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
                             <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">VISUAL</div>
                             <div class="col-span-10">
-                                <h3 class="font-serif-elegant text-2xl mb-1">Pixel Evolutoin</h3>
-                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">What are evolutionary algorithms?</p>
+                                <h3 class="font-sans-reading text-2xl mb-1">Pixel Evolutoin</h3>
+                                <p class="opacity-80 subtext font-sans-reading text-lg">What are evolutionary algorithms?</p>
                             </div>
                         </div>
                     </a>
 
-                    <a href="sundries/distribution_visualization.html" class="index-row block border-b brutal-border p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
+                    <a href="sundries/distribution_visualization.html" class="index-row block border-b brutal-border p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
                         <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
                             <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">VISUAL</div>
                             <div class="col-span-10">
-                                <h3 class="font-serif-elegant text-2xl mb-1">Distribution Explorer</h3>
-                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">What do common probability distributions actually look like?</p>
+                                <h3 class="font-sans-reading text-2xl mb-1">Distribution Explorer</h3>
+                                <p class="opacity-80 subtext font-sans-reading text-lg">What do common probability distributions actually look like?</p>
                             </div>
                         </div>
                     </a>
 
-                    <a href="https://zyntora.com" class="index-row block p-6 md:px-10 md:py-8" target="_blank" rel="noopener noreferrer">
+                    <a href="https://zyntora.com" class="index-row block p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
                         <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
                             <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">STARTUP</div>
                             <div class="col-span-10">
-                                <h3 class="font-serif-elegant text-2xl mb-1">Zyntora</h3>
-                                <p class="opacity-80 subtext font-serif-elegant text-lg italic">Can we make a virtual real estate social media app?</p>
+                                <h3 class="font-sans-reading text-2xl mb-1">Zyntora</h3>
+                                <p class="opacity-80 subtext font-sans-reading text-lg">Can we make a virtual real estate social media app?</p>
                             </div>
                         </div>
                     </a>
@@ -668,25 +727,35 @@
                 </div>
             </section>
             
-            <footer class="p-6 md:p-10 font-akzidenz text-xs opacity-50 border-t brutal-border text-center">
+            <footer class="p-5 md:p-6 font-akzidenz text-xs opacity-50 border-t brutal-border text-center">
                 I never saved anything for the swim back.
             </footer>
-        </main>
-    </div>
+    </main>
 
     <script>
         // Theme Toggle Logic
-        const toggles = document.querySelectorAll('#theme-toggle');
+        const toggle = document.getElementById('theme-toggle');
         const body = document.body;
 
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        if (savedTheme === 'dark') body.classList.add('dark');
+        let savedTheme = 'dark';
+        try {
+            savedTheme = localStorage.getItem('theme') || savedTheme;
+        } catch {}
+        body.classList.toggle('dark', savedTheme === 'dark');
 
-        toggles.forEach(toggle => {
-            toggle.addEventListener('click', () => {
-                body.classList.toggle('dark');
+        function updateThemeLabel() {
+            const label = body.classList.contains('dark') ? 'Switch to light mode' : 'Switch to dark mode';
+            toggle.setAttribute('aria-label', label);
+            toggle.setAttribute('title', label);
+        }
+
+        updateThemeLabel();
+        toggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            updateThemeLabel();
+            try {
                 localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
-            });
+            } catch {}
         });
 
         // Clickable project cards with nested links support

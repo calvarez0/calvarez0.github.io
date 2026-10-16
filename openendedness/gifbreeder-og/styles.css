@@ -46,8 +46,8 @@ body {
     overflow-x: hidden;
 }
 
-.font-mono-tech {
-    font-family: 'Space Mono', monospace;
+.font-sans-ui {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .site-nav {
@@ -65,7 +65,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     text-align: center;
-    font-family: 'Space Mono', monospace;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-size: 0.75rem;
     opacity: 0.5;
 }

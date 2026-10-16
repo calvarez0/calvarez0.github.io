@@ -543,10 +543,8 @@ function paintLabelCanvas(canvas, text, color) {
     const size = canvas.width;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, size, size);
-    // Italic serif is the math/scientific convention for scalar variable names.
-    // Times/STIX render cleanly in Chrome/Safari/Firefox canvas without loading
-    // any external font.
-    ctx.font = `italic 320px "STIX Two Text", "Times New Roman", Times, serif`;
+    // Use the same sans-serif style as the surrounding interface.
+    ctx.font = `320px Arial, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = color;
@@ -642,7 +640,7 @@ function addAxisIndicators(group, lineMaterial) {
     // Each axis is a short arrow extending past the +face of the cube:
     //   shaft (LineSegments2, same style as cube frame)
     //   arrowhead (small cone, MeshBasicMaterial so lighting doesn't dim it)
-    //   italic-serif label just past the tip
+    //   sans-serif label just past the tip
     // The three arrows meet visually at the -x/-y/-z origin corner via their
     // parallel cube edges, so users can trace each label back to a real axis.
     const s = 0.5;
