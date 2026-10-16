@@ -259,17 +259,80 @@
             margin: 0 0 1rem 1.5rem;
         }
 
+        .profile-photo-surface {
+            position: relative;
+            aspect-ratio: 1;
+            transition: transform 280ms ease;
+        }
+
         .profile-avatar {
             display: block;
             width: 100%;
             height: auto;
         }
 
+        .profile-avatar-hover {
+            position: absolute;
+            inset: 0;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 280ms ease;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .profile-photo-frame:hover .profile-photo-surface {
+                transform: translateY(-2px);
+            }
+
+            .profile-photo-frame:hover .profile-avatar-hover {
+                opacity: 1;
+            }
+
+            .profile-photo-frame:hover + .profile-caption .profile-caption-original {
+                visibility: hidden;
+            }
+
+            .profile-photo-frame:hover + .profile-caption .profile-caption-alternate {
+                visibility: visible;
+            }
+        }
+
+        .profile-photo-frame:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 5px;
+        }
+
+        .profile-photo-frame:focus-visible .profile-photo-surface {
+            transform: translateY(-2px);
+        }
+
+        .profile-photo-frame:focus-visible .profile-avatar-hover {
+            opacity: 1;
+        }
+
         .profile-caption {
+            display: grid;
             margin-top: 0.5rem;
             font-size: 0.75rem;
             line-height: 1.5;
             opacity: 0.7;
+        }
+
+        .profile-caption > span {
+            grid-area: 1 / 1;
+        }
+
+        .profile-caption-alternate {
+            visibility: hidden;
+        }
+
+        .profile-photo-frame:focus-visible + .profile-caption .profile-caption-original {
+            visibility: hidden;
+        }
+
+        .profile-photo-frame:focus-visible + .profile-caption .profile-caption-alternate {
+            visibility: visible;
         }
 
         body:not(.dark) :is(.profile-caption, .subtext, .opacity-50, .opacity-60, .opacity-80),
@@ -304,8 +367,14 @@
 
         @media (prefers-reduced-motion: reduce) {
             .theme-switch-track,
-            .theme-switch-track::after {
+            .theme-switch-track::after,
+            .profile-photo-surface,
+            .profile-avatar-hover {
                 transition: none;
+            }
+
+            .profile-photo-frame:is(:hover, :focus-visible) .profile-photo-surface {
+                transform: none;
             }
         }
     </style>
@@ -324,13 +393,21 @@
 
                 <div class="profile-bio">
                     <figure class="profile-photo">
-                        <img src="assets/profile.jpg" alt="Alex Alvarez (right) at the Museo Napoleonico in Havana" class="profile-avatar contrast-125">
-                        <figcaption class="profile-caption font-sans-ui">Me (right) at the Museo Napoleonico in Havana</figcaption>
+                        <div class="profile-photo-frame" tabindex="0" role="img" aria-label="Alex Alvarez at the Museo Napoleonico in Havana. Hover or focus to see Alex on horseback in Viñales, Pinar del Río.">
+                            <div class="profile-photo-surface">
+                                <img src="assets/profile.jpg" alt="" class="profile-avatar contrast-125" width="1992" height="1992">
+                                <img src="assets/profile2.JPG" alt="" aria-hidden="true" class="profile-avatar profile-avatar-hover contrast-125" width="1552" height="1552">
+                            </div>
+                        </div>
+                        <figcaption class="profile-caption font-sans-ui">
+                            <span class="profile-caption-original">Me (right) at the Museo Napoleonico in Havana</span>
+                            <span class="profile-caption-alternate">Viñales, Pinar del Río</span>
+                        </figcaption>
                     </figure>
                     <!-- <p>I'm a pre-doc researcher at Harvard Medical School. As an undergrad I was part of the <a href="https://yschoe.github.io/" class="text-link" target="_blank" rel="noopener noreferrer">Brain Networks Lab</a>, <a href="https://sites.google.com/tamu.edu/yamauchi-cognitive-science-lab/research?authuser=0" class="text-link" target="_blank" rel="noopener noreferrer">Cognitive Science Lab</a>, and <a href="https://artsci.tamu.edu/psychological-brain-sciences/contact/profiles/carlos-bolanos.html" class="text-link" target="_blank" rel="noopener noreferrer">Addiction Nueroscience Lab</a> at Texas A&M University.</p> -->
 
                     <p>
-                        I'm a <a href = "https://bcs.mit.edu/postbac1" class="text-link" target="_blank" rel="noopener noreferrer">post-baccalaureate research scholar</a> in the <a href = "https://cocosci.mit.edu/" class="text-link" target="_blank" rel="noopener noreferrer">Computational Cognitive Science Lab</a> at MIT, where I study natural and artifical learning and intelligence. I'm particularly interested in where ideas come from and how we choose between them. 
+                        I'm a <a href = "https://bcs.mit.edu/postbac1" class="text-link" target="_blank" rel="noopener noreferrer">post-baccalaureate research scholar</a> in the <a href = "https://cocosci.mit.edu/" class="text-link" target="_blank" rel="noopener noreferrer">Computational Cognitive Science Lab</a> at MIT, where I study natural and artificial learning and intelligence. I'm particularly interested in where ideas come from and how we choose between them. 
                     </p>
 
                     <p>
