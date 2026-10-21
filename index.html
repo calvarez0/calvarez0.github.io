@@ -361,6 +361,26 @@
             gap: 0.75rem 1.5rem;
         }
 
+        @media (max-width: 767px) {
+            .profile-name {
+                font-size: clamp(2.25rem, 8.125vw, 4.375rem);
+            }
+
+            .profile-hero {
+                flex-direction: row-reverse;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .profile-hero .theme-btn {
+                align-self: center;
+            }
+
+            .profile-bio {
+                font-size: calc(1.328125rem * 0.75);
+            }
+        }
+
         @media (max-width: 479px) {
             .profile-photo {
                 margin-left: 1rem;
