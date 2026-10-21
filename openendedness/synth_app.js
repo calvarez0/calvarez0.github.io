@@ -12,7 +12,7 @@ const ENVELOPE_RESOLUTION = 256; // Number of points in envelope curve
 // Evolution parameters
 let generation = 0;
 let population = [];
-let selectedIndex = null;
+const selectedIndices = new Set();
 let nextInnovation = 0;
 
 // NEAT configuration (user-adjustable)
@@ -451,6 +451,7 @@ function drawWaveform(canvas, waveform) {
 
 // Initialize population with dual CPPNs (waveform + envelope)
 function initializePopulation() {
+    selectedIndices.clear();
     population = [];
 
     for (let i = 0; i < 9; i++) {
@@ -525,8 +526,12 @@ function renderPopulation() {
         const item = document.createElement('div');
         item.className = 'sound-item';
         item.dataset.index = index;
+        item.tabIndex = 0;
+        item.setAttribute('role', 'button');
+        item.setAttribute('aria-label', `Sound ${index + 1}`);
+        item.setAttribute('aria-pressed', String(selectedIndices.has(index)));
 
-        if (selectedIndex === index) {
+        if (selectedIndices.has(index)) {
             item.classList.add('selected');
         }
 
@@ -559,42 +564,60 @@ function renderPopulation() {
         item.appendChild(vizContainer);
         item.appendChild(info);
 
+        let playbackId = 0;
         item.addEventListener('click', () => {
-            // Play sound immediately
-            item.classList.add('playing');
-            playSound(individual);
-            setTimeout(() => item.classList.remove('playing'), SOUND_DURATION * 1000);
-
-            // Clear previous selection
-            selectedIndex = index;
-
-            // Update visual selection
-            document.querySelectorAll('.sound-item').forEach(el => el.classList.remove('selected'));
-            item.classList.add('selected');
+            if (selectedIndices.has(index)) {
+                selectedIndices.delete(index);
+            } else {
+                selectedIndices.add(index);
+            }
+            item.classList.toggle('selected', selectedIndices.has(index));
+            item.setAttribute('aria-pressed', String(selectedIndices.has(index)));
 
             // Update stats and network visualization
             updateStats();
             drawNetworkTopology(individual.waveformCPPN, individual.envelopeCPPN);
+
+            // Playback is temporary; breeding selection remains until toggled off.
+            if (audioContext.state === 'suspended') audioContext.resume();
+            const currentPlayback = ++playbackId;
+            item.classList.add('playing');
+            const source = playSound(individual);
+            source.addEventListener('ended', () => {
+                if (currentPlayback === playbackId) item.classList.remove('playing');
+            }, { once: true });
+        });
+
+        item.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                if (!event.repeat) item.click();
+            }
         });
 
         grid.appendChild(item);
     });
 }
 
-// Evolve new generation - both waveform and envelope networks evolve independently
+// Cross selected parents at the timbre/envelope boundary, then mutate both networks.
 function evolve() {
-    if (selectedIndex === null) {
-        alert('Please select a sound to evolve!');
+    if (selectedIndices.size === 0) {
+        alert('Please select one or more sounds to evolve!');
         return;
     }
 
-    const parent = population[selectedIndex];
+    const parents = Array.from(selectedIndices, index => population[index]);
+    // Cycle through every parent in both roles, using different parents when possible.
+    const envelopeOffset = parents.length > 1
+        ? 1 + Math.floor(Math.random() * (parents.length - 1))
+        : 0;
     const newPopulation = [];
 
     for (let i = 0; i < 9; i++) {
-        // Both networks evolve independently from the parent
-        const childWaveformCPPN = parent.waveformCPPN.copy();
-        const childEnvelopeCPPN = parent.envelopeCPPN.copy();
+        const waveformParent = parents[i % parents.length];
+        const envelopeParent = parents[(i + envelopeOffset) % parents.length];
+        const childWaveformCPPN = waveformParent.waveformCPPN.copy();
+        const childEnvelopeCPPN = envelopeParent.envelopeCPPN.copy();
 
         // Mutate both networks
         childWaveformCPPN.mutate();
@@ -615,7 +638,7 @@ function evolve() {
     }
 
     population = newPopulation;
-    selectedIndex = null;
+    selectedIndices.clear();
     generation++;
 
     renderPopulation();
@@ -626,25 +649,14 @@ function evolve() {
 function reset() {
     if (confirm('Start a new random population? This will clear your current generation.')) {
         generation = 0;
-        selectedIndex = null;
         initializePopulation();
     }
-}
-
-// Save selected sounds
-function saveSelected() {
-    if (selectedIndex === null) {
-        alert('Please select a sound to save!');
-        return;
-    }
-
-    alert(`Save functionality coming soon!`);
 }
 
 // Update statistics
 function updateStats() {
     document.getElementById('generation').textContent = generation;
-    document.getElementById('selected-count').textContent = selectedIndex !== null ? 1 : 0;
+    document.getElementById('selected-count').textContent = selectedIndices.size;
 
     const avgComplexity = population.reduce((sum, ind) => {
         return sum + ind.waveformCPPN.getComplexity() + ind.envelopeCPPN.getComplexity();
@@ -945,32 +957,38 @@ function initializeSettingsPanel() {
     });
 }
 
-// Save/Export selected sound's DNA
+// Save all selected sounds in one DNA download.
 function saveSelected() {
-    if (selectedIndex === null) {
-        alert('Please select a sound first by clicking on one.');
+    if (selectedIndices.size === 0) {
+        alert('Please select one or more sounds first.');
         return;
     }
 
-    const individual = population[selectedIndex];
+    const serializeCPPN = cppn => ({
+        nodes: Array.from(cppn.nodes.values(), node => ({
+            id: node.id,
+            type: node.type,
+            activation: node.activation
+        })),
+        connections: cppn.connections.map(connection => ({ ...connection })),
+        nodeCounter: cppn.nextNodeId
+    });
+    const sounds = Array.from(selectedIndices, index => ({
+        id: population[index].id,
+        waveformGenotype: serializeCPPN(population[index].waveformCPPN),
+        envelopeGenotype: serializeCPPN(population[index].envelopeCPPN)
+    }));
 
-    // Create exportable JSON of the genotype
     const exportData = {
-        type: 'synthbreeder-sound',
+        type: sounds.length === 1 ? 'synthbreeder-sound' : 'synthbreeder-sounds',
         version: '1.0',
         timestamp: new Date().toISOString(),
-        generation: generation,
-        waveformGenotype: {
-            nodes: individual.waveformGenotype.nodes,
-            connections: individual.waveformGenotype.connections,
-            nodeCounter: individual.waveformGenotype.nodeCounter
-        },
-        envelopeGenotype: {
-            nodes: individual.envelopeGenotype.nodes,
-            connections: individual.envelopeGenotype.connections,
-            nodeCounter: individual.envelopeGenotype.nodeCounter
-        },
-        neatConfig: neatConfig
+        generation,
+        ...(sounds.length === 1 ? sounds[0] : { sounds }),
+        neatConfig: {
+            ...neatConfig,
+            enabledActivations: Array.from(neatConfig.enabledActivations)
+        }
     };
 
     // Convert to JSON string
@@ -981,7 +999,7 @@ function saveSelected() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `synthbreeder-sound-gen${generation}-${Date.now()}.json`;
+    a.download = `synthbreeder-${sounds.length === 1 ? 'sound' : 'sounds'}-gen${generation}-${Date.now()}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

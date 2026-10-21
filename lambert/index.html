@@ -1210,7 +1210,7 @@ a:hover {
       <header class="story-intro">
         <div class="eyebrow">Inside the visual response</div>
         <h3 id="processTitle">From natural image to neural threshold</h3>
-        <p>Following <a href="https://doi.org/10.1109/IJCNN.2003.1223343">Lee and Choe's orientation-energy model</a>, this sequence follows the filtering method formalized in <a href="assets/lambert/saliency_thresholds.pdf#page=7">Appendix A.1</a>.</p>
+        <p>Following <a href="https://doi.org/10.1109/IJCNN.2003.1223343">Lee and Choe's orientation-energy model</a>, this sequence follows the filtering method formalized in <a href="../assets/lambert/saliency_thresholds.pdf#page=7">Appendix A.1</a>.</p>
       </header>
 
       <section class="story-chapter" aria-labelledby="storyInputTitle">
@@ -1221,14 +1221,14 @@ a:hover {
           <div class="story-equation">I(x, y) &rarr; grayscale luminance</div>
         </div>
         <figure class="story-figure">
-          <img src="assets/wolf/before.jpeg" alt="Natural photograph of a wolf standing in brush">
+          <img src="../assets/wolf/before.jpeg" alt="Natural photograph of a wolf standing in brush">
           <figcaption>Input stimulus I</figcaption>
         </figure>
       </section>
 
       <section class="story-chapter is-reversed" aria-labelledby="storyDogTitle">
         <figure class="story-figure">
-          <img src="assets/wolf/wolf_dog.png" alt="Signed Difference-of-Gaussians response of the wolf photograph">
+          <img src="../assets/wolf/wolf_dog.png" alt="Signed Difference-of-Gaussians response of the wolf photograph">
           <figcaption>Signed local contrast ID</figcaption>
         </figure>
         <div class="story-copy">
@@ -1252,31 +1252,31 @@ a:hover {
 
           <div class="combine-stage" id="combineStage" aria-label="Six orientation maps converging into the final energy map">
             <figure class="combine-map" data-x="-34" data-y="-32">
-              <img src="assets/wolf/wolf_gabor_000.png" alt="0 degree orientation-energy response">
+              <img src="../assets/wolf/wolf_gabor_000.png" alt="0 degree orientation-energy response">
               <figcaption><span class="orientation-mark" style="--angle: 0deg"></span>0&deg;</figcaption>
             </figure>
             <figure class="combine-map" data-x="0" data-y="-32">
-              <img src="assets/wolf/wolf_gabor_030.png" alt="30 degree orientation-energy response">
+              <img src="../assets/wolf/wolf_gabor_030.png" alt="30 degree orientation-energy response">
               <figcaption><span class="orientation-mark" style="--angle: 30deg"></span>30&deg;</figcaption>
             </figure>
             <figure class="combine-map" data-x="34" data-y="-32">
-              <img src="assets/wolf/wolf_gabor_060.png" alt="60 degree orientation-energy response">
+              <img src="../assets/wolf/wolf_gabor_060.png" alt="60 degree orientation-energy response">
               <figcaption><span class="orientation-mark" style="--angle: 60deg"></span>60&deg;</figcaption>
             </figure>
             <figure class="combine-map" data-x="-34" data-y="32">
-              <img src="assets/wolf/wolf_gabor_090.png" alt="90 degree orientation-energy response">
+              <img src="../assets/wolf/wolf_gabor_090.png" alt="90 degree orientation-energy response">
               <figcaption><span class="orientation-mark" style="--angle: 90deg"></span>90&deg;</figcaption>
             </figure>
             <figure class="combine-map" data-x="0" data-y="32">
-              <img src="assets/wolf/wolf_gabor_120.png" alt="120 degree orientation-energy response">
+              <img src="../assets/wolf/wolf_gabor_120.png" alt="120 degree orientation-energy response">
               <figcaption><span class="orientation-mark" style="--angle: 120deg"></span>120&deg;</figcaption>
             </figure>
             <figure class="combine-map" data-x="34" data-y="32">
-              <img src="assets/wolf/wolf_gabor_150.png" alt="150 degree orientation-energy response">
+              <img src="../assets/wolf/wolf_gabor_150.png" alt="150 degree orientation-energy response">
               <figcaption><span class="orientation-mark" style="--angle: 150deg"></span>150&deg;</figcaption>
             </figure>
             <figure class="combined-energy" id="combinedEnergy">
-              <img src="assets/wolf/After.png" alt="Final summed orientation-energy map of the wolf">
+              <img src="../assets/wolf/After.png" alt="Final summed orientation-energy map of the wolf">
             </figure>
           </div>
         </div>
@@ -1290,12 +1290,12 @@ a:hover {
         </header>
         <div class="signal-flow">
           <figure class="signal-node">
-            <div class="signal-frame"><img src="assets/wolf/After.png" alt="Hot-color wolf orientation-energy map"></div>
+            <div class="signal-frame"><img src="../assets/wolf/After.png" alt="Hot-color wolf orientation-energy map"></div>
             <p class="signal-node-label">Summed response <span class="signal-node-detail">Six E&theta; channels</span></p>
           </figure>
           <div class="flow-arrow">Read magnitude</div>
           <figure class="signal-node">
-            <div class="signal-frame"><img src="assets/wolf/wolf_energy_grayscale.png" alt="Grayscale scalar energy magnitudes for the wolf"></div>
+            <div class="signal-frame"><img src="../assets/wolf/wolf_energy_grayscale.png" alt="Grayscale scalar energy magnitudes for the wolf"></div>
             <p class="signal-node-label">Scalar energy E <span class="signal-node-detail">One value per pixel</span></p>
           </figure>
           <div class="flow-arrow is-second">Bin values</div>
@@ -1314,7 +1314,7 @@ a:hover {
         </header>
         <div class="signal-flow">
           <figure class="signal-node">
-            <div class="signal-frame"><img src="assets/wolf/white_noise.png" alt="Seeded grayscale white-noise input"></div>
+            <div class="signal-frame"><img src="../assets/wolf/white_noise.png" alt="Seeded grayscale white-noise input"></div>
             <p class="signal-node-label">White noise <span class="signal-node-detail">Independent pixel intensities</span></p>
           </figure>
           <div class="flow-arrow">
@@ -1322,7 +1322,7 @@ a:hover {
             Same filters
           </div>
           <figure class="signal-node">
-            <div class="signal-frame"><img id="whiteNoiseEnergyImage" src="assets/wolf/white_noise_energy.png" alt="Orientation-energy response to white noise"></div>
+            <div class="signal-frame"><img id="whiteNoiseEnergyImage" src="../assets/wolf/white_noise_energy.png" alt="Orientation-energy response to white noise"></div>
             <p class="signal-node-label">Noise response <span class="signal-node-detail">No coherent contours</span></p>
           </figure>
           <div class="flow-arrow is-second">Bin values</div>
@@ -1444,13 +1444,13 @@ a:hover {
     <p>
       <strong>→ <a href="https://openreview.net/pdf?id=cjo2oadaRz" style="color: #2d8ef4; text-decoration: underline;">Read the full paper</a></strong>
        <!-- ·
-      <a href="portfolio/assets/poster.pdf" style="color: #2d8ef4; text-decoration: underline;">View Poster</a> -->
+      <a href="../portfolio/assets/poster.pdf" style="color: #2d8ef4; text-decoration: underline;">View Poster</a> -->
     </p>
 
   </article>
 </div>
 
-<script src="portfolio/assets/saliency/viz_data.js"></script>
+<script src="../portfolio/assets/saliency/viz_data.js"></script>
 <script>
 (function() {
   const stages = ['image', 'dog', 'orientations', 'energy'];
@@ -1462,7 +1462,7 @@ a:hover {
       equation: 'I(x, y) &rarr; grayscale luminance',
       detail: 'The visual system model operates on a grayscale image, matching the orientation-energy method in Appendix A.1.',
       label: 'Stimulus I',
-      src: 'assets/wolf/before.jpeg',
+      src: '../assets/wolf/before.jpeg',
       alt: 'Natural photograph of a wolf in brush',
       next: 'Next: center-surround &rarr;'
     },
@@ -1473,7 +1473,7 @@ a:hover {
       equation: 'I<sub>D</sub> = I * D &nbsp;&nbsp; where &nbsp;&nbsp; D = N<sub>&sigma;/2</sub> - N<sub>&sigma;</sub>',
       detail: 'This center-surround operation models the lateral geniculate nucleus (LGN). The signed response is normalized here only for display.',
       label: 'DoG response ID',
-      src: 'assets/wolf/wolf_dog.png',
+      src: '../assets/wolf/wolf_dog.png',
       alt: 'Signed Difference-of-Gaussians response of the wolf image',
       next: 'Next: orientation bank &rarr;'
     },
@@ -1493,7 +1493,7 @@ a:hover {
       equation: 'E = &Sigma;<sub>k=0</sub><sup>5</sup> E<sub>&theta;<i>k</i></sub> &nbsp;&nbsp; where &nbsp;&nbsp; &theta;<sub>k</sub> = k&pi;/6',
       detail: 'This is the supplied wolf energy output used below. Its response histogram has the heavy tail analyzed in the paper.',
       label: 'Final energy E',
-      src: 'assets/wolf/After.png',
+      src: '../assets/wolf/After.png',
       alt: 'Final summed orientation-energy map of the wolf',
       next: 'Continue to the threshold &darr;'
     }
@@ -1573,7 +1573,7 @@ a:hover {
       }
     });
 
-    ['assets/wolf/wolf_dog.png', 'assets/wolf/After.png'].forEach(src => {
+    ['../assets/wolf/wolf_dog.png', '../assets/wolf/After.png'].forEach(src => {
       const preload = new Image();
       preload.src = src;
     });
@@ -1920,6 +1920,7 @@ a:hover {
   }
 
   async function initScrollStory() {
+    if (!document.querySelector('.scroll-story')) return;
     const data = SALIENCY_DATA.wolf_after_release_1000_odfw;
     const noiseImage = document.getElementById('whiteNoiseEnergyImage');
     if (!noiseImage.complete) {

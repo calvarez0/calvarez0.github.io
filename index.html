@@ -230,17 +230,22 @@
             margin-inline: auto;
         }
 
+        .profile-intro {
+            padding-top: clamp(3rem, 7vw, 6rem);
+            padding-bottom: 2.5rem;
+        }
+
         .profile-hero {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
         .profile-bio {
             display: flow-root;
-            font-size: 1.0625rem;
+            font-size: 1.328125rem;
             line-height: 1.6;
         }
 
@@ -249,7 +254,7 @@
         }
 
         .profile-bio > p + p {
-            margin-top: 1rem;
+            margin-top: 1.25rem;
         }
 
         .profile-photo {
@@ -385,10 +390,10 @@
         
         <section aria-label="About Alex Alvarez" class="border-b brutal-border">
             
-            <div class="p-5 md:p-6">
+            <div class="profile-intro px-5 md:px-6">
                 <header class="profile-hero">
-                    <h1 class="profile-name font-akzidenz">Alex Alvarez</h1>
                     <button id="theme-toggle" type="button" class="theme-btn" aria-label="Switch to light mode" title="Switch to light mode"><span class="theme-switch-track" aria-hidden="true"></span></button>
+                    <h1 class="profile-name font-akzidenz">Alex Alvarez</h1>
                 </header>
 
                 <div class="profile-bio">
@@ -419,7 +424,7 @@
                     </p>
                 </div>
 
-                <div class="news-links mt-5 font-sans-ui text-sm space-y-3">
+                <div class="news-links mt-8 font-sans-ui text-sm space-y-3">
                     <h2 class="text-sm font-bold border-b brutal-border pb-2 mb-3">Updates</h2>
 
                     <div class="flex justify-between gap-4">
