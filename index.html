@@ -4,888 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alex Alvarez</title>
-    <link rel="icon" type="image/x-icon" href="assets/icon.png">
-    
+    <link rel="icon" type="image/x-icon" href="/assets/icon.png">
+
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        @font-face {
-            font-family: 'Akzidenz-Grotesk Pro';
-            src: url('assets/akzidenz_static/akzidenzgroteskpro_md.ttf') format('truetype');
-            font-weight: 500;
-            font-style: normal;
-        }
 
-        :root {
-            --bg: #f4f4f0;
-            --fg: #000000;
-            --border: #111111;
-            --accent: #0000ff;
-            --section-band-bg: #f4f4f0;
-            --selection-bg: #111111;
-            --selection-fg: #e0e0e0;
-        }
- 
-        .dark {
-            --bg: #111111;
-            --fg: #e0e0e0;
-            --border: #444444;
-            --accent: #40A2E3;
-            --section-band-bg: #000000;
-            --selection-bg: #f4f4f0;
-            --selection-fg: #111111;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--fg);
-            transition: background-color 0.1s, color 0.1s;
-        }
-
-        ::selection {
-            background-color: var(--selection-bg);
-            color: var(--selection-fg);
-        }
-
-        ::-moz-selection {
-            background-color: var(--selection-bg);
-            color: var(--selection-fg);
-        }
-
-        /* Typography */
-        .font-sans-reading {
-            font-family: 'Akzidenz-Grotesk Pro', system-ui, -apple-system, sans-serif;
-            font-weight: 500;
-        }
-        
-        .font-sans-ui {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-
-        .font-akzidenz {
-            font-family: 'Akzidenz-Grotesk Pro', sans-serif;
-            font-weight: 500;
-        }
-
-        /* Brutalist Borders */
-        .brutal-border {
-            border-color: var(--border);
-        }
-
-        /* Index Row Hover Effects */
-        .index-row {
-            transition: background-color 0s, color 0s;
-            cursor: pointer;
-        }
-
-        .index-row:hover {
-            background-color: var(--fg);
-            color: var(--bg);
-        }
-
-        .index-row:hover:has(.card-link-chip:hover),
-        .index-row:hover:has(.card-link-chip:focus-visible) {
-            background-color: transparent;
-            color: inherit;
-        }
-
-        .index-row:hover .subtext {
-            color: var(--bg);
-            opacity: 0.7;
-        }
-
-        .index-row:hover:has(.card-link-chip:hover) .subtext,
-        .index-row:hover:has(.card-link-chip:focus-visible) .subtext {
-            color: inherit;
-            opacity: inherit;
-        }
-
-        .index-row:hover .index-arrow {
-            transform: translateX(4px) rotate(-45deg);
-        }
-
-        .index-arrow {
-            transition: transform 0.2s ease;
-        }
-
-        /* Links */
-        .text-link {
-            text-decoration: underline;
-            text-decoration-thickness: 1px;
-            text-underline-offset: 4px;
-            transition: color 0.2s;
-        }
-        
-        a:not(.card-link-chip, .index-row, [role="button"]):is(:hover, :focus-visible) {
-            color: var(--accent);
-            text-decoration-color: var(--accent);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--bg);
-            border-left: 1px solid var(--border);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--fg);
-        }
-
-        /* Theme Toggle */
-        .theme-btn {
-            display: inline-flex;
-            align-self: flex-end;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border: 0;
-            border-radius: 0;
-            color: var(--fg);
-            width: 58px;
-            height: 44px;
-            flex-shrink: 0;
-            padding: 4px;
-            cursor: pointer;
-        }
-
-        .theme-switch-track {
-            position: relative;
-            display: block;
-            width: 50px;
-            height: 24px;
-            border: 1px solid var(--fg);
-            background: linear-gradient(90deg, var(--fg) 50%, var(--bg) 50%);
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-        }
-
-        .theme-switch-track::after {
-            content: '';
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 18px;
-            height: 16px;
-            background: var(--bg);
-            transition: transform 0.2s ease;
-        }
-
-        .dark .theme-switch-track::after {
-            transform: translateX(24px);
-            background: var(--fg);
-        }
-
-        /* Hover lift disabled for now.
-        .theme-btn:hover .theme-switch-track {
-            transform: translate(-1px, -1px);
-            box-shadow: 3px 3px 0 var(--border);
-        }
-        */
-
-        .theme-btn:active .theme-switch-track {
-            transform: translate(1px, 1px);
-            box-shadow: none;
-        }
-
-        .theme-btn:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 4px;
-        }
-
-        .card-link-chip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid currentColor;
-            padding: 3px 9px;
-            font-size: 0.875rem;
-            line-height: 1.2;
-            letter-spacing: normal;
-            text-transform: none;
-            text-decoration: none;
-            transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .card-link-chip:hover,
-        .card-link-chip:focus-visible {
-            background-color: var(--fg);
-            border-color: var(--fg);
-            color: var(--bg);
-            text-decoration: none;
-        }
-
-        .section-band {
-            background-color: var(--section-band-bg);
-            color: var(--fg);
-        }
-
-        .page-container {
-            width: 100%;
-            max-width: 64rem;
-            margin-inline: auto;
-        }
-
-        .profile-intro {
-            padding-top: clamp(3rem, 7vw, 6rem);
-            padding-bottom: 2.5rem;
-        }
-
-        .profile-hero {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .profile-bio {
-            display: flow-root;
-            font-size: 1.328125rem;
-            line-height: 1.6;
-        }
-
-        .profile-bio > p:first-of-type {
-            margin-top: 0;
-        }
-
-        .profile-bio > p + p {
-            margin-top: 1.25rem;
-        }
-
-        .profile-photo {
-            float: right;
-            width: 13rem;
-            max-width: 40%;
-            margin: 0 0 1rem 1.5rem;
-        }
-
-        .profile-photo-surface {
-            position: relative;
-            aspect-ratio: 1;
-            transition: transform 280ms ease;
-        }
-
-        .profile-avatar {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-
-        .profile-avatar-hover {
-            position: absolute;
-            inset: 0;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0;
-            transition: opacity 280ms ease;
-        }
-
-        @media (hover: hover) and (pointer: fine) {
-            .profile-photo-frame:hover .profile-photo-surface {
-                transform: translateY(-2px);
-            }
-
-            .profile-photo-frame:hover .profile-avatar-hover {
-                opacity: 1;
-            }
-
-            .profile-photo-frame:hover + .profile-caption .profile-caption-original {
-                visibility: hidden;
-            }
-
-            .profile-photo-frame:hover + .profile-caption .profile-caption-alternate {
-                visibility: visible;
-            }
-        }
-
-        .profile-photo-frame:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 5px;
-        }
-
-        .profile-photo-frame:focus-visible .profile-photo-surface {
-            transform: translateY(-2px);
-        }
-
-        .profile-photo-frame:focus-visible .profile-avatar-hover {
-            opacity: 1;
-        }
-
-        .profile-caption {
-            display: grid;
-            margin-top: 0.5rem;
-            font-size: 0.75rem;
-            line-height: 1.5;
-            opacity: 0.7;
-        }
-
-        .profile-caption > span {
-            grid-area: 1 / 1;
-        }
-
-        .profile-caption-alternate {
-            visibility: hidden;
-        }
-
-        .profile-photo-frame:focus-visible + .profile-caption .profile-caption-original {
-            visibility: hidden;
-        }
-
-        .profile-photo-frame:focus-visible + .profile-caption .profile-caption-alternate {
-            visibility: visible;
-        }
-
-        body:not(.dark) :is(.profile-caption, .subtext, .opacity-50, .opacity-60, .opacity-80),
-        body:not(.dark) .index-row:hover .subtext {
-            opacity: 1;
-        }
-
-        .profile-name {
-            font-size: clamp(1.8rem, 6.5vw, 3.5rem);
-            line-height: 1.05;
-            letter-spacing: -0.035em;
-            min-width: 0;
-        }
-
-        .contact-strip {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 0.75rem 1.5rem;
-        }
-
-        @media (max-width: 767px) {
-            .profile-name {
-                font-size: clamp(2.25rem, 8.125vw, 4.375rem);
-            }
-
-            .profile-hero {
-                flex-direction: row-reverse;
-                align-items: center;
-                justify-content: space-between;
-            }
-
-            .profile-hero .theme-btn {
-                align-self: center;
-            }
-
-            .profile-bio {
-                font-size: calc(1.328125rem * 0.75);
-            }
-        }
-
-        @media (max-width: 479px) {
-            .profile-photo {
-                margin-left: 1rem;
-            }
-
-            .profile-caption {
-                font-size: 0.6875rem;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .theme-switch-track,
-            .theme-switch-track::after,
-            .profile-photo-surface,
-            .profile-avatar-hover {
-                transition: none;
-            }
-
-            .profile-photo-frame:is(:hover, :focus-visible) .profile-photo-surface {
-                transform: none;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/site.css">
+    <script src="/assets/site.js" defer></script>
 </head>
-<body class="antialiased min-h-screen font-akzidenz">
-
-    <main class="page-container min-h-screen">
-        
-        <section aria-label="About Alex Alvarez" class="border-b brutal-border">
-            
-            <div class="profile-intro px-5 md:px-6">
-                <header class="profile-hero">
-                    <button id="theme-toggle" type="button" class="theme-btn" aria-label="Switch to light mode" title="Switch to light mode"><span class="theme-switch-track" aria-hidden="true"></span></button>
-                    <h1 class="profile-name font-akzidenz">Alex Alvarez</h1>
-                </header>
-
-                <div class="profile-bio">
-                    <figure class="profile-photo">
-                        <div class="profile-photo-frame" tabindex="0" role="img" aria-label="Alex Alvarez at the Museo Napoleonico in Havana. Hover or focus to see Alex on horseback in Viñales, Pinar del Río.">
-                            <div class="profile-photo-surface">
-                                <img src="assets/profile.jpg" alt="" class="profile-avatar contrast-125" width="1992" height="1992">
-                                <img src="assets/profile2.JPG" alt="" aria-hidden="true" class="profile-avatar profile-avatar-hover contrast-125" width="1552" height="1552">
-                            </div>
-                        </div>
-                        <figcaption class="profile-caption font-sans-ui">
-                            <span class="profile-caption-original">Me (right) at the Museo Napoleonico in Havana</span>
-                            <span class="profile-caption-alternate">Viñales, Pinar del Río</span>
-                        </figcaption>
-                    </figure>
-
-
-                    <p>
-                        I'm a <a href = "https://bcs.mit.edu/postbac1" class="text-link" target="_blank" rel="noopener noreferrer">post-baccalaureate research scholar</a> in the <a href = "https://cocosci.mit.edu/" class="text-link" target="_blank" rel="noopener noreferrer">Computational Cognitive Science Lab</a> at MIT, where I study natural and artificial learning and intelligence. I'm particularly interested in where ideas come from and how we choose between them. 
-                    </p>
-
-                    <p>
-                        Previously, I studied computer science and psychology at Texas A&M University, where I worked with <a href="https://scholar.google.com/citations?user=nFb_T4wAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Yoonsuck Choe</a>, <a href="https://scholar.google.com/citations?user=zOqjA-sAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Takashi Yamauchi</a>, and <a href="https://scholar.google.com/citations?user=6TsCDRwAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Carlos Bolaños</a>.
-                    </p>
-
-                    <p>
-                        I came to the U.S. when I was eight years old as a <a href="https://en.wikipedia.org/wiki/Wet_feet,_dry_feet_policy" class="text-link" target="_blank" rel="noopener noreferrer">political refugee from Cuba</a>. One day I'd like to provide Cuban students with the same opportunities that I had access to here. Feel free to reach out if you’d like to chat about research or Cuba.
-                    </p>
-                </div>
-
-                <div class="news-links mt-8 font-sans-ui text-sm space-y-3">
-                    <h2 class="text-sm font-bold border-b brutal-border pb-2 mb-3">Updates</h2>
-
-                    <div class="flex justify-between gap-4">
-                        <a href="https://arxiv.org/abs/2607.23842" class="hover:underline" target="_blank">
-                            Limbomorphs abstract accepted to ALife 2026
-                        </a>
-                        <span class="opacity-60 whitespace-nowrap">Jul 26</span>
-                    </div>
-
-                    <div class="flex justify-between gap-4">
-                        <a href="https://youtu.be/7O-lRBVaEag?si=a2lmCHKPbRfNpg6i" class="hover:underline" target="_blank">
-                            Talk at INRIA Flowers Lab
-                        </a>
-                        <span class="opacity-60 whitespace-nowrap">Mar 26</span>
-                    </div>
-
-
-                    <div class="flex justify-between gap-4">
-                        <a href="https://neurips.cc/virtual/2025/loc/san-diego/136854" class="hover:underline" target="_blank">
-                            Workshop Paper Accepted at NeurIPS 2025
-                        </a>
-                        <span class="opacity-60 whitespace-nowrap">Dec 25</span>
-                    </div>
-
-                    <!-- <div class="flex justify-between gap-4">
-                        <a href="https://medium.com/@0xalexrez/your-mind-is-a-storm-856e57553070" class="hover:underline" target="_blank">
-                            Essay on Fernando Pessoa & Consciousness
-                        </a>
-                        <span class="opacity-60 whitespace-nowrap">Jan 25</span>
-                    </div> -->
-
-                    <div class="flex justify-between gap-4">
-                        <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" class="hover:underline" target="_blank">
-                            Demographic IQ on the news! (KBTX)
-                        </a>
-                        <span class="opacity-60 whitespace-nowrap">Oct 24</span>
-                    </div>
-                </div>
+<body class="dark antialiased min-h-screen font-akzidenz">
+    <div class="page-container min-h-screen">
+        <header class="site-header px-5 md:px-6">
+            <div class="profile-hero">
+                <button id="theme-toggle" type="button" class="theme-btn" aria-label="Switch to light mode" title="Switch to light mode"><span class="theme-switch-track" aria-hidden="true"></span></button>
+                <h1 class="profile-name font-akzidenz"><a class="site-name" href="/">Alex Alvarez</a></h1>
             </div>
+        </header>
 
-            <div class="contact-strip px-5 py-4 md:px-6 border-t brutal-border font-sans-ui text-sm">
-                <span>alexrez at em i tee dot e dee you</span>
-                <div class="flex flex-wrap gap-x-4 gap-y-2">
-                    <a href="https://scholar.google.com/citations?user=FqABySkAAAAJ&hl=en" class="hover:underline" target="_blank" rel="noopener noreferrer">Scholar</a>
-                    <a href="https://bsky.app/profile/alexrez.bsky.social" class="hover:underline" target="_blank" rel="noopener noreferrer">Bluesky</a>
-                    <a href="https://github.com/calvarez0" class="hover:underline" target="_blank" rel="noopener noreferrer">Github</a>
-                    <a href="https://www.linkedin.com/in/calexalvarez/" class="hover:underline" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-                    <a href="https://twitter.com/0xalexrez" class="hover:underline" target="_blank" rel="noopener noreferrer">Twitter</a>
-                </div>
-            </div>
-        </section>
+        <nav class="site-nav px-5 md:px-6 border-b brutal-border font-sans-ui text-sm" aria-label="Main navigation">
+            <a class="site-nav-link" href="/" aria-current="page">About</a>
+            <a class="site-nav-link" href="/research/">Research</a>
+            <a class="site-nav-link" href="/old-sundries/">Sundries</a>
+        </nav>
 
-            <section id="research" class="border-b brutal-border">
-                <!-- <div class="p-5 md:p-6 section-band border-b brutal-border">
-                    <h2 class="font-sans-ui text-sm mb-2">Research</h2>
-                </div> -->
+        <main id="page-main" data-page="about">
+            <section aria-label="About Alex Alvarez">
 
-                <div class="flex flex-col">
-                    <!-- Interference/Subgoals Paper -->
-                    <!-- <div class="index-row border-b brutal-border p-5 md:p-6">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                    <span class="text-gray-400 font-sans-ui text-sm">Image/GIF placeholder</span>
+                <div class="profile-intro px-5 md:px-6">
+
+                    <div class="profile-bio">
+                        <figure class="profile-photo">
+                            <div class="profile-photo-frame" tabindex="0" role="img" aria-label="Alex Alvarez at the Museo Napoleonico in Havana. Hover or focus to see Alex on horseback in Viñales, Pinar del Río.">
+                                <div class="profile-photo-surface">
+                                    <img src="/assets/profile.JPG" alt="" class="profile-avatar contrast-125" width="1992" height="1992">
+                                    <img src="/assets/profile2.JPG" alt="" aria-hidden="true" class="profile-avatar profile-avatar-hover contrast-125" width="1552" height="1552">
                                 </div>
                             </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">Interference & Subgoals in Neural Networks</h3>
-                                <p class="text-base mb-3 opacity-80">Coming soon</p>
-                                <p class="text-base mb-4">TLDR: Placeholder description for interference and subgoals research.</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
-                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
-                                </div>
-                            </div>
+                            <figcaption class="profile-caption font-sans-ui">
+                                <span class="profile-caption-original">Me (right) at the Museo Napoleonico in Havana</span>
+                                <span class="profile-caption-alternate">Viñales, Pinar del Río</span>
+                            </figcaption>
+                        </figure>
+
+
+                        <p>
+                            I'm a <a href="https://bcs.mit.edu/postbac1" class="text-link" target="_blank" rel="noopener noreferrer">post-baccalaureate research scholar</a> in the <a href="https://cocosci.mit.edu/" class="text-link" target="_blank" rel="noopener noreferrer">Computational Cognitive Science Lab</a> at MIT, where I study natural and artificial learning and intelligence. I'm particularly interested in where ideas come from and how we choose between them.
+                        </p>
+
+                        <p>
+                            Previously, I studied computer science and psychology at Texas A&M University, where I worked with <a href="https://scholar.google.com/citations?user=nFb_T4wAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Yoonsuck Choe</a>, <a href="https://scholar.google.com/citations?user=zOqjA-sAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Takashi Yamauchi</a>, and <a href="https://scholar.google.com/citations?user=6TsCDRwAAAAJ&hl" class="text-link" target="_blank" rel="noopener noreferrer">Carlos Bolaños</a>.
+                        </p>
+
+                        <p>
+                            I came to the U.S. when I was eight years old as a <a href="https://en.wikipedia.org/wiki/Wet_feet,_dry_feet_policy" class="text-link" target="_blank" rel="noopener noreferrer">political refugee from Cuba</a>. One day I'd like to provide Cuban students with the same opportunities that I had access to here. Feel free to reach out if you’d like to chat about research or Cuba.
+                        </p>
+                    </div>
+
+                    <div class="contact-strip mt-8 py-4 border-t brutal-border font-sans-ui text-sm">
+                        <span>alexrez at emm eye tee dot eee dee you</span>
+                        <div class="flex flex-wrap gap-x-4 gap-y-2">
+                            <a href="https://scholar.google.com/citations?user=FqABySkAAAAJ&hl=en" class="hover:underline" target="_blank" rel="noopener noreferrer">Scholar</a>
+                            <a href="https://bsky.app/profile/alexrez.bsky.social" class="hover:underline" target="_blank" rel="noopener noreferrer">Bluesky</a>
+                            <a href="https://github.com/calvarez0" class="hover:underline" target="_blank" rel="noopener noreferrer">Github</a>
+                            <a href="https://www.linkedin.com/in/calexalvarez/" class="hover:underline" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                            <a href="https://twitter.com/0xalexrez" class="hover:underline" target="_blank" rel="noopener noreferrer">Twitter</a>
                         </div>
                     </div>
 
-                    // Syne
-                    <div class="index-row border-b brutal-border p-5 md:p-6">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                    <span class="text-gray-400 font-sans-ui text-sm">Image/GIF placeholder</span>
-                                </div>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">SYNE</h3>
-                                <p class="text-base mb-3 opacity-80">Coming soon</p>
-                                <p class="text-base mb-4">TLDR: Placeholder description for Syne project.</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
-                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
+                    <div class="news-links mt-8 font-sans-ui text-sm space-y-3">
+                        <h2 class="text-sm font-bold border-b brutal-border pb-2 mb-3">Updates</h2>
 
-                    <!-- Limbomorphs -->
-                    <div class="index-row border-b brutal-border p-5 md:p-6" data-card-link="openendedness/limbomorphs/index.html" data-card-target="_blank" role="link" tabindex="0">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
-                                    <img src="openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-1hno91tpi_a.gif" alt="Limbomorph species a" class="w-full h-full object-cover">
-                                    <img src="openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-1kf9rs6w4_c.gif" alt="Limbomorph species c" class="w-full h-full object-cover">
-                                    <img src="openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-enqnro76u_h.gif" alt="Limbomorph species h" class="w-full h-full object-cover">
-                                    <img src="openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-g1w7nskuh_f.gif" alt="Limbomorph species f" class="w-full h-full object-cover">
-                                    <img src="openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-u3cgt1jm4_I.gif" alt="Limbomorph species i" class="w-full h-full object-cover">
-                                    <img src="openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-xs6c095fq_d.gif" alt="Limbomorph species d" class="w-full h-full object-cover">
-                                </div>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">Limbomorphs</h3>
-                                <p class="text-base mb-3 opacity-80">ALife 2026</p>
-                                <p class="text-base mb-4">Lifelike creatures with species-specific reactions to perturbations emerge from Gifbreeder despite the absence of explicit agents, environments, or local interactions.</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <a href="openendedness/limbomorphs/index.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web Paper</a>
-                                    <a href="openendedness/limbomorphs/Limbomorphs.pdf" class="card-link-chip" target="_blank" rel="noopener noreferrer">PDF</a>
-                                    <a href="https://arxiv.org/abs/2607.23842" class="card-link-chip" target="_blank" rel="noopener noreferrer">arXiv</a>
-                                    <a href="openendedness/gifbreeder/drawing.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Drawing App</a>
-                                    <a href="https://x.com/0xalexrez/status/2082930070440570953?s=20" class="card-link-chip" target="_blank" rel="noopener noreferrer">Tweet</a>
-                                </div>
-                            </div>
+                        <div class="flex justify-between gap-4">
+                            <a href="https://arxiv.org/abs/2607.23842" class="hover:underline" target="_blank">
+                                Limbomorphs abstract accepted to ALife 2026
+                            </a>
+                            <span class="opacity-60 whitespace-nowrap">Jul 26</span>
                         </div>
-                    </div>
 
-                    <!-- GIFBreeder -->
-                    <div class="index-row border-b brutal-border p-5 md:p-6" data-card-link="openendedness/gifbreeder/index.html" data-card-target="_blank" role="link" tabindex="0">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
-                                    <img src="assets/gifbreeder/preview-64/activation-lab-output-trwerhx67.gif" alt="GIFBreeder output 1" class="w-full h-full object-cover">
-                                    <img src="assets/gifbreeder/preview-64/activation-lab-output-09fy1uuyk.gif" alt="GIFBreeder output 2" class="w-full h-full object-cover">
-                                    <img src="assets/gifbreeder/preview-64/activation-lab-output-n30hi1h8h.gif" alt="GIFBreeder output 3" class="w-full h-full object-cover">
-                                    <img src="assets/gifbreeder/preview-64/activation-lab-output-kqv0p6vk5%20copy.gif" alt="GIFBreeder output 4" class="w-full h-full object-cover">
-                                    <img src="assets/gifbreeder/preview-64/activation-lab-output-qeoe3k9y6.gif" alt="GIFBreeder output 5" class="w-full h-full object-cover">
-                                    <img src="assets/gifbreeder/preview-64/activation-lab-output-fkg40fwea.gif" alt="GIFBreeder output 6" class="w-full h-full object-cover">
-                                </div>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">GIFBreeder</h3>
-                                <p class="text-base mb-3 opacity-80">Interactive Platform</p>
-                                <p class="text-base mb-4">Adding a time variable to Picbreeder brings images to life.</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <a href="openendedness/gifbreeder/index.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web App</a>
-                                    <a href="openendedness/gifbreeder-og/" class="card-link-chip" target="_blank" rel="noopener noreferrer">Picbreeder-faithful</a>
-                                </div>
-                            </div>
+                        <div class="flex justify-between gap-4">
+                            <a href="https://youtu.be/7O-lRBVaEag?si=a2lmCHKPbRfNpg6i" class="hover:underline" target="_blank">
+                                Talk at INRIA Flowers Lab
+                            </a>
+                            <span class="opacity-60 whitespace-nowrap">Mar 26</span>
                         </div>
-                    </div>
 
-                    <!-- Picbreeder -->
-                    <a href="openendedness/picbreeder/index.html" class="index-row border-b brutal-border p-5 md:p-6 block" target="_blank" rel="noopener noreferrer">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
-                                    <img src="assets/picbreeder/preview-64/alien.png" alt="Picbreeder alien output" class="w-full h-full object-cover">
-                                    <img src="assets/picbreeder/preview-64/abstract.png" alt="Picbreeder abstract output" class="w-full h-full object-cover">
-                                    <img src="assets/picbreeder/preview-64/clover.png" alt="Picbreeder clover output" class="w-full h-full object-cover">
-                                    <img src="assets/picbreeder/preview-64/owl.png" alt="Picbreeder owl output" class="w-full h-full object-cover">
-                                    <img src="assets/picbreeder/preview-64/torso.png" alt="Picbreeder torso output" class="w-full h-full object-cover">
-                                    <img src="assets/picbreeder/preview-64/two%20people.png" alt="Picbreeder two people output" class="w-full h-full object-cover">
-                                </div>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">Picbreeder</h3>
-                                <p class="text-base mb-3 opacity-80">Interactive Platform</p>
-                                <p class="text-base mb-4">My take on Picbreeder!</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <span class="card-link-chip">Web App</span>
-                                </div>
-                            </div>
+
+                        <div class="flex justify-between gap-4">
+                            <a href="https://neurips.cc/virtual/2025/loc/san-diego/136854" class="hover:underline" target="_blank">
+                                Workshop Paper Accepted at NeurIPS 2025
+                            </a>
+                            <span class="opacity-60 whitespace-nowrap">Dec 25</span>
                         </div>
-                    </a>
 
-                    <!-- Side Quest -->
-                    <!-- <a href="https://www.sideqoest.com/" class="index-row border-b brutal-border p-5 md:p-6 block" target="_blank" rel="noopener noreferrer">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 overflow-hidden">
-                                    <img src="assets/platforms/side%20quest.gif" alt="Side Quest preview" class="w-full h-full object-cover">
-                                </div>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">Side Quest</h3>
-                                <p class="text-base mb-3 opacity-80">Interactive Platform</p>
-                                <p class="text-base mb-4">Interactive evolution guiding LLMs.</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <span class="card-link-chip">Beta</span>
-                                </div>
-                            </div>
-                        </div>
-                    </a> -->
+                        <!-- <div class="flex justify-between gap-4">
+                            <a href="https://medium.com/@0xalexrez/your-mind-is-a-storm-856e57553070" class="hover:underline" target="_blank">
+                                Essay on Fernando Pessoa & Consciousness
+                            </a>
+                            <span class="opacity-60 whitespace-nowrap">Jan 25</span>
+                        </div> -->
 
-                    <!-- You-Axis -->
-                    <!-- <div class="index-row border-b brutal-border p-5 md:p-6">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 overflow-hidden">
-                                    <img src="assets/you-axis.png" alt="You-Axis preview" class="w-full h-full object-cover">
-                                </div>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">You-Axis</h3>
-                                <p class="text-base mb-3 opacity-80">Coming soon</p>
-                                <p class="text-base mb-4">Using Contrastive Activation Addition, we isolate a direction in space that invokes the model's subjective opinions. Shifting the embeddings along this axis in latent space can reveal the model's ideological bias. When we force the model to give us an opinion, where does it draw its ethical model from? What does the LLM's moral compass look like?</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
-                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-
-                    <!-- Visual Saliency -->
-                    <div class="index-row border-b brutal-border p-5 md:p-6" data-card-link="lambert/index.html" role="link" tabindex="0">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 overflow-hidden">
-                                    <img src="assets/lambert/saliency_process_preview_v6.gif" alt="Saliency process preview" class="h-full object-cover max-w-none" style="width: calc(100% + 10px); margin-left: -5px;">
-                                </div>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">Saliency Thresholds in Neural Code and its Relation to the Power-Law, Gaussian, and Lambert W Function</h3>
-                                <p class="text-base mb-3 opacity-80">NeurIPS 2025 Workshop on Symmetry and Geometry in Neural Representations</p>
-                                <p class="text-base mb-4">How does the brain calculate visual saliency?</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <a href="https://openreview.net/pdf?id=cjo2oadaRz" class="card-link-chip" target="_blank" rel="noopener noreferrer">PDF</a>
-                                    <a href="lambert/index.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Demo</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- AblOEh -->
-                    <a href="openendedness/ablOEh.html" class="index-row border-b brutal-border p-5 md:p-6 block" target="_blank" rel="noopener noreferrer">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 overflow-hidden">
-                                    <img src="assets/platforms/abloeh.gif" alt="AblOEh preview" class="w-full h-full object-cover">
-                                </div>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">"AblOEh"</h3>
-                                <p class="text-base mb-3 opacity-80">Interactive Platform </p>
-                                <p class="text-base mb-4">Neuroevolutionary dress design.</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <span class="card-link-chip">Web App</span>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Synthbreeder -->
-                    <a href="openendedness/synthbreeder.html" class="index-row border-b brutal-border p-5 md:p-6 block" target="_blank" rel="noopener noreferrer">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 overflow-hidden">
-                                    <img src="assets/synth_zoomed.gif" alt="Synthbreeder preview" class="w-full h-full object-cover">
-                                </div>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">Synthbreeder</h3>
-                                <p class="text-base mb-3 opacity-80">Interactive Platform</p>
-                                <p class="text-base mb-4">Breed synthesizer sounds.</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <span class="card-link-chip">Web App</span>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Boids -->
-                    <a href="boids/index.html" class="index-row border-b brutal-border p-5 md:p-6 block" target="_blank" rel="noopener noreferrer">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 overflow-hidden">
-                                    <img src="assets/boids.gif" alt="Boids dynamic perception delay preview" class="w-full h-full object-cover">
-                                </div>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">BOIDS + Dynamic Perception Delay</h3>
-                                <p class="text-base mb-3 opacity-80">Interactive Demo</p>
-                                <p class="text-base mb-4">How does collective behavior emerge from simple local rules?</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <span class="card-link-chip">Web App</span>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Demographic IQ -->
-                    <div class="index-row border-b brutal-border p-5 md:p-6" data-card-link="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" data-card-target="_blank" role="link" tabindex="0">
-                        <div class="md:flex md:gap-6 items-start">
-                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
-                                <div class="w-full h-36 overflow-hidden">
-                                    <img src="demographic_iq/assets/demo.png" alt="Demographic IQ preview" class="w-full h-full object-cover">
-                                </div>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-akzidenz text-2xl mb-2">Demographic IQ</h3>
-                                <p class="text-base mb-3 opacity-80">Human-Policy Interface</p>
-                                <p class="text-base mb-4">Voter information tool for the 2024 presidential election.</p>
-                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
-                                    <a href="demographic_iq/" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web App</a>
-                                    <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" class="card-link-chip" target="_blank" rel="noopener noreferrer">Press</a>
-                                    <a href="https://x.com/0xalexrez/status/1851390704796176734" class="card-link-chip" target="_blank" rel="noopener noreferrer">Tweet</a>
-                                </div>
-                            </div>
+                        <div class="flex justify-between gap-4">
+                            <a href="https://www.kbtx.com/2024/10/31/texas-am-students-create-app-help-voters-calculate-financial-impact-candidates-policies/" class="hover:underline" target="_blank">
+                                Demographic IQ on the news! (KBTX)
+                            </a>
+                            <span class="opacity-60 whitespace-nowrap">Oct 24</span>
                         </div>
                     </div>
                 </div>
             </section>
+        </main>
 
-            <section>
-                <div class="p-5 md:p-6 section-band border-b brutal-border">
-                    <h2 class="font-sans-ui text-sm mb-2">Old Sundries</h2>
-                </div>
-
-                <div class="flex flex-col font-sans-ui text-sm">
-
-                    <a href="assets/Spectral Bias.pdf" class="index-row block border-b brutal-border p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
-                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
-                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">RESEARCH</div>
-                            <div class="col-span-10">
-                                <h3 class="font-sans-reading text-2xl mb-1">Spectral Bias & Saddle Points</h3>
-                                <p class="opacity-80 subtext font-sans-reading text-lg">Is spectral bias correlated to saddle point drops in the loss landscape?</p>
-                            </div>
-                        </div>
-                    </a>
-
-                    <a href="assets/Continuum of Algorithms.pdf" class="index-row block border-b brutal-border p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
-                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
-                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">PAPER</div>
-                            <div class="col-span-10">
-                                <h3 class="font-sans-reading text-2xl mb-1">A Continuum of Algorithms</h3>
-                                <p class="opacity-80 subtext font-sans-reading text-lg">How does the brain compute physical reasoning?</p>
-                            </div>
-                        </div>
-                    </a>
-
-                    <a href="sundries/connectome_visualization.html" class="index-row block border-b brutal-border p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
-                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
-                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">VISUAL</div>
-                            <div class="col-span-10">
-                                <h3 class="font-sans-reading text-2xl mb-1">C. Elegans Connectome</h3>
-                                <p class="opacity-80 subtext font-sans-reading text-lg">What does the connectome look like on a 3D plane?</p>
-                            </div>
-                        </div>
-                    </a>
-
-                    <a href="sundries/evolve-images.html" class="index-row block border-b brutal-border p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
-                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
-                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">VISUAL</div>
-                            <div class="col-span-10">
-                                <h3 class="font-sans-reading text-2xl mb-1">Pixel Evolutoin</h3>
-                                <p class="opacity-80 subtext font-sans-reading text-lg">What are evolutionary algorithms?</p>
-                            </div>
-                        </div>
-                    </a>
-
-                    <a href="sundries/distribution_visualization.html" class="index-row block border-b brutal-border p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
-                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
-                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">VISUAL</div>
-                            <div class="col-span-10">
-                                <h3 class="font-sans-reading text-2xl mb-1">Distribution Explorer</h3>
-                                <p class="opacity-80 subtext font-sans-reading text-lg">What do common probability distributions actually look like?</p>
-                            </div>
-                        </div>
-                    </a>
-
-                    <a href="https://zyntora.com" class="index-row block p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
-                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
-                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">STARTUP</div>
-                            <div class="col-span-10">
-                                <h3 class="font-sans-reading text-2xl mb-1">Zyntora</h3>
-                                <p class="opacity-80 subtext font-sans-reading text-lg">Can we make a virtual real estate social media app?</p>
-                            </div>
-                        </div>
-                    </a>
-
-                </div>
-            </section>
-            
-            <footer class="p-5 md:p-6 font-akzidenz text-xs opacity-50 border-t brutal-border text-center">
-                I never saved anything for the swim back.
-            </footer>
-    </main>
-
-    <script>
-        // Theme Toggle Logic
-        const toggle = document.getElementById('theme-toggle');
-        const body = document.body;
-
-        let savedTheme = 'dark';
-        try {
-            savedTheme = localStorage.getItem('theme') || savedTheme;
-        } catch {}
-        body.classList.toggle('dark', savedTheme === 'dark');
-
-        function updateThemeLabel() {
-            const label = body.classList.contains('dark') ? 'Switch to light mode' : 'Switch to dark mode';
-            toggle.setAttribute('aria-label', label);
-            toggle.setAttribute('title', label);
-        }
-
-        updateThemeLabel();
-        toggle.addEventListener('click', () => {
-            body.classList.toggle('dark');
-            updateThemeLabel();
-            try {
-                localStorage.setItem('theme', body.classList.contains('dark') ? 'dark' : 'light');
-            } catch {}
-        });
-
-        // Clickable project cards with nested links support
-        function openCardLink(card) {
-            const href = card.dataset.cardLink;
-            if (!href) return;
-            const target = card.dataset.cardTarget || '_self';
-
-            if (target === '_blank') {
-                window.open(href, '_blank', 'noopener,noreferrer');
-                return;
-            }
-            window.location.href = href;
-        }
-
-        document.querySelectorAll('[data-card-link]').forEach(card => {
-            card.addEventListener('click', (event) => {
-                if (event.target.closest('a, button, input, select, textarea, label')) return;
-                openCardLink(card);
-            });
-
-            card.addEventListener('keydown', (event) => {
-                if (event.key !== 'Enter' && event.key !== ' ') return;
-                event.preventDefault();
-                openCardLink(card);
-            });
-        });
-    </script>
+    </div>
 </body>
 </html>

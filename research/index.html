@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research | Alex Alvarez</title>
+    <link rel="icon" type="image/x-icon" href="/assets/icon.png">
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/assets/site.css">
+    <script src="/assets/site.js" defer></script>
+</head>
+<body class="dark antialiased min-h-screen font-akzidenz">
+    <div class="page-container min-h-screen">
+        <header class="site-header px-5 md:px-6">
+            <div class="profile-hero">
+                <button id="theme-toggle" type="button" class="theme-btn" aria-label="Switch to light mode" title="Switch to light mode"><span class="theme-switch-track" aria-hidden="true"></span></button>
+                <h1 class="profile-name font-akzidenz"><a class="site-name" href="/">Alex Alvarez</a></h1>
+            </div>
+        </header>
+
+        <nav class="site-nav px-5 md:px-6 border-b brutal-border font-sans-ui text-sm" aria-label="Main navigation">
+            <a class="site-nav-link" href="/">About</a>
+            <a class="site-nav-link" href="/research/" aria-current="page">Research</a>
+            <a class="site-nav-link" href="/old-sundries/">Sundries</a>
+        </nav>
+
+        <main id="page-main" data-page="research">
+            <section id="research" aria-labelledby="research-heading">
+                <h2 id="research-heading" class="sr-only">Research</h2>
+
+                <div class="flex flex-col">
+                    <!-- Interference/Subgoals Paper -->
+                    <!-- <div class="index-row border-b brutal-border p-5 md:p-6">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-gray-400 font-sans-ui text-sm">Image/GIF placeholder</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">Interference & Subgoals in Neural Networks</h3>
+                                <p class="text-base mb-3 opacity-80">Coming soon</p>
+                                <p class="text-base mb-4">TLDR: Placeholder description for interference and subgoals research.</p>
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    // Syne
+                    <div class="index-row border-b brutal-border p-5 md:p-6">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span class="text-gray-400 font-sans-ui text-sm">Image/GIF placeholder</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">SYNE</h3>
+                                <p class="text-base mb-3 opacity-80">Coming soon</p>
+                                <p class="text-base mb-4">TLDR: Placeholder description for Syne project.</p>
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+
+                    <!-- Limbomorphs -->
+                    <div class="index-row border-b brutal-border p-5 md:p-6" data-card-link="/openendedness/limbomorphs/index.html" data-card-target="_blank" role="link" tabindex="0">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 grid grid-cols-3 grid-rows-2 gap-1 overflow-hidden">
+                                    <img src="/openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-1hno91tpi_a.gif" alt="Limbomorph species a" class="w-full h-full object-cover">
+                                    <img src="/openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-1kf9rs6w4_c.gif" alt="Limbomorph species c" class="w-full h-full object-cover">
+                                    <img src="/openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-enqnro76u_h.gif" alt="Limbomorph species h" class="w-full h-full object-cover">
+                                    <img src="/openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-g1w7nskuh_f.gif" alt="Limbomorph species f" class="w-full h-full object-cover">
+                                    <img src="/openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-u3cgt1jm4_I.gif" alt="Limbomorph species i" class="w-full h-full object-cover">
+                                    <img src="/openendedness/limbomorphs/figures/family/preview-64/activation-lab-output-xs6c095fq_d.gif" alt="Limbomorph species d" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">Limbomorphs</h3>
+                                <p class="text-base mb-3 opacity-80">ALife 2026</p>
+                                <p class="text-base mb-4">Lifelike creatures with species-specific reactions to perturbations emerge from Gifbreeder despite the absence of explicit agents, environments, or local interactions.</p>
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
+                                    <a href="/openendedness/limbomorphs/index.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Web Paper</a>
+                                    <a href="/openendedness/limbomorphs/Limbomorphs.pdf" class="card-link-chip" target="_blank" rel="noopener noreferrer">PDF</a>
+                                    <a href="https://arxiv.org/abs/2607.23842" class="card-link-chip" target="_blank" rel="noopener noreferrer">arXiv</a>
+                                    <a href="/openendedness/gifbreeder/drawing.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Drawing App</a>
+                                    <a href="https://x.com/0xalexrez/status/2082930070440570953?s=20" class="card-link-chip" target="_blank" rel="noopener noreferrer">Tweet</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Side Quest -->
+                    <!-- <a href="https://www.sideqoest.com/" class="index-row border-b brutal-border p-5 md:p-6 block" target="_blank" rel="noopener noreferrer">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 overflow-hidden">
+                                    <img src="/assets/platforms/side%20quest.gif" alt="Side Quest preview" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">Side Quest</h3>
+                                <p class="text-base mb-3 opacity-80">Interactive Platform</p>
+                                <p class="text-base mb-4">Interactive evolution guiding LLMs.</p>
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
+                                    <span class="card-link-chip">Beta</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a> -->
+
+                    <!-- You-Axis -->
+                    <!-- <div class="index-row border-b brutal-border p-5 md:p-6">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 overflow-hidden">
+                                    <img src="/assets/you-axis.png" alt="You-Axis preview" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">You-Axis</h3>
+                                <p class="text-base mb-3 opacity-80">Coming soon</p>
+                                <p class="text-base mb-4">Using Contrastive Activation Addition, we isolate a direction in space that invokes the model's subjective opinions. Shifting the embeddings along this axis in latent space can reveal the model's ideological bias. When we force the model to give us an opinion, where does it draw its ethical model from? What does the LLM's moral compass look like?</p>
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Paper]</a>
+                                    <a href="#" class="hover:underline" target="_blank" rel="noopener noreferrer">[Code]</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+
+                    <!-- Visual Saliency -->
+                    <div class="index-row border-b brutal-border p-5 md:p-6" data-card-link="/lambert/index.html" role="link" tabindex="0">
+                        <div class="md:flex md:gap-6 items-start">
+                            <div class="md:w-48 md:flex-shrink-0 mb-4 md:mb-0">
+                                <div class="w-full h-36 overflow-hidden">
+                                    <img src="/assets/lambert/saliency_process_preview_v6.gif" alt="Saliency process preview" class="h-full object-cover max-w-none" style="width: calc(100% + 10px); margin-left: -5px;">
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-akzidenz text-2xl mb-2">Saliency Thresholds in Neural Code and its Relation to the Power-Law, Gaussian, and Lambert W Function</h3>
+                                <p class="text-base mb-3 opacity-80">NeurIPS 2025 Workshop on Symmetry and Geometry in Neural Representations</p>
+                                <p class="text-base mb-4">How does the brain calculate visual saliency?</p>
+                                <div class="flex flex-wrap gap-3 font-sans-ui text-xs">
+                                    <a href="https://openreview.net/pdf?id=cjo2oadaRz" class="card-link-chip" target="_blank" rel="noopener noreferrer">PDF</a>
+                                    <a href="/lambert/index.html" class="card-link-chip" target="_blank" rel="noopener noreferrer">Demo</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="flex flex-col font-sans-ui text-sm">
+                    <a href="/assets/Spectral Bias.pdf" class="index-row block border-b brutal-border p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
+                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
+                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">POSTER</div>
+                            <div class="col-span-10">
+                                <h3 class="font-sans-reading text-2xl mb-1">Spectral Bias & Saddle Points</h3>
+                                <p class="opacity-80 subtext font-sans-reading text-lg">Is spectral bias correlated to saddle point drops in the loss landscape?</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="/assets/Continuum of Algorithms.pdf" class="index-row block p-5 md:px-6 md:py-5" target="_blank" rel="noopener noreferrer">
+                        <div class="md:grid md:grid-cols-12 md:gap-4 items-baseline">
+                            <div class="col-span-2 mb-2 md:mb-0 opacity-60 subtext">ORAL PRESENTATION</div>
+                            <div class="col-span-10">
+                                <h3 class="font-sans-reading text-2xl mb-1">A Continuum of Algorithms</h3>
+                                <p class="opacity-80 subtext font-sans-reading text-lg">How does the mind compute physical reasoning?</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+    </div>
+</body>
+</html>
